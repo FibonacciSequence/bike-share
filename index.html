@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Lima Bike Share</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css" rel="stylesheet">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <style>
     body { background: #f9f9f9; }
@@ -15,65 +16,200 @@
       display: flex;
       flex-direction: column;
       height: 100%;
+      margin-bottom: 20px;
     }
     .equal-card .card-content {
       flex-grow: 1;
+      padding: 20px;
+    }
+    .equal-card .card-content p {
+      margin: 8px 0;
+      line-height: 1.4;
     }
     .equal-card img {
-      height: 180px;
+      height: 200px;
       object-fit: cover;
       width: 100%;
     }
     .equal-card .card-action {
       margin-top: auto;
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .equal-card .card-title {
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    /* Mejorar grid spacing */
+    .row {
+      margin-bottom: 0;
+    }
+    .row .col {
+      padding: 0 10px;
+    }
+
+    /* Admin styles */
+    .admin-panel { display: none; }
+    .admin-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+    }
+    .admin-controls .btn-small {
+      margin-left: 5px;
+    }
+    .login-modal { max-width: 400px; }
+    .nav-wrapper .right {
+      display: flex;
+      align-items: center;
+    }
+    #adminInfo {
+      color: white;
+      margin-right: 15px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body class="container">
-  <h3 class="center-align">🚲 Lima Bike Share</h3>
+  <!-- Navbar con login admin -->
+  <nav class="blue darken-2">
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo">🚲 Lima Bike Share</a>
+      <div class="right">
+        <span id="adminInfo" style="display: none;"></span>
+        <a href="#" id="adminLoginBtn" class="btn-flat white-text">
+          <i class="material-icons left">admin_panel_settings</i>Admin
+        </a>
+        <a href="#" id="adminLogoutBtn" class="btn-flat white-text" style="display: none;">
+          <i class="material-icons left">logout</i>Salir
+        </a>
+      </div>
+    </div>
+  </nav>
 
-  <!-- Formulario -->
-  <div class="card">
-    <div class="card-content">
-      <span class="card-title">Agregar una bici</span>
-      <form id="addBikeForm">
-        <div class="input-field">
-          <input id="bikeName" type="text" required>
-          <label for="bikeName">Nombre de la bici</label>
-        </div>
-        <div class="input-field">
-          <input id="bikeLocation" type="text" required>
-          <label for="bikeLocation">Ubicación</label>
-        </div>
-        <div class="input-field">
-          <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
-          <label for="bikeWhatsapp">WhatsApp</label>
-        </div>
-        <div class="input-field">
-          <input id="bikePrice" type="number" required>
-          <label for="bikePrice">Precio (por hora)</label>
-        </div>
-        <div class="file-field input-field">
-          <div class="btn">
-            <span>Foto</span>
-            <input type="file" id="photoInput" accept="image/*">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Sube una foto de la bici">
+  <div style="margin-top: 2rem;">
+    <!-- Panel Admin (oculto por defecto) -->
+    <div id="adminPanel" class="admin-panel">
+      <div class="card red lighten-5">
+        <div class="card-content">
+          <span class="card-title red-text">🔧 Panel de Administración</span>
+          <div class="row">
+            <div class="col s12 m4">
+              <button class="btn red" id="editInfoBtn">
+                <i class="material-icons left">edit</i>Editar Info
+              </button>
+            </div>
+            <div class="col s12 m4">
+              <button class="btn orange" id="viewStatsBtn">
+                <i class="material-icons left">analytics</i>Estadísticas
+              </button>
+            </div>
+            <div class="col s12 m4">
+              <button class="btn purple" id="exportDataBtn">
+                <i class="material-icons left">download</i>Exportar
+              </button>
+            </div>
           </div>
         </div>
-        <button class="btn waves-effect waves-light" type="submit">Agregar</button>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Agregar una bici</span>
+        <form id="addBikeForm">
+          <div class="input-field">
+            <input id="bikeName" type="text" required>
+            <label for="bikeName">Nombre de la bici</label>
+          </div>
+          <div class="input-field">
+            <input id="bikeLocation" type="text" required>
+            <label for="bikeLocation">Ubicación</label>
+          </div>
+          <div class="input-field">
+            <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
+            <label for="bikeWhatsapp">WhatsApp</label>
+          </div>
+          <div class="input-field">
+            <input id="bikePrice" type="number" required>
+            <label for="bikePrice">Precio (por hora)</label>
+          </div>
+          <div class="file-field input-field">
+            <div class="btn">
+              <span>Foto *</span>
+              <input type="file" id="photoInput" accept="image/*" required>
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Sube una foto de la bici (obligatorio)" required>
+            </div>
+          </div>
+          <button class="btn waves-effect waves-light" type="submit">Agregar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de bicis -->
+    <div id="bikeList" class="row" style="margin-top: 2rem;"></div>
+  </div>
+
+  <!-- Modal Login Admin -->
+  <div id="adminLoginModal" class="modal login-modal">
+    <div class="modal-content">
+      <h4>🔐 Login Administrador</h4>
+      <form id="adminLoginForm">
+        <div class="input-field">
+          <input id="adminEmail" type="email" required>
+          <label for="adminEmail">Email</label>
+        </div>
+        <div class="input-field">
+          <input id="adminPassword" type="password" required>
+          <label for="adminPassword">Contraseña</label>
+        </div>
       </form>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" form="adminLoginForm" class="btn blue">Iniciar Sesión</button>
+      <a href="#" class="modal-close btn-flat">Cancelar</a>
     </div>
   </div>
 
-  <!-- Lista de bicis -->
-  <div id="bikeList" class="row"></div>
+  <!-- Modal Editar Info -->
+  <div id="editInfoModal" class="modal">
+    <div class="modal-content">
+      <h4>📝 Editar Información del Sitio</h4>
+      <form id="editInfoForm">
+        <div class="input-field">
+          <input id="siteTitle" type="text" value="Lima Bike Share">
+          <label for="siteTitle">Título del sitio</label>
+        </div>
+        <div class="input-field">
+          <input id="contactEmail" type="email" value="info@limabikeshare.com">
+          <label for="contactEmail">Email de contacto</label>
+        </div>
+        <div class="input-field">
+          <input id="contactPhone" type="text" value="+51 999 123 456">
+          <label for="contactPhone">Teléfono de contacto</label>
+        </div>
+        <div class="input-field">
+          <textarea id="siteDescription" class="materialize-textarea">Plataforma de alquiler de bicicletas en Lima</textarea>
+          <label for="siteDescription">Descripción</label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" form="editInfoForm" class="btn green">Guardar</button>
+      <a href="#" class="modal-close btn-flat">Cancelar</a>
+    </div>
+  </div>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "878883777843688",
@@ -86,6 +222,67 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    let isAdmin = false;
+
+    // Initialize Materialize components
+    document.addEventListener('DOMContentLoaded', function() {
+      M.Modal.init(document.querySelectorAll('.modal'));
+      M.updateTextFields();
+    });
+
+    // 🔐 Admin Authentication
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        isAdmin = true;
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminLoginBtn').style.display = 'none';
+        document.getElementById('adminLogoutBtn').style.display = 'block';
+        document.getElementById('adminInfo').style.display = 'block';
+        document.getElementById('adminInfo').textContent = `Admin: ${user.email}`;
+        M.toast({ html: `✅ Bienvenido admin: ${user.email}` });
+        loadBikes(); // Reload bikes to show admin controls
+      } else {
+        isAdmin = false;
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('adminLoginBtn').style.display = 'block';
+        document.getElementById('adminLogoutBtn').style.display = 'none';
+        document.getElementById('adminInfo').style.display = 'none';
+        loadBikes(); // Reload bikes to hide admin controls
+      }
+    });
+
+    // Login admin
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value;
+      const password = document.getElementById('adminPassword').value;
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        M.Modal.getInstance(document.getElementById('adminLoginModal')).close();
+        document.getElementById('adminLoginForm').reset();
+      } catch (error) {
+        M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
+      }
+    });
+
+    // Logout admin
+    document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+      await signOut(auth);
+      M.toast({ html: "👋 Sesión cerrada" });
+    });
+
+    // Show login modal
+    document.getElementById('adminLoginBtn').addEventListener('click', () => {
+      M.Modal.getInstance(document.getElementById('adminLoginModal')).open();
+    });
+
+    // Show edit info modal
+    document.getElementById('editInfoBtn').addEventListener('click', () => {
+      M.Modal.getInstance(document.getElementById('editInfoModal')).open();
+    });
 
     // 🚀 Subir a Cloudinary
     async function uploadToCloudinary(file) {
@@ -103,54 +300,99 @@
     document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const file = document.getElementById("photoInput").files[0];
-      let photoURL = "";
-
-      if (file) {
-        photoURL = await uploadToCloudinary(file);
+      
+      // Validar que se haya seleccionado una foto
+      if (!file) {
+        M.toast({ html: "❌ Debes subir una foto de la bici", classes: "red" });
+        return;
       }
 
-      await addDoc(collection(db, "bikes"), {
-        name: document.getElementById("bikeName").value,
-        location: document.getElementById("bikeLocation").value,
-        whatsapp: document.getElementById("bikeWhatsapp").value,
-        price: document.getElementById("bikePrice").value,
-        photo: photoURL,
-        createdAt: serverTimestamp()
-      });
+      try {
+        const photoURL = await uploadToCloudinary(file);
 
-      e.target.reset();
-      M.updateTextFields();
-      M.toast({ html: "✅ Bici agregada" });
+        await addDoc(collection(db, "bikes"), {
+          name: document.getElementById("bikeName").value,
+          location: document.getElementById("bikeLocation").value,
+          whatsapp: document.getElementById("bikeWhatsapp").value,
+          price: document.getElementById("bikePrice").value,
+          photo: photoURL,
+          createdAt: serverTimestamp()
+        });
+
+        e.target.reset();
+        M.updateTextFields();
+        M.toast({ html: "✅ Bici agregada correctamente" });
+      } catch (error) {
+        M.toast({ html: "❌ Error al subir la foto", classes: "red" });
+        console.error("Error:", error);
+      }
+    });
+
+    // 🗑️ Eliminar bici (solo admin)
+    window.deleteBike = async (bikeId) => {
+      if (!isAdmin) return;
+      if (confirm('¿Estás seguro de eliminar esta bici?')) {
+        try {
+          await deleteDoc(doc(db, "bikes", bikeId));
+          M.toast({ html: "🗑️ Bici eliminada" });
+        } catch (error) {
+          M.toast({ html: "❌ Error al eliminar", classes: "red" });
+        }
+      }
+    };
+
+    // 📊 Ver estadísticas
+    document.getElementById('viewStatsBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const bikeElements = document.querySelectorAll('#bikeList .col');
+      const totalBikes = bikeElements.length;
+      M.toast({ html: `📊 Total de bicis: ${totalBikes}` });
     });
 
     // 🚀 Mostrar bicis en tiempo real
-    const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshot) => {
-      const bikeList = document.getElementById("bikeList");
-      bikeList.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const bike = doc.data();
-        bikeList.innerHTML += `
-          <div class="col s12 m6 l4">
-            <div class="card equal-card hoverable">
-              <div class="card-image">
-                <img src="${bike.photo}" alt="${bike.name}">
-              </div>
-              <div class="card-content">
-                <span class="card-title truncate">${bike.name}</span>
-                <p><strong>📍 Ubicación:</strong> ${bike.location}</p>
-                <p><strong>💰 Precio:</strong> S/ ${bike.price} por hora</p>
-              </div>
-              <div class="card-action">
-                <a class="btn wa-btn waves-effect waves-light" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
-                  💬 WhatsApp
-                </a>
+    function loadBikes() {
+      const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const bikeList = document.getElementById("bikeList");
+        bikeList.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const bike = doc.data();
+          const bikeId = doc.id;
+          
+          const adminControls = isAdmin ? `
+            <div class="admin-controls">
+              <button class="btn-small red" onclick="deleteBike('${bikeId}')">
+                <i class="material-icons">delete</i>
+              </button>
+            </div>
+          ` : '';
+          
+          bikeList.innerHTML += `
+            <div class="col s12 m6 l4">
+              <div class="card equal-card hoverable" style="position: relative;">
+                ${adminControls}
+                <div class="card-image">
+                  <img src="${bike.photo}" alt="${bike.name}">
+                </div>
+                <div class="card-content">
+                  <span class="card-title truncate">${bike.name}</span>
+                  <p><strong>📍 Ubicación:</strong> ${bike.location}</p>
+                  <p><strong>💰 Precio:</strong> S/ ${bike.price} por hora</p>
+                </div>
+                <div class="card-action">
+                  <a class="btn wa-btn waves-effect waves-light" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
+                    💬 WhatsApp
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        });
       });
-    });
+    }
+
+    // Inicializar
+    loadBikes();
   </script>
 </body>
 </html>
