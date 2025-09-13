@@ -3,146 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <title>Lima Bike Share</title>
-  <!-- Materialize CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  <!-- Material Icons -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <style>
+    body { background: #f9f9f9; }
+    .bike-card img { max-height: 180px; object-fit: cover; }
+    .wa-btn { background-color: #25D366 !important; }
+  </style>
+</head>
+<body class="container">
+  <h3 class="center-align">🚲 Lima Bike Share</h3>
+
+  <!-- Formulario -->
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">Agregar una bici</span>
+      <form id="addBikeForm">
+        <div class="input-field">
+          <input id="bikeName" type="text" required>
+          <label for="bikeName">Nombre de la bici</label>
+        </div>
+        <div class="input-field">
+          <input id="bikeLocation" type="text" required>
+          <label for="bikeLocation">Ubicación</label>
+        </div>
+        <div class="input-field">
+          <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
+          <label for="bikeWhatsapp">WhatsApp</label>
+        </div>
+        <div class="input-field">
+          <input id="bikePrice" type="number" required>
+          <label for="bikePrice">Precio (por hora)</label>
+        </div>
+        <div class="file-field input-field">
+          <div class="btn">
+            <span>Foto</span>
+            <input type="file" id="photoInput" accept="image/*">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Sube una foto de la bici">
+          </div>
+        </div>
+        <button class="btn waves-effect waves-light" type="submit">Agregar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de bicis -->
+  <div id="bikeList" class="row"></div>
+
   <!-- Firebase -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ⚠️ Configuración de tu Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
+      apiKey: "TU_API_KEY",
       authDomain: "bike-share-lima.firebaseapp.com",
       projectId: "bike-share-lima",
       storageBucket: "bike-share-lima.appspot.com",
       messagingSenderId: "742260721560",
-      appId: "1:742260721560:web:38831f59c1080a0b818ded",
-      measurementId: "G-B5E8FXD1P5"
+      appId: "1:742260721560:web:38831f59c1080a0b818ded"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
-    const bikesCol = collection(db, "bikes");
 
-    // Agregar bici
-    async function addBike(e) {
+    // 🚀 Subir a Cloudinary
+    async function uploadToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mdidemll"); 
+
+      const response = await fetch(url, { method: "POST", body: formData });
+      const data = await response.json();
+      return data.secure_url;
+    }
+
+    // 🚀 Agregar bici
+    document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById("bikeName").value;
-      const location = document.getElementById("bikeLocation").value;
-      const price = document.getElementById("bikePrice").value;
-      const whatsapp = document.getElementById("bikePhone").value;
-      const photoFile = document.getElementById("bikePhoto").files[0];
-
-      if (!name || !location || !price || !whatsapp) {
-        alert("Por favor completa todos los campos.");
-        return;
-      }
-
+      const file = document.getElementById("photoInput").files[0];
       let photoURL = "";
-      if (photoFile) {
-        const storageRef = ref(storage, "bikes/" + Date.now() + "_" + photoFile.name);
-        await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(storageRef);
+
+      if (file) {
+        photoURL = await uploadToCloudinary(file);
       }
 
-      await addDoc(bikesCol, {
-        name,
-        location,
-        price,
-        whatsapp,
-        photoURL,
+      await addDoc(collection(db, "bikes"), {
+        name: document.getElementById("bikeName").value,
+        location: document.getElementById("bikeLocation").value,
+        whatsapp: document.getElementById("bikeWhatsapp").value,
+        price: document.getElementById("bikePrice").value,
+        photo: photoURL,
         createdAt: serverTimestamp()
       });
 
-      document.getElementById("addBikeForm").reset();
-    }
+      e.target.reset();
+      M.updateTextFields();
+      M.toast({ html: "✅ Bici agregada" });
+    });
 
-    // Mostrar bicis en tiempo real
-    function loadBikes() {
-      const list = document.getElementById("bikesList");
-      onSnapshot(bikesCol, (snapshot) => {
-        list.innerHTML = "";
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const contact = data.phone || data.whatsapp || "";
-          const card = `
-            <div class="card">
+    // 🚀 Mostrar bicis en tiempo real
+    const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      const bikeList = document.getElementById("bikeList");
+      bikeList.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const bike = doc.data();
+        bikeList.innerHTML += `
+          <div class="col s12 m6">
+            <div class="card bike-card">
+              <div class="card-image">
+                <img src="${bike.photo || 'https://via.placeholder.com/400x200'}" alt="${bike.name}">
+              </div>
               <div class="card-content">
-                <span class="card-title">${data.name || "Sin nombre"}</span>
-                <p>${data.location || "Ubicación desconocida"}</p>
-                ${data.price ? `<p>Precio: S/ ${data.price}</p>` : ""}
-                ${contact ? `<p>Contacto: ${contact}</p>` : ""}
-                ${data.photoURL ? `<img src="${data.photoURL}" alt="Foto de ${data.name}" style="max-width:100%;margin-top:10px;border-radius:8px;">` : ""}
-                ${contact ? `
-                  <a href="https://wa.me/${contact.replace(/\D/g, '')}" target="_blank" class="btn green darken-1" style="margin-top:10px;">
-                    <i class="material-icons left">chat</i> WhatsApp
-                  </a>` : ""}
+                <span class="card-title">${bike.name}</span>
+                <p><strong>Ubicación:</strong> ${bike.location}</p>
+                <p><strong>Precio:</strong> S/ ${bike.price}</p>
+              </div>
+              <div class="card-action">
+                <a class="btn wa-btn" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
+                  WhatsApp
+                </a>
               </div>
             </div>
-          `;
-          list.innerHTML += card;
-        });
+          </div>
+        `;
       });
-    }
-
-    window.addBike = addBike;
-    window.onload = loadBikes;
+    });
   </script>
-</head>
-<body class="grey lighten-4">
-
-  <nav class="green darken-2">
-    <div class="nav-wrapper container">
-      <a href="#" class="brand-logo">🚲 Lima Bike Share</a>
-    </div>
-  </nav>
-
-  <div class="container" style="margin-top:30px;">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Agregar tu bici</span>
-        <form id="addBikeForm" onsubmit="addBike(event)">
-          <div class="input-field">
-            <input id="bikeName" type="text" required>
-            <label for="bikeName">Nombre de la bici</label>
-          </div>
-          <div class="input-field">
-            <input id="bikeLocation" type="text" required>
-            <label for="bikeLocation">Ubicación</label>
-          </div>
-          <div class="input-field">
-            <input id="bikePrice" type="number" required>
-            <label for="bikePrice">Precio por hora (S/)</label>
-          </div>
-          <div class="input-field">
-            <input id="bikePhone" type="text" required placeholder="+51 987654321">
-            <label for="bikePhone">Número de WhatsApp</label>
-          </div>
-          <div class="file-field input-field">
-            <div class="btn">
-              <span>Foto</span>
-              <input type="file" id="bikePhoto" accept="image/*">
-            </div>
-            <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Sube una foto de la bici">
-            </div>
-          </div>
-          <button type="submit" class="btn green">Agregar</button>
-        </form>
-      </div>
-    </div>
-
-    <h5>Bicis disponibles</h5>
-    <div id="bikesList"></div>
-  </div>
-
-  <!-- Materialize JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>
 
