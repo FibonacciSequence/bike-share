@@ -70,6 +70,16 @@
       margin-right: 15px;
       font-size: 0.9rem;
     }
+
+    /* Error message styles */
+    .error-message {
+      background: #ffebee;
+      border: 1px solid #f44336;
+      border-radius: 4px;
+      padding: 16px;
+      margin: 20px 0;
+      color: #c62828;
+    }
   </style>
 </head>
 <body class="container">
@@ -90,6 +100,12 @@
   </nav>
 
   <div style="margin-top: 2rem;">
+    <!-- Error Message -->
+    <div id="firebaseError" class="error-message" style="display: none;">
+      <strong>⚠️ Error de configuración:</strong>
+      <p>Hay un problema con la configuración de Firebase. Por favor, verifica las credenciales.</p>
+    </div>
+
     <!-- Panel Admin (oculto por defecto) -->
     <div id="adminPanel" class="admin-panel">
       <div class="card red lighten-5">
@@ -211,8 +227,9 @@
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    // ⚠️ CONFIGURACIÓN FIREBASE - DEBES ACTUALIZAR ESTAS CREDENCIALES
     const firebaseConfig = {
-      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
+      apiKey: "TU_API_KEY_AQUI", // ⚠️ Reemplaza con tu API Key real
       authDomain: "bike-share-lima.firebaseapp.com",
       projectId: "bike-share-lima",
       storageBucket: "bike-share-lima.firebasestorage.app",
@@ -221,11 +238,22 @@
       measurementId: "G-B5E8FXD1P5"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    
+    let app, db, auth;
     let isAdmin = false;
+    let firebaseInitialized = false;
+
+    // Initialize Firebase with error handling
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      firebaseInitialized = true;
+      console.log("✅ Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("❌ Error inicializando Firebase:", error);
+      document.getElementById('firebaseError').style.display = 'block';
+      firebaseInitialized = false;
+    }
 
     // Initialize Materialize components
     document.addEventListener('DOMContentLoaded', function() {
@@ -234,29 +262,37 @@
     });
 
     // 🔐 Admin Authentication
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        isAdmin = true;
-        document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('adminLoginBtn').style.display = 'none';
-        document.getElementById('adminLogoutBtn').style.display = 'block';
-        document.getElementById('adminInfo').style.display = 'block';
-        document.getElementById('adminInfo').textContent = `Admin: ${user.email}`;
-        M.toast({ html: `✅ Bienvenido admin: ${user.email}` });
-        loadBikes(); // Reload bikes to show admin controls
-      } else {
-        isAdmin = false;
-        document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('adminLoginBtn').style.display = 'block';
-        document.getElementById('adminLogoutBtn').style.display = 'none';
-        document.getElementById('adminInfo').style.display = 'none';
-        loadBikes(); // Reload bikes to hide admin controls
-      }
-    });
+    if (firebaseInitialized) {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          isAdmin = true;
+          document.getElementById('adminPanel').style.display = 'block';
+          document.getElementById('adminLoginBtn').style.display = 'none';
+          document.getElementById('adminLogoutBtn').style.display = 'block';
+          document.getElementById('adminInfo').style.display = 'block';
+          document.getElementById('adminInfo').textContent = `Admin: ${user.email}`;
+          M.toast({ html: `✅ Bienvenido admin: ${user.email}` });
+          loadBikes(); // Reload bikes to show admin controls
+        } else {
+          isAdmin = false;
+          document.getElementById('adminPanel').style.display = 'none';
+          document.getElementById('adminLoginBtn').style.display = 'block';
+          document.getElementById('adminLogoutBtn').style.display = 'none';
+          document.getElementById('adminInfo').style.display = 'none';
+          loadBikes(); // Reload bikes to hide admin controls
+        }
+      });
+    }
 
     // Login admin
     document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      if (!firebaseInitialized) {
+        M.toast({ html: "❌ Firebase no está configurado correctamente", classes: "red" });
+        return;
+      }
+
       const email = document.getElementById('adminEmail').value;
       const password = document.getElementById('adminPassword').value;
       
@@ -265,18 +301,49 @@
         M.Modal.getInstance(document.getElementById('adminLoginModal')).close();
         document.getElementById('adminLoginForm').reset();
       } catch (error) {
-        M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
+        console.error("Error de login:", error);
+        let errorMessage = "Error desconocido";
+        
+        switch (error.code) {
+          case 'auth/api-key-not-valid':
+            errorMessage = "API Key de Firebase no válida";
+            break;
+          case 'auth/user-not-found':
+            errorMessage = "Usuario no encontrado";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Contraseña incorrecta";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        
+        M.toast({ html: `❌ Error: ${errorMessage}`, classes: "red" });
       }
     });
 
     // Logout admin
     document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
-      await signOut(auth);
-      M.toast({ html: "👋 Sesión cerrada" });
+      if (!firebaseInitialized) return;
+      
+      try {
+        await signOut(auth);
+        M.toast({ html: "👋 Sesión cerrada" });
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+        M.toast({ html: "❌ Error al cerrar sesión", classes: "red" });
+      }
     });
 
     // Show login modal
     document.getElementById('adminLoginBtn').addEventListener('click', () => {
+      if (!firebaseInitialized) {
+        M.toast({ html: "❌ Firebase no está configurado", classes: "red" });
+        return;
+      }
       M.Modal.getInstance(document.getElementById('adminLoginModal')).open();
     });
 
@@ -293,6 +360,9 @@
       formData.append("upload_preset", "mdidemll"); 
 
       const response = await fetch(url, { method: "POST", body: formData });
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
       const data = await response.json();
       return data.secure_url;
     }
@@ -300,6 +370,12 @@
     // 🚀 Agregar bici
     document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      if (!firebaseInitialized) {
+        M.toast({ html: "❌ Firebase no está configurado", classes: "red" });
+        return;
+      }
+
       const file = document.getElementById("photoInput").files[0];
       
       // Validar que se haya seleccionado una foto
@@ -324,19 +400,20 @@
         M.updateTextFields();
         M.toast({ html: "✅ Bici agregada correctamente" });
       } catch (error) {
-        M.toast({ html: "❌ Error al subir la foto", classes: "red" });
         console.error("Error:", error);
+        M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
       }
     });
 
     // 🗑️ Eliminar bici (solo admin)
     window.deleteBike = async (bikeId) => {
-      if (!isAdmin) return;
+      if (!isAdmin || !firebaseInitialized) return;
       if (confirm('¿Estás seguro de eliminar esta bici?')) {
         try {
           await deleteDoc(doc(db, "bikes", bikeId));
           M.toast({ html: "🗑️ Bici eliminada" });
         } catch (error) {
+          console.error("Error al eliminar:", error);
           M.toast({ html: "❌ Error al eliminar", classes: "red" });
         }
       }
@@ -352,44 +429,89 @@
 
     // 🚀 Mostrar bicis en tiempo real
     function loadBikes() {
-      const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
-      onSnapshot(q, (snapshot) => {
-        const bikeList = document.getElementById("bikeList");
-        bikeList.innerHTML = "";
-        snapshot.forEach((doc) => {
-          const bike = doc.data();
-          const bikeId = doc.id;
-          
-          const adminControls = isAdmin ? `
-            <div class="admin-controls">
-              <button class="btn-small red" onclick="deleteBike('${bikeId}')">
-                <i class="material-icons">delete</i>
-              </button>
+      if (!firebaseInitialized) {
+        document.getElementById("bikeList").innerHTML = `
+          <div class="col s12">
+            <div class="card red lighten-4">
+              <div class="card-content">
+                <span class="card-title red-text">⚠️ Error de configuración</span>
+                <p>No se pueden cargar las bicicletas. Firebase no está configurado correctamente.</p>
+              </div>
             </div>
-          ` : '';
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+          const bikeList = document.getElementById("bikeList");
+          bikeList.innerHTML = "";
           
-          bikeList.innerHTML += `
-            <div class="col s12 m6 l4">
-              <div class="card equal-card hoverable" style="position: relative;">
-                ${adminControls}
-                <div class="card-image">
-                  <img src="${bike.photo}" alt="${bike.name}">
+          if (snapshot.empty) {
+            bikeList.innerHTML = `
+              <div class="col s12">
+                <div class="card blue-grey lighten-4">
+                  <div class="card-content center-align">
+                    <span class="card-title">🚲 No hay bicicletas disponibles</span>
+                    <p>Sé el primero en agregar una bicicleta al sistema.</p>
+                  </div>
                 </div>
+              </div>
+            `;
+            return;
+          }
+          
+          snapshot.forEach((doc) => {
+            const bike = doc.data();
+            const bikeId = doc.id;
+            
+            const adminControls = isAdmin ? `
+              <div class="admin-controls">
+                <button class="btn-small red" onclick="deleteBike('${bikeId}')">
+                  <i class="material-icons">delete</i>
+                </button>
+              </div>
+            ` : '';
+            
+            bikeList.innerHTML += `
+              <div class="col s12 m6 l4">
+                <div class="card equal-card hoverable" style="position: relative;">
+                  ${adminControls}
+                  <div class="card-image">
+                    <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Sin+Imagen'">
+                  </div>
+                  <div class="card-content">
+                    <span class="card-title truncate">${bike.name}</span>
+                    <p><strong>📍 Ubicación:</strong> ${bike.location}</p>
+                    <p><strong>💰 Precio:</strong> S/ ${bike.price} por hora</p>
+                  </div>
+                  <div class="card-action">
+                    <a class="btn wa-btn waves-effect waves-light" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
+                      💬 WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        }, (error) => {
+          console.error("Error loading bikes:", error);
+          document.getElementById("bikeList").innerHTML = `
+            <div class="col s12">
+              <div class="card red lighten-4">
                 <div class="card-content">
-                  <span class="card-title truncate">${bike.name}</span>
-                  <p><strong>📍 Ubicación:</strong> ${bike.location}</p>
-                  <p><strong>💰 Precio:</strong> S/ ${bike.price} por hora</p>
-                </div>
-                <div class="card-action">
-                  <a class="btn wa-btn waves-effect waves-light" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
-                    💬 WhatsApp
-                  </a>
+                  <span class="card-title red-text">❌ Error</span>
+                  <p>No se pudieron cargar las bicicletas: ${error.message}</p>
                 </div>
               </div>
             </div>
           `;
         });
-      });
+      } catch (error) {
+        console.error("Error setting up listener:", error);
+      }
     }
 
     // Inicializar
