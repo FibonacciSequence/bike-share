@@ -28,6 +28,112 @@
           <label for="bikeLocation">Ubicación</label>
         </div>
         <div class="input-field">
-          <input id="bikeWhats
+          <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
+          <label for="bikeWhatsapp">WhatsApp</label>
+        </div>
+        <div class="input-field">
+          <input id="bikePrice" type="number" required>
+          <label for="bikePrice">Precio (por hora)</label>
+        </div>
+        <div class="file-field input-field">
+          <div class="btn">
+            <span>Foto</span>
+            <input type="file" id="photoInput" accept="image/*">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Sube una foto de la bici">
+          </div>
+        </div>
+        <button class="btn waves-effect waves-light" type="submit">Agregar</button>
+      </form>
+    </div>
+  </div>
 
+  <!-- Lista de bicis -->
+  <div id="bikeList" class="row"></div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "bike-share-lima.firebaseapp.com",
+      projectId: "bike-share-lima",
+      storageBucket: "bike-share-lima.appspot.com",
+      messagingSenderId: "742260721560",
+      appId: "1:742260721560:web:38831f59c1080a0b818ded"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 🚀 Subir a Cloudinary
+    async function uploadToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mdidemll"); 
+
+      const response = await fetch(url, { method: "POST", body: formData });
+      const data = await response.json();
+      return data.secure_url;
+    }
+
+    // 🚀 Agregar bici
+    document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("photoInput").files[0];
+      let photoURL = "";
+
+      if (file) {
+        photoURL = await uploadToCloudinary(file);
+      }
+
+      await addDoc(collection(db, "bikes"), {
+        name: document.getElementById("bikeName").value,
+        location: document.getElementById("bikeLocation").value,
+        whatsapp: document.getElementById("bikeWhatsapp").value,
+        price: document.getElementById("bikePrice").value,
+        photo: photoURL,
+        createdAt: serverTimestamp()
+      });
+
+      e.target.reset();
+      M.updateTextFields();
+      M.toast({ html: "✅ Bici agregada" });
+    });
+
+    // 🚀 Mostrar bicis en tiempo real
+    const q = query(collection(db, "bikes"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      const bikeList = document.getElementById("bikeList");
+      bikeList.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const bike = doc.data();
+        bikeList.innerHTML += `
+          <div class="col s12 m6">
+            <div class="card bike-card">
+              <div class="card-image">
+                <img src="${bike.photo || 'https://via.placeholder.com/400x200'}" alt="${bike.name}">
+              </div>
+              <div class="card-content">
+                <span class="card-title">${bike.name}</span>
+                <p><strong>Ubicación:</strong> ${bike.location}</p>
+                <p><strong>Precio:</strong> S/ ${bike.price}</p>
+              </div>
+              <div class="card-action">
+                <a class="btn wa-btn" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>
 
