@@ -9,6 +9,24 @@
     body { background: #f9f9f9; }
     .bike-card img { max-height: 180px; object-fit: cover; }
     .wa-btn { background-color: #25D366 !important; }
+    
+    /* Nuevos estilos para alinear tarjetas */
+    .equal-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .equal-card .card-content {
+      flex-grow: 1;
+    }
+    .equal-card img {
+      height: 180px;
+      object-fit: cover;
+      width: 100%;
+    }
+    .equal-card .card-action {
+      margin-top: auto;
+    }
   </style>
 </head>
 <body class="container">
@@ -58,7 +76,7 @@
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
+      apiKey: "878883777843688",
       authDomain: "bike-share-lima.firebaseapp.com",
       projectId: "bike-share-lima",
       storageBucket: "bike-share-lima.appspot.com",
@@ -113,10 +131,10 @@
       snapshot.forEach((doc) => {
         const bike = doc.data();
         bikeList.innerHTML += `
-          <div class="col s12 m6">
-            <div class="card bike-card">
+          <div class="col s12 m6 l4">
+            <div class="card equal-card">
               <div class="card-image">
-                <img src="${bike.photo || 'https://via.placeholder.com/400x200'}" alt="${bike.name}">
+                <img src="${bike.photo || 'https://via.placeholder.com/400x200/cccccc/000000?text=Sin+foto'}" alt="${bike.name}">
               </div>
               <div class="card-content">
                 <span class="card-title">${bike.name}</span>
@@ -136,4 +154,3 @@
   </script>
 </body>
 </html>
-
