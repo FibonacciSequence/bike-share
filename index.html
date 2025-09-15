@@ -65,25 +65,47 @@
     
     /* Hero Section */
     .hero {
-      background: linear-gradient(135deg, #2e7d32, #4caf50);
+      background: linear-gradient(rgba(46, 125, 50, 0.85), rgba(76, 175, 80, 0.85)), url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1200&h=800&fit=crop') center/cover;
       color: white;
       padding: 150px 0 100px;
       text-align: center;
+      position: relative;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+    
+    .hero .container {
+      position: relative;
+      z-index: 2;
     }
     
     .hero h1 {
       font-size: 3.5rem;
-      font-weight: 300;
+      font-weight: 700;
       margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      color: white;
     }
     
     .hero p {
       font-size: 1.3rem;
       margin-bottom: 2rem;
-      opacity: 0.9;
+      opacity: 0.95;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+      color: white;
+      line-height: 1.5;
     }
     
     /* Buttons */
@@ -468,8 +490,9 @@
         <li><a href="#como-funciona">Cómo funciona</a></li>
         <li><a href="#bicicletas">Bicicletas</a></li>
         <li><a href="#agregar">Agregar bici</a></li>
-        <li><a href="#" id="adminLoginBtn">Admin</a></li>
-        <li><a href="#" id="adminLogoutBtn" style="display: none;">Salir</a></li>
+        <li><a href="#" id="loginBtn">Iniciar sesión</a></li>
+        <li><a href="#" id="signupBtn">Registrarse</a></li>
+        <li><a href="#" id="logoutBtn" style="display: none;">Salir</a></li>
       </ul>
     </div>
   </nav>
@@ -486,12 +509,12 @@
     </div>
   </section>
 
-  <!-- Admin Panel -->
+  <!-- User Panel -->
   <div class="container">
-    <div id="adminPanel" class="admin-panel">
-      <h3>✅ Modo Administrador Activo</h3>
-      <p>Puedes editar y eliminar bicicletas usando los botones en cada tarjeta.</p>
-      <span id="adminInfo"></span>
+    <div id="userPanel" style="display: none; background: #4caf50; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+      <h3>✅ Bienvenido</h3>
+      <p>Ahora puedes gestionar tus bicicletas publicadas.</p>
+      <span id="userInfo"></span>
     </div>
   </div>
 
@@ -616,24 +639,57 @@
   </footer>
 
   <!-- Modals -->
-  <div id="adminLoginModal" class="modal">
+  <div id="loginModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h3>🔐 Acceso Administrador</h3>
-      <form id="adminLoginForm">
+      <h3>Iniciar Sesión</h3>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">Accede a tu cuenta para gestionar tus bicicletas</p>
+      <form id="loginForm">
         <div class="form-group">
-          <label for="adminEmail">Email</label>
-          <input type="email" id="adminEmail" required>
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required>
         </div>
         <div class="form-group">
-          <label for="adminPassword">Contraseña</label>
-          <input type="password" id="adminPassword" required>
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" required>
         </div>
         <div class="modal-buttons">
-          <button type="button" onclick="closeModal('adminLoginModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="button" onclick="closeModal('loginModal')" class="btn btn-secondary">Cancelar</button>
           <button type="submit" class="btn btn-green">Iniciar Sesión</button>
         </div>
       </form>
+      <p style="text-align: center; margin-top: 20px; color: #666;">
+        ¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); openModal('signupModal')" style="color: #4caf50;">Regístrate aquí</a>
+      </p>
+    </div>
+  </div>
+
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Crear Cuenta</h3>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">Únete a la comunidad de ciclistas de Lima</p>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Contraseña</label>
+          <input type="password" id="signupPassword" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Contraseña</label>
+          <input type="password" id="confirmPassword" minlength="6" required>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" onclick="closeModal('signupModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-green">Crear Cuenta</button>
+        </div>
+      </form>
+      <p style="text-align: center; margin-top: 20px; color: #666;">
+        ¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); openModal('loginModal')" style="color: #4caf50;">Inicia sesión aquí</a>
+      </p>
     </div>
   </div>
 
@@ -679,7 +735,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
@@ -692,7 +748,7 @@
     };
 
     let app, db, auth;
-    let isAdmin = false;
+    let currentUser = null;
     let firebaseInitialized = false;
 
     // Initialize Firebase
@@ -759,49 +815,114 @@
       });
     });
 
-    // Authentication
+    // Authentication State Management
     if (firebaseInitialized) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          isAdmin = true;
-          document.getElementById('adminPanel').style.display = 'block';
-          document.getElementById('adminLoginBtn').style.display = 'none';
-          document.getElementById('adminLogoutBtn').style.display = 'block';
-          document.getElementById('adminInfo').textContent = `Conectado como: ${user.email}`;
-          showSuccess(`Bienvenido administrador: ${user.email}`);
+          currentUser = user;
+          document.getElementById('userPanel').style.display = 'block';
+          document.getElementById('loginBtn').style.display = 'none';
+          document.getElementById('signupBtn').style.display = 'none';
+          document.getElementById('logoutBtn').style.display = 'block';
+          document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
+          showSuccess(`Bienvenido: ${user.email}`);
           loadBikes();
         } else {
-          isAdmin = false;
-          document.getElementById('adminPanel').style.display = 'none';
-          document.getElementById('adminLoginBtn').style.display = 'block';
-          document.getElementById('adminLogoutBtn').style.display = 'none';
+          currentUser = null;
+          document.getElementById('userPanel').style.display = 'none';
+          document.getElementById('loginBtn').style.display = 'block';
+          document.getElementById('signupBtn').style.display = 'block';
+          document.getElementById('logoutBtn').style.display = 'none';
           loadBikes();
         }
       });
     }
 
     // Login
-    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
       }
 
-      const email = document.getElementById('adminEmail').value;
-      const password = document.getElementById('adminPassword').value;
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
       
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        closeModal('adminLoginModal');
-        document.getElementById('adminLoginForm').reset();
+        closeModal('loginModal');
+        document.getElementById('loginForm').reset();
       } catch (error) {
-        showError(`Error de autenticación: ${error.message}`);
+        let errorMessage = "Error de autenticación";
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = "No existe una cuenta con este email";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Contraseña incorrecta";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Demasiados intentos. Intenta más tarde";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showError(errorMessage);
+      }
+    });
+
+    // Signup
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showError("Las contraseñas no coinciden");
+        return;
+      }
+
+      if (password.length < 6) {
+        showError("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+      
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        closeModal('signupModal');
+        document.getElementById('signupForm').reset();
+        showSuccess("Cuenta creada exitosamente");
+      } catch (error) {
+        let errorMessage = "Error al crear cuenta";
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Ya existe una cuenta con este email";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "La contraseña es muy débil";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showError(errorMessage);
       }
     });
 
     // Logout
-    document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
       if (!firebaseInitialized) return;
       try {
         await signOut(auth);
@@ -811,13 +932,21 @@
       }
     });
 
-    // Show login modal
-    document.getElementById('adminLoginBtn').addEventListener('click', () => {
+    // Show modals
+    document.getElementById('loginBtn').addEventListener('click', () => {
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
       }
-      openModal('adminLoginModal');
+      openModal('loginModal');
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', () => {
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+      openModal('signupModal');
     });
 
     // Cloudinary upload
@@ -841,6 +970,11 @@
         return;
       }
 
+      if (!currentUser) {
+        showError("Debes iniciar sesión para publicar una bicicleta");
+        return;
+      }
+
       const file = document.getElementById("photoInput").files[0];
       if (!file) {
         showError("Debes subir una foto de la bicicleta");
@@ -857,6 +991,8 @@
           whatsapp: document.getElementById("bikeWhatsapp").value,
           price: document.getElementById("bikePrice").value,
           photo: photoURL,
+          ownerId: currentUser.uid,
+          ownerEmail: currentUser.email,
           createdAt: serverTimestamp()
         });
 
@@ -871,8 +1007,15 @@
     });
 
     // Delete bike
-    window.deleteBike = async (bikeId) => {
-      if (!isAdmin || !firebaseInitialized) return;
+    window.deleteBike = async (bikeId, ownerId) => {
+      if (!currentUser || !firebaseInitialized) return;
+      
+      // Only allow owner to delete their bike
+      if (currentUser.uid !== ownerId) {
+        showError("Solo puedes eliminar tus propias bicicletas");
+        return;
+      }
+
       if (confirm('¿Estás seguro de que quieres eliminar esta bicicleta?')) {
         try {
           await deleteDoc(doc(db, "bikes", bikeId));
@@ -885,6 +1028,55 @@
 
     // Edit bike
     window.editBike = async (bikeId, bikeData) => {
-      if (!isAdmin || !firebaseInitialized) return;
+      if (!currentUser || !firebaseInitialized) return;
       
-      document.getElementById('
+      // Only allow owner to edit their bike
+      if (currentUser.uid !== bikeData.ownerId) {
+        showError("Solo puedes editar tus propias bicicletas");
+        return;
+      }
+      
+      document.getElementById('editBikeId').value = bikeId;
+      document.getElementById('editBikeName').value = bikeData.name;
+      document.getElementById('editBikeLocation').value = bikeData.location;
+      document.getElementById('editBikePrice').value = bikeData.price;
+      document.getElementById('editBikeWhatsapp').value = bikeData.whatsapp;
+      
+      openModal('editBikeModal');
+    };
+
+    // Save bike edits
+    document.getElementById("editBikeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      const bikeId = document.getElementById("editBikeId").value;
+      const file = document.getElementById("editPhotoInput").files[0];
+      
+      try {
+        const updateData = {
+          name: document.getElementById("editBikeName").value,
+          location: document.getElementById("editBikeLocation").value,
+          whatsapp: document.getElementById("editBikeWhatsapp").value,
+          price: document.getElementById("editBikePrice").value
+        };
+
+        if (file) {
+          showSuccess("Actualizando foto...");
+          const photoURL = await uploadToCloudinary(file);
+          updateData.photo = photoURL;
+        }
+
+        await updateDoc(doc(db, "bikes", bikeId), updateData);
+        
+        closeModal('editBikeModal');
+        document.getElementById("editBikeForm").reset();
+        showSuccess("Bicicleta actualizada correctamente");
+      } catch (error) {
+        showError(`Error al actualizar bicicleta: ${error.message}`);
+      }
+    });
