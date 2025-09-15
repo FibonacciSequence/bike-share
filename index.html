@@ -789,7 +789,9 @@
       document.getElementById(modalId).style.display = 'none';
     }
 
-    window.closeModal = closeModal; // Make available globally
+    // Make functions available globally
+    window.openModal = openModal;
+    window.closeModal = closeModal;
 
     // Modal close functionality
     document.querySelectorAll('.close').forEach(closeBtn => {
@@ -1026,21 +1028,30 @@
       }
     };
 
-    // Edit bike
-    window.editBike = async (bikeId, bikeData) => {
+    // Edit bike - simplified version
+    window.editBike = async (bikeId, ownerId) => {
       if (!currentUser || !firebaseInitialized) return;
       
-      // Only allow owner to edit their bike
-      if (currentUser.uid !== bikeData.ownerId) {
+      if (currentUser.uid !== ownerId) {
         showError("Solo puedes editar tus propias bicicletas");
         return;
       }
+
+      // Get bike data from DOM instead of parameter
+      const bikeCard = document.querySelector(`[onclick*="${bikeId}"]`).closest('.card');
+      const name = bikeCard.querySelector('.card-title').textContent;
+      const location = bikeCard.querySelector('.bike-info').textContent;
+      const price = bikeCard.querySelector('.price').textContent.replace(/[^\d]/g, '');
+      
+      // Try to get WhatsApp from the button
+      const whatsappBtn = bikeCard.querySelector('.btn-whatsapp');
+      const whatsapp = whatsappBtn ? whatsappBtn.getAttribute('onclick').match(/\d+/)?.[0] || '' : '';
       
       document.getElementById('editBikeId').value = bikeId;
-      document.getElementById('editBikeName').value = bikeData.name;
-      document.getElementById('editBikeLocation').value = bikeData.location;
-      document.getElementById('editBikePrice').value = bikeData.price;
-      document.getElementById('editBikeWhatsapp').value = bikeData.whatsapp;
+      document.getElementById('editBikeName').value = name;
+      document.getElementById('editBikeLocation').value = location;
+      document.getElementById('editBikePrice').value = price;
+      document.getElementById('editBikeWhatsapp').value = whatsapp;
       
       openModal('editBikeModal');
     };
