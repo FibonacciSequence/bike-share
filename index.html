@@ -1,180 +1,480 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lima Bike Share</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lima Bike Share - Comparte tu bici, alquila una bici</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.min.css" rel="stylesheet">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <style>
-    body { background: #f9f9f9; }
-    .bike-card img { max-height: 180px; object-fit: cover; }
-    .wa-btn { background-color: #25D366 !important; }
+    :root {
+      --primary-color: #2e7d32;
+      --secondary-color: #4caf50;
+      --accent-color: #ff6b35;
+      --text-dark: #1b1b1b;
+      --text-light: #666;
+      --bg-light: #f8f9fa;
+    }
     
-    /* Nuevos estilos para alinear tarjetas */
-    .equal-card {
+    body { 
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      color: var(--text-dark);
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      min-height: 70vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    .hero p {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn-large-custom {
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      text-transform: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: var(--accent-color);
+      border: none;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+    
+    .btn-primary:hover { background: #e55a2b; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+    
+    /* How It Works */
+    .how-it-works {
+      padding: 80px 0;
+      background: var(--bg-light);
+    }
+    
+    .step-card {
+      text-align: center;
+      padding: 30px 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
       height: 100%;
-      margin-bottom: 20px;
     }
-    .equal-card .card-content {
-      flex-grow: 1;
+    
+    .step-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .step-number {
+      width: 60px;
+      height: 60px;
+      background: var(--secondary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .step-card h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    /* Features */
+    .features {
+      padding: 80px 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--secondary-color);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    /* Navigation */
+    .navbar-fixed nav {
+      background: rgba(46, 125, 50, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    
+    .nav-wrapper .brand-logo {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    
+    /* Admin Panel */
+    .admin-panel { display: none; }
+    .admin-info {
+      background: var(--secondary-color);
+      color: white;
       padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
     }
-    .equal-card .card-content p {
-      margin: 8px 0;
-      line-height: 1.4;
+    
+    /* Bike Cards */
+    .bike-card {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      margin-bottom: 30px;
+      background: white;
     }
-    .equal-card img {
-      height: 200px;
+    
+    .bike-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .bike-card img {
+      height: 220px;
       object-fit: cover;
       width: 100%;
     }
-    .equal-card .card-action {
-      margin-top: auto;
-      padding: 16px 20px;
-      text-align: center;
+    
+    .bike-card .card-content {
+      padding: 25px;
     }
-    .equal-card .card-title {
-      font-size: 1.3rem;
-      margin-bottom: 12px;
+    
+    .bike-card .card-title {
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      margin-bottom: 15px;
       font-weight: 500;
     }
-    /* Mejorar grid spacing */
-    .row {
-      margin-bottom: 0;
-    }
-    .row .col {
-      padding: 0 10px;
-    }
-
-    /* Admin styles */
-    .admin-panel { display: none; }
-    .admin-controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 1;
-    }
-    .admin-controls .btn-small {
-      margin-left: 5px;
-    }
-    .login-modal { max-width: 400px; }
-    .nav-wrapper .right {
+    
+    .bike-info {
       display: flex;
       align-items: center;
+      margin-bottom: 10px;
+      color: var(--text-light);
     }
-    #adminInfo {
-      color: white;
-      margin-right: 15px;
-      font-size: 0.9rem;
+    
+    .bike-info i {
+      margin-right: 10px;
+      color: var(--secondary-color);
     }
-
-    /* Error message styles */
-    .error-message {
-      background: #ffebee;
-      border: 1px solid #f44336;
-      border-radius: 4px;
-      padding: 16px;
-      margin: 20px 0;
-      color: #c62828;
+    
+    .price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin: 15px 0;
+    }
+    
+    .wa-btn {
+      background: #25D366;
+      width: 100%;
+      border-radius: 25px;
+      padding: 12px;
+      font-weight: 500;
+    }
+    
+    .wa-btn:hover { background: #128C7E; }
+    
+    /* Admin controls */
+    .admin-controls {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+    
+    .admin-controls .btn-small {
+      margin-left: 5px;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Add Bike Form */
+    .add-bike-section {
+      background: var(--bg-light);
+      padding: 60px 0;
+    }
+    
+    .form-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1.1rem; }
+      .cta-buttons { justify-content: center; }
+      .feature-item { flex-direction: column; text-align: center; }
+      .feature-icon { margin-bottom: 15px; margin-right: 0; }
     }
   </style>
 </head>
-<body class="container">
-  <!-- Navbar con login admin -->
-  <nav class="blue darken-2">
-    <div class="nav-wrapper">
-      <a href="#" class="brand-logo">🚲 Lima Bike Share</a>
-      <div class="right">
-        <span id="adminInfo" style="display: none;"></span>
-        <a href="#" id="adminLoginBtn" class="btn-flat white-text">
-          <i class="material-icons left">admin_panel_settings</i>Admin
-        </a>
-        <a href="#" id="adminLogoutBtn" class="btn-flat white-text" style="display: none;">
-          <i class="material-icons left">logout</i>Salir
-        </a>
+<body>
+  <!-- Navigation -->
+  <div class="navbar-fixed">
+    <nav>
+      <div class="nav-wrapper container">
+        <a href="#" class="brand-logo">🚲 Lima Bike Share</a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="#como-funciona">Cómo funciona</a></li>
+          <li><a href="#bicicletas">Bicicletas</a></li>
+          <li><a href="#agregar">Agregar bici</a></li>
+          <li><a href="#" id="adminLoginBtn"><i class="material-icons left">admin_panel_settings</i>Admin</a></li>
+          <li><a href="#" id="adminLogoutBtn" style="display: none;"><i class="material-icons left">logout</i>Salir</a></li>
+        </ul>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </div>
 
-  <div style="margin-top: 2rem;">
-    <!-- Error Message -->
-    <div id="firebaseError" class="error-message" style="display: none;">
-      <strong>⚠️ Error de configuración:</strong>
-      <p>Hay un problema con la configuración de Firebase. Por favor, verifica las credenciales.</p>
-    </div>
+  <!-- Mobile Sidenav -->
+  <ul class="sidenav" id="mobile-demo">
+    <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#bicicletas">Bicicletas</a></li>
+    <li><a href="#agregar">Agregar bici</a></li>
+    <li><a href="#" id="adminLoginBtnMobile">Admin</a></li>
+  </ul>
 
-    <!-- Panel Admin (oculto por defecto) -->
-    <div id="adminPanel" class="admin-panel">
-      <div class="card red lighten-5">
-        <div class="card-content">
-          <span class="card-title red-text">🔧 Panel de Administración</span>
-          <div class="row">
-            <div class="col s12 m4">
-              <button class="btn red" id="editInfoBtn">
-                <i class="material-icons left">edit</i>Editar Info
-              </button>
-            </div>
-            <div class="col s12 m4">
-              <button class="btn orange" id="viewStatsBtn">
-                <i class="material-icons left">analytics</i>Estadísticas
-              </button>
-            </div>
-            <div class="col s12 m4">
-              <button class="btn purple" id="exportDataBtn">
-                <i class="material-icons left">download</i>Exportar
-              </button>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="row">
+        <div class="col s12 l8">
+          <div class="hero-content">
+            <h1>Comparte tu bici<br>Alquila una bici</h1>
+            <p>Conectamos ciclistas en Lima. Comparte tu bicicleta con otros ciclistas o alquila una bici local. Transacciones confiables, usuarios verificados.</p>
+            <div class="cta-buttons">
+              <a href="#bicicletas" class="btn btn-large-custom btn-primary waves-effect">Ver Bicicletas</a>
+              <a href="#agregar" class="btn btn-large-custom btn-secondary waves-effect">Compartir mi Bici</a>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Formulario -->
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Agregar una bici</span>
-        <form id="addBikeForm">
-          <div class="input-field">
-            <input id="bikeName" type="text" required>
-            <label for="bikeName">Nombre de la bici</label>
+  <!-- How It Works -->
+  <section id="como-funciona" class="how-it-works">
+    <div class="container">
+      <h2 class="center-align" style="color: var(--primary-color); margin-bottom: 60px; font-size: 2.5rem; font-weight: 300;">¿Cómo funciona?</h2>
+      <div class="row">
+        <div class="col s12 m4">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Encuentra una bici</h3>
+            <p>Explora las bicicletas disponibles en Lima. Filtra por ubicación, precio y tipo de bicicleta.</p>
           </div>
-          <div class="input-field">
-            <input id="bikeLocation" type="text" required>
-            <label for="bikeLocation">Ubicación</label>
+        </div>
+        <div class="col s12 m4">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Contacta al dueño</h3>
+            <p>Comunícate directamente con el propietario vía WhatsApp para coordinar lugar y hora.</p>
           </div>
-          <div class="input-field">
-            <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
-            <label for="bikeWhatsapp">WhatsApp</label>
+        </div>
+        <div class="col s12 m4">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>¡Pedalea!</h3>
+            <p>Recoge la bici, disfruta tu paseo por Lima y devuélvela según lo acordado.</p>
           </div>
-          <div class="input-field">
-            <input id="bikePrice" type="number" required>
-            <label for="bikePrice">Precio (por hora)</label>
-          </div>
-          <div class="file-field input-field">
-            <div class="btn">
-              <span>Foto *</span>
-              <input type="file" id="photoInput" accept="image/*" required>
-            </div>
-            <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Sube una foto de la bici (obligatorio)" required>
-            </div>
-          </div>
-          <button class="btn waves-effect waves-light" type="submit">Agregar</button>
-        </form>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- Lista de bicis -->
-    <div id="bikeList" class="row" style="margin-top: 2rem;"></div>
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <div class="row">
+        <div class="col s12 l6">
+          <h2 style="color: var(--primary-color); margin-bottom: 40px; font-size: 2.2rem; font-weight: 300;">¿Por qué Lima Bike Share?</h2>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="material-icons">verified_user</i>
+            </div>
+            <div>
+              <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">Comunidad confiable</h4>
+              <p>Todos los usuarios son verificados para garantizar transacciones seguras.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="material-icons">eco</i>
+            </div>
+            <div>
+              <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">Transporte sostenible</h4>
+              <p>Contribuye a reducir la contaminación en Lima con movilidad limpia.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <i class="material-icons">attach_money</i>
+            </div>
+            <div>
+              <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">Precios justos</h4>
+              <p>Alquila por horas a precios accesibles, o gana dinero compartiendo tu bici.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col s12 l6">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Ciclistas en Lima" style="width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admin Panel -->
+  <div class="container">
+    <div id="adminPanel" class="admin-panel">
+      <div class="admin-info">
+        <h5>✅ Modo Administrador Activo</h5>
+        <p>Puedes editar y eliminar bicicletas usando los botones en cada tarjeta.</p>
+        <span id="adminInfo"></span>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal Login Admin -->
-  <div id="adminLoginModal" class="modal login-modal">
+  <!-- Bikes Section -->
+  <section id="bicicletas" class="add-bike-section">
+    <div class="container">
+      <h2 class="center-align" style="color: var(--primary-color); margin-bottom: 50px; font-size: 2.5rem; font-weight: 300;">Bicicletas Disponibles</h2>
+      <div id="bikeList" class="row"></div>
+    </div>
+  </section>
+
+  <!-- Add Bike Section -->
+  <section id="agregar" class="add-bike-section">
+    <div class="container">
+      <div class="row">
+        <div class="col s12 l8 offset-l2">
+          <div class="form-container">
+            <h3 class="center-align" style="color: var(--primary-color); margin-bottom: 30px;">Comparte tu Bicicleta</h3>
+            <p class="center-align" style="color: var(--text-light); margin-bottom: 40px;">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
+            
+            <form id="addBikeForm">
+              <div class="row">
+                <div class="input-field col s12 m6">
+                  <input id="bikeName" type="text" required>
+                  <label for="bikeName">Nombre/Marca de la bici</label>
+                </div>
+                <div class="input-field col s12 m6">
+                  <input id="bikePrice" type="number" required>
+                  <label for="bikePrice">Precio por hora (S/)</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12 m6">
+                  <input id="bikeLocation" type="text" required>
+                  <label for="bikeLocation">Ubicación (distrito)</label>
+                </div>
+                <div class="input-field col s12 m6">
+                  <input id="bikeWhatsapp" type="text" placeholder="+51 999 999 999" required>
+                  <label for="bikeWhatsapp">WhatsApp</label>
+                </div>
+              </div>
+              <div class="file-field input-field">
+                <div class="btn" style="background: var(--secondary-color);">
+                  <span>Foto de la bici</span>
+                  <input type="file" id="photoInput" accept="image/*" required>
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text" placeholder="Sube una foto clara de tu bicicleta">
+                </div>
+              </div>
+              <div class="center-align">
+                <button class="btn btn-large-custom btn-primary waves-effect" type="submit">Publicar Bicicleta</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: var(--primary-color); color: white; padding: 40px 0; text-align: center;">
+    <div class="container">
+      <p>&copy; 2024 Lima Bike Share - Conectando ciclistas en Lima</p>
+      <p style="opacity: 0.8;">Transporte sostenible para una ciudad mejor</p>
+    </div>
+  </footer>
+
+  <!-- Modals -->
+  <div id="adminLoginModal" class="modal">
     <div class="modal-content">
-      <h4>🔐 Login Administrador</h4>
+      <h4 style="color: var(--primary-color);">🔐 Acceso Administrador</h4>
       <form id="adminLoginForm">
         <div class="input-field">
           <input id="adminEmail" type="email" required>
@@ -187,49 +487,61 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button type="submit" form="adminLoginForm" class="btn blue">Iniciar Sesión</button>
+      <button type="submit" form="adminLoginForm" class="btn" style="background: var(--primary-color);">Iniciar Sesión</button>
       <a href="#" class="modal-close btn-flat">Cancelar</a>
     </div>
   </div>
 
-  <!-- Modal Editar Info -->
-  <div id="editInfoModal" class="modal">
+  <div id="editBikeModal" class="modal">
     <div class="modal-content">
-      <h4>📝 Editar Información del Sitio</h4>
-      <form id="editInfoForm">
-        <div class="input-field">
-          <input id="siteTitle" type="text" value="Lima Bike Share">
-          <label for="siteTitle">Título del sitio</label>
+      <h4 style="color: var(--primary-color);">✏️ Editar Bicicleta</h4>
+      <form id="editBikeForm">
+        <input type="hidden" id="editBikeId">
+        <div class="row">
+          <div class="input-field col s12 m6">
+            <input id="editBikeName" type="text" required>
+            <label for="editBikeName">Nombre de la bici</label>
+          </div>
+          <div class="input-field col s12 m6">
+            <input id="editBikePrice" type="number" required>
+            <label for="editBikePrice">Precio por hora (S/)</label>
+          </div>
         </div>
-        <div class="input-field">
-          <input id="contactEmail" type="email" value="info@limabikeshare.com">
-          <label for="contactEmail">Email de contacto</label>
+        <div class="row">
+          <div class="input-field col s12 m6">
+            <input id="editBikeLocation" type="text" required>
+            <label for="editBikeLocation">Ubicación</label>
+          </div>
+          <div class="input-field col s12 m6">
+            <input id="editBikeWhatsapp" type="text" required>
+            <label for="editBikeWhatsapp">WhatsApp</label>
+          </div>
         </div>
-        <div class="input-field">
-          <input id="contactPhone" type="text" value="+51 999 123 456">
-          <label for="contactPhone">Teléfono de contacto</label>
-        </div>
-        <div class="input-field">
-          <textarea id="siteDescription" class="materialize-textarea">Plataforma de alquiler de bicicletas en Lima</textarea>
-          <label for="siteDescription">Descripción</label>
+        <div class="file-field input-field">
+          <div class="btn" style="background: var(--secondary-color);">
+            <span>Nueva Foto (opcional)</span>
+            <input type="file" id="editPhotoInput" accept="image/*">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Cambiar foto solo si es necesario">
+          </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="submit" form="editInfoForm" class="btn green">Guardar</button>
+      <button type="submit" form="editBikeForm" class="btn" style="background: var(--secondary-color);">Guardar Cambios</button>
       <a href="#" class="modal-close btn-flat">Cancelar</a>
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // ⚠️ CONFIGURACIÓN FIREBASE - DEBES ACTUALIZAR ESTAS CREDENCIALES
     const firebaseConfig = {
-      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc", // ⚠️ Reemplaza con tu API Key real
+      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
       authDomain: "bike-share-lima.firebaseapp.com",
       projectId: "bike-share-lima",
       storageBucket: "bike-share-lima.firebasestorage.app",
@@ -242,26 +554,36 @@
     let isAdmin = false;
     let firebaseInitialized = false;
 
-    // Initialize Firebase with error handling
+    // Initialize Firebase
     try {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
       firebaseInitialized = true;
-      console.log("✅ Firebase inicializado correctamente");
     } catch (error) {
-      console.error("❌ Error inicializando Firebase:", error);
-      document.getElementById('firebaseError').style.display = 'block';
+      console.error("Firebase initialization error:", error);
       firebaseInitialized = false;
     }
 
-    // Initialize Materialize components
+    // Initialize Materialize
     document.addEventListener('DOMContentLoaded', function() {
       M.Modal.init(document.querySelectorAll('.modal'));
+      M.Sidenav.init(document.querySelectorAll('.sidenav'));
       M.updateTextFields();
+      
+      // Smooth scrolling
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
     });
 
-    // 🔐 Admin Authentication
+    // Authentication
     if (firebaseInitialized) {
       onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -269,27 +591,24 @@
           document.getElementById('adminPanel').style.display = 'block';
           document.getElementById('adminLoginBtn').style.display = 'none';
           document.getElementById('adminLogoutBtn').style.display = 'block';
-          document.getElementById('adminInfo').style.display = 'block';
-          document.getElementById('adminInfo').textContent = `Admin: ${user.email}`;
-          M.toast({ html: `✅ Bienvenido admin: ${user.email}` });
-          loadBikes(); // Reload bikes to show admin controls
+          document.getElementById('adminInfo').textContent = `Conectado como: ${user.email}`;
+          M.toast({ html: `✅ Bienvenido ${user.email}`, classes: 'green' });
+          loadBikes();
         } else {
           isAdmin = false;
           document.getElementById('adminPanel').style.display = 'none';
           document.getElementById('adminLoginBtn').style.display = 'block';
           document.getElementById('adminLogoutBtn').style.display = 'none';
-          document.getElementById('adminInfo').style.display = 'none';
-          loadBikes(); // Reload bikes to hide admin controls
+          loadBikes();
         }
       });
     }
 
-    // Login admin
+    // Login
     document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
       if (!firebaseInitialized) {
-        M.toast({ html: "❌ Firebase no está configurado correctamente", classes: "red" });
+        M.toast({ html: "❌ Firebase no configurado", classes: "red" });
         return;
       }
 
@@ -301,90 +620,67 @@
         M.Modal.getInstance(document.getElementById('adminLoginModal')).close();
         document.getElementById('adminLoginForm').reset();
       } catch (error) {
-        console.error("Error de login:", error);
-        let errorMessage = "Error desconocido";
-        
-        switch (error.code) {
-          case 'auth/api-key-not-valid':
-            errorMessage = "API Key de Firebase no válida";
-            break;
-          case 'auth/user-not-found':
-            errorMessage = "Usuario no encontrado";
-            break;
-          case 'auth/wrong-password':
-            errorMessage = "Contraseña incorrecta";
-            break;
-          case 'auth/invalid-email':
-            errorMessage = "Email inválido";
-            break;
-          default:
-            errorMessage = error.message;
-        }
-        
-        M.toast({ html: `❌ Error: ${errorMessage}`, classes: "red" });
+        M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
       }
     });
 
-    // Logout admin
+    // Logout
     document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
       if (!firebaseInitialized) return;
-      
       try {
         await signOut(auth);
-        M.toast({ html: "👋 Sesión cerrada" });
+        M.toast({ html: "👋 Sesión cerrada", classes: 'orange' });
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
-        M.toast({ html: "❌ Error al cerrar sesión", classes: "red" });
       }
     });
 
     // Show login modal
     document.getElementById('adminLoginBtn').addEventListener('click', () => {
       if (!firebaseInitialized) {
-        M.toast({ html: "❌ Firebase no está configurado", classes: "red" });
+        M.toast({ html: "❌ Firebase no configurado", classes: "red" });
         return;
       }
       M.Modal.getInstance(document.getElementById('adminLoginModal')).open();
     });
 
-    // Show edit info modal
-    document.getElementById('editInfoBtn').addEventListener('click', () => {
-      M.Modal.getInstance(document.getElementById('editInfoModal')).open();
+    document.getElementById('adminLoginBtnMobile').addEventListener('click', () => {
+      if (!firebaseInitialized) {
+        M.toast({ html: "❌ Firebase no configurado", classes: "red" });
+        return;
+      }
+      M.Modal.getInstance(document.getElementById('adminLoginModal')).open();
     });
 
-    // 🚀 Subir a Cloudinary
+    // Cloudinary upload
     async function uploadToCloudinary(file) {
       const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "mdidemll"); 
+      formData.append("upload_preset", "mdidemll");
 
       const response = await fetch(url, { method: "POST", body: formData });
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`Error ${response.status}`);
       const data = await response.json();
       return data.secure_url;
     }
 
-    // 🚀 Agregar bici
+    // Add bike
     document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      
       if (!firebaseInitialized) {
-        M.toast({ html: "❌ Firebase no está configurado", classes: "red" });
+        M.toast({ html: "❌ Firebase no configurado", classes: "red" });
         return;
       }
 
       const file = document.getElementById("photoInput").files[0];
-      
-      // Validar que se haya seleccionado una foto
       if (!file) {
-        M.toast({ html: "❌ Debes subir una foto de la bici", classes: "red" });
+        M.toast({ html: "❌ Debes subir una foto", classes: "red" });
         return;
       }
 
       try {
+        M.toast({ html: "📤 Subiendo foto...", classes: 'blue' });
         const photoURL = await uploadToCloudinary(file);
 
         await addDoc(collection(db, "bikes"), {
@@ -398,44 +694,112 @@
 
         e.target.reset();
         M.updateTextFields();
-        M.toast({ html: "✅ Bici agregada correctamente" });
+        M.toast({ html: "✅ Bicicleta publicada correctamente", classes: 'green' });
+        
+        // Scroll to bikes section
+        document.getElementById('bicicletas').scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
         console.error("Error:", error);
         M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
       }
     });
 
-    // 🗑️ Eliminar bici (solo admin)
+    // Delete bike
     window.deleteBike = async (bikeId) => {
       if (!isAdmin || !firebaseInitialized) return;
-      if (confirm('¿Estás seguro de eliminar esta bici?')) {
+      if (confirm('¿Eliminar esta bicicleta?')) {
         try {
           await deleteDoc(doc(db, "bikes", bikeId));
-          M.toast({ html: "🗑️ Bici eliminada" });
+          M.toast({ html: "🗑️ Bicicleta eliminada", classes: 'orange' });
         } catch (error) {
-          console.error("Error al eliminar:", error);
+          console.error("Error:", error);
           M.toast({ html: "❌ Error al eliminar", classes: "red" });
         }
       }
     };
 
-    // 📊 Ver estadísticas
-    document.getElementById('viewStatsBtn').addEventListener('click', (e) => {
+    // Edit bike
+    window.editBike = async (bikeId) => {
+      if (!isAdmin || !firebaseInitialized) return;
+      
+      try {
+        const bikeElements = document.querySelectorAll('#bikeList .bike-card');
+        let bikeData = null;
+        
+        bikeElements.forEach(card => {
+          const deleteBtn = card.querySelector(`[onclick="deleteBike('${bikeId}')"]`);
+          if (deleteBtn) {
+            bikeData = {
+              name: card.querySelector('.card-title').textContent,
+              location: card.querySelector('.bike-info').textContent.trim(),
+              price: card.querySelector('.price').textContent.replace(/[^\d]/g, ''),
+              whatsapp: card.querySelector('.wa-btn').href.replace('https://wa.me/', '')
+            };
+          }
+        });
+
+        if (bikeData) {
+          document.getElementById('editBikeId').value = bikeId;
+          document.getElementById('editBikeName').value = bikeData.name;
+          document.getElementById('editBikeLocation').value = bikeData.location;
+          document.getElementById('editBikePrice').value = bikeData.price;
+          document.getElementById('editBikeWhatsapp').value = bikeData.whatsapp;
+          
+          M.updateTextFields();
+          M.Modal.getInstance(document.getElementById('editBikeModal')).open();
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        M.toast({ html: "❌ Error al cargar datos", classes: "red" });
+      }
+    };
+
+    // Save bike edits
+    document.getElementById("editBikeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const bikeElements = document.querySelectorAll('#bikeList .col');
-      const totalBikes = bikeElements.length;
-      M.toast({ html: `📊 Total de bicis: ${totalBikes}` });
+      
+      if (!firebaseInitialized) {
+        M.toast({ html: "❌ Firebase no configurado", classes: "red" });
+        return;
+      }
+
+      const bikeId = document.getElementById("editBikeId").value;
+      const file = document.getElementById("editPhotoInput").files[0];
+      
+      try {
+        const updateData = {
+          name: document.getElementById("editBikeName").value,
+          location: document.getElementById("editBikeLocation").value,
+          whatsapp: document.getElementById("editBikeWhatsapp").value,
+          price: document.getElementById("editBikePrice").value
+        };
+
+        if (file) {
+          M.toast({ html: "📤 Actualizando foto...", classes: 'blue' });
+          const photoURL = await uploadToCloudinary(file);
+          updateData.photo = photoURL;
+        }
+
+        await updateDoc(doc(db, "bikes", bikeId), updateData);
+        
+        M.Modal.getInstance(document.getElementById('editBikeModal')).close();
+        document.getElementById("editBikeForm").reset();
+        M.toast({ html: "✅ Bicicleta actualizada", classes: 'green' });
+      } catch (error) {
+        console.error("Error:", error);
+        M.toast({ html: `❌ Error: ${error.message}`, classes: "red" });
+      }
     });
 
-    // 🚀 Mostrar bicis en tiempo real
+    // Load bikes
     function loadBikes() {
       if (!firebaseInitialized) {
         document.getElementById("bikeList").innerHTML = `
           <div class="col s12">
             <div class="card red lighten-4">
-              <div class="card-content">
+              <div class="card-content center-align">
                 <span class="card-title red-text">⚠️ Error de configuración</span>
-                <p>No se pueden cargar las bicicletas. Firebase no está configurado correctamente.</p>
+                <p>No se pueden cargar las bicicletas. Verifica la configuración de Firebase.</p>
               </div>
             </div>
           </div>
@@ -452,11 +816,9 @@
           if (snapshot.empty) {
             bikeList.innerHTML = `
               <div class="col s12">
-                <div class="card blue-grey lighten-4">
-                  <div class="card-content center-align">
-                    <span class="card-title">🚲 No hay bicicletas disponibles</span>
-                    <p>Sé el primero en agregar una bicicleta al sistema.</p>
-                  </div>
+                <div class="card center-align" style="padding: 40px;">
+                  <h4 style="color: var(--primary-color);">🚲 ¡Sé el primero!</h4>
+                  <p style="color: var(--text-light);">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: var(--accent-color);">Comparte la tuya</a> y empieza la comunidad.</p>
                 </div>
               </div>
             `;
@@ -469,7 +831,10 @@
             
             const adminControls = isAdmin ? `
               <div class="admin-controls">
-                <button class="btn-small red" onclick="deleteBike('${bikeId}')">
+                <button class="btn-small blue" onclick="editBike('${bikeId}')" title="Editar">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-small red" onclick="deleteBike('${bikeId}')" title="Eliminar">
                   <i class="material-icons">delete</i>
                 </button>
               </div>
@@ -477,44 +842,41 @@
             
             bikeList.innerHTML += `
               <div class="col s12 m6 l4">
-                <div class="card equal-card hoverable" style="position: relative;">
+                <div class="bike-card" style="position: relative;">
                   ${adminControls}
-                  <div class="card-image">
-                    <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Sin+Imagen'">
-                  </div>
+                  <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'">
                   <div class="card-content">
-                    <span class="card-title truncate">${bike.name}</span>
-                    <p><strong>📍 Ubicación:</strong> ${bike.location}</p>
-                    <p><strong>💰 Precio:</strong> S/ ${bike.price} por hora</p>
-                  </div>
-                  <div class="card-action">
-                    <a class="btn wa-btn waves-effect waves-light" target="_blank" href="https://wa.me/${bike.whatsapp.replace(/\D/g,'')}">
-                      💬 WhatsApp
-                    </a>
+                    <h3 class="card-title">${bike.name}</h3>
+                    <div class="bike-info">
+                      <i class="material-icons">place</i>
+                      <span>${bike.location}</span>
+                    </div>
+                    <div class="price">S/ ${bike.price} por hora</div>
+                    <button class="btn waves-effect" style="background: #25D366; color: white; width: 100%; border-radius: 25px; border: none; padding: 15px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px;" onclick="window.open('https://wa.me/${bike.whatsapp.replace(/\D/g,'')}', '_blank')">
+                      Contactar por WhatsApp
+                    </button>
                   </div>
                 </div>
               </div>
             `;
           });
-        }, (error) => {
-          console.error("Error loading bikes:", error);
-          document.getElementById("bikeList").innerHTML = `
-            <div class="col s12">
-              <div class="card red lighten-4">
-                <div class="card-content">
-                  <span class="card-title red-text">❌ Error</span>
-                  <p>No se pudieron cargar las bicicletas: ${error.message}</p>
-                </div>
-              </div>
-            </div>
-          `;
         });
       } catch (error) {
-        console.error("Error setting up listener:", error);
+        console.error("Error loading bikes:", error);
+        document.getElementById("bikeList").innerHTML = `
+          <div class="col s12">
+            <div class="card red lighten-4">
+              <div class="card-content center-align">
+                <span class="card-title red-text">❌ Error</span>
+                <p>No se pudieron cargar las bicicletas: ${error.message}</p>
+              </div>
+            </div>
+          </div>
+        `;
       }
     }
 
-    // Inicializar
+    // Initialize
     loadBikes();
   </script>
 </body>
