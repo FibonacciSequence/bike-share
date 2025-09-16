@@ -840,9 +840,11 @@
       });
     }
 
-    // Login
+    // Login - with debug
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Login form submitted');
+      
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
@@ -851,11 +853,15 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       
+      console.log('Attempting login with:', email);
+      
       try {
         await signInWithEmailAndPassword(auth, email, password);
         closeModal('loginModal');
         document.getElementById('loginForm').reset();
+        console.log('Login successful');
       } catch (error) {
+        console.error('Login error:', error);
         let errorMessage = "Error de autenticación";
         switch (error.code) {
           case 'auth/user-not-found':
@@ -877,9 +883,11 @@
       }
     });
 
-    // Signup
+    // Signup - with debug
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Signup form submitted');
+      
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
@@ -888,6 +896,8 @@
       const email = document.getElementById('signupEmail').value;
       const password = document.getElementById('signupPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
+
+      console.log('Attempting signup with:', email);
 
       if (password !== confirmPassword) {
         showError("Las contraseñas no coinciden");
@@ -904,7 +914,9 @@
         closeModal('signupModal');
         document.getElementById('signupForm').reset();
         showSuccess("Cuenta creada exitosamente");
+        console.log('Signup successful');
       } catch (error) {
+        console.error('Signup error:', error);
         let errorMessage = "Error al crear cuenta";
         switch (error.code) {
           case 'auth/email-already-in-use':
@@ -934,8 +946,10 @@
       }
     });
 
-    // Show modals
-    document.getElementById('loginBtn').addEventListener('click', () => {
+    // Show modals - with debug
+    document.getElementById('loginBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Login button clicked');
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
@@ -943,7 +957,9 @@
       openModal('loginModal');
     });
 
-    document.getElementById('signupBtn').addEventListener('click', () => {
+    document.getElementById('signupBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Signup button clicked');
       if (!firebaseInitialized) {
         showError("Firebase no está configurado correctamente");
         return;
