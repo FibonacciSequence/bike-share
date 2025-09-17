@@ -3,43 +3,850 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bike Share</title>
-  <!-- Aquí mantenemos tus estilos y scripts originales -->
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <title>Lima Bike Share - Comparte tu bici, alquila una bici</title>
+  
+  <!-- JavaScript functions defined FIRST -->
+  <script>
+    console.log('Head script loading...');
+    
+    function testLogin() {
+      console.log('testLogin called');
+      document.getElementById('loginModal').style.display = 'block';
+    }
+    
+    function testSignup() {
+      console.log('testSignup called');
+      document.getElementById('signupModal').style.display = 'block';
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Make sure they're global
+    window.testLogin = testLogin;
+    window.testSignup = testSignup;
+    window.closeModal = closeModal;
+    
+    console.log('Head functions defined:', typeof testLogin);
+  </script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Navigation */
+    nav {
+      background: #2e7d32;
+      color: white;
+      padding: 1rem 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+    
+    nav a {
+      color: white;
+      text-decoration: none;
+      transition: opacity 0.3s;
+    }
+    
+    nav a:hover {
+      opacity: 0.8;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(rgba(46, 125, 50, 0.85), rgba(76, 175, 80, 0.85)), url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1200&h=800&fit=crop') center/cover;
+      color: white;
+      padding: 150px 0 100px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+    
+    .hero .container {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      color: white;
+    }
+    
+    .hero p {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+      color: white;
+      line-height: 1.5;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0.5rem;
+      text-align: center;
+    }
+    
+    .btn-primary {
+      background: #ff6b35;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #e55a2b;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .btn-green {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .btn-green:hover {
+      background: #45a049;
+      color: white;
+    }
+    
+    .btn-whatsapp {
+      background: #25D366;
+      color: white;
+      width: 100%;
+      margin: 0;
+    }
+    
+    .btn-whatsapp:hover {
+      background: #128C7E;
+      color: white;
+    }
+    
+    /* Sections */
+    section {
+      padding: 80px 0;
+    }
+    
+    .bg-light {
+      background: #f8f9fa;
+    }
+    
+    h2 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #2e7d32;
+      font-weight: 300;
+    }
+    
+    h3 {
+      color: #2e7d32;
+      margin-bottom: 1rem;
+    }
+    
+    /* Grid System */
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: -15px;
+    }
+    
+    .col {
+      flex: 1;
+      padding: 15px;
+      min-width: 300px;
+    }
+    
+    .col-3 {
+      flex: 0 0 33.333%;
+      padding: 15px;
+    }
+    
+    .col-2 {
+      flex: 0 0 50%;
+      padding: 15px;
+    }
+    
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      height: 100%;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+    
+    .card-content {
+      padding: 25px;
+    }
+    
+    .card-title {
+      font-size: 1.4rem;
+      color: #2e7d32;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    
+    .bike-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .bike-info::before {
+      content: "📍";
+      margin-right: 8px;
+    }
+    
+    .price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ff6b35;
+      margin: 15px 0;
+    }
+    
+    /* Step Cards */
+    .step-card {
+      text-align: center;
+      padding: 30px 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      height: 100%;
+    }
+    
+    .step-number {
+      width: 60px;
+      height: 60px;
+      background: #4caf50;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+    }
+    
+    /* Form */
+    .form-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #2e7d32;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #4caf50;
+    }
+    
+    /* Admin Panel */
+    .admin-panel {
+      display: none;
+      background: #4caf50;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .admin-controls {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+    
+    .admin-controls button {
+      margin-left: 5px;
+      padding: 8px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 0.8rem;
+    }
+    
+    .btn-edit {
+      background: #2196F3;
+    }
+    
+    .btn-delete {
+      background: #f44336;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+    
+    .modal h3 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    .close {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    /* Features */
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 30px;
+    }
+    
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      background: #4caf50;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    /* Footer */
+    footer {
+      background: #2e7d32;
+      color: white;
+      padding: 40px 0;
+      text-align: center;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+      }
+      
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .col-3, .col-2 {
+        flex: 0 0 100%;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      
+      .feature-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .feature-icon {
+        margin: 0 auto 15px;
+      }
+    }
+    
+    /* Error message */
+    .error-message {
+      background: #ffebee;
+      border: 1px solid #f44336;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+      color: #c62828;
+    }
+  </style>
 </head>
 <body>
-  <!-- Contenido original del sitio (mapas, módulos, etc.) -->
-  <div id="app">
-    <!-- Aquí va todo lo que tenías en tu index.html original -->
+  <script>
+    // Define functions IMMEDIATELY when body starts loading
+    console.log('Defining functions...');
+    
+    function testLogin() {
+      console.log('Login clicked - opening modal');
+      var modal = document.getElementById('loginModal');
+      if (modal) {
+        modal.style.display = 'block';
+      } else {
+        console.error('Login modal not found');
+      }
+    }
+
+    function testSignup() {
+      console.log('Signup clicked - opening modal');
+      var modal = document.getElementById('signupModal');
+      if (modal) {
+        modal.style.display = 'block';
+      } else {
+        console.error('Signup modal not found');
+      }
+    }
+
+    function closeModal(modalId) {
+      console.log('Closing modal:', modalId);
+      var modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Make functions global
+    window.testLogin = testLogin;
+    window.testSignup = testSignup; 
+    window.closeModal = closeModal;
+    
+    console.log('Functions defined:', typeof testLogin, typeof testSignup);
+  </script>
+  <!-- Navigation -->
+  <nav>
+    <div class="container">
+      <a href="#" class="logo">🚲 Lima Bike Share</a>
+      <ul>
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#bicicletas">Bicicletas</a></li>
+        <li><a href="#agregar">Agregar bici</a></li>
+        <li><a href="#" onclick="testLogin(); return false;">Iniciar sesión</a></li>
+        <li><a href="#" onclick="testSignup(); return false;">Registrarse</a></li>
+        <li><a href="#" id="logoutBtn" style="display: none;">Salir</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Comparte tu bici<br>Alquila una bici</h1>
+      <p>Conectamos ciclistas en Lima. Comparte tu bicicleta con otros ciclistas o alquila una bici local. Transacciones confiables, usuarios verificados.</p>
+      <div>
+        <a href="#bicicletas" class="btn btn-primary">Ver Bicicletas</a>
+        <a href="#agregar" class="btn btn-secondary">Compartir mi Bici</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- User Panel -->
+  <div class="container">
+    <div id="userPanel" style="display: none; background: #4caf50; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+      <h3>✅ Bienvenido</h3>
+      <p>Ahora puedes gestionar tus bicicletas publicadas.</p>
+      <span id="userInfo"></span>
+    </div>
   </div>
 
-  <!-- Login Modal -->
+  <!-- How It Works -->
+  <section id="como-funciona" class="bg-light">
+    <div class="container">
+      <h2>¿Cómo funciona?</h2>
+      <div class="row">
+        <div class="col-3">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Encuentra una bici</h3>
+            <p>Explora las bicicletas disponibles en Lima. Filtra por ubicación, precio y tipo de bicicleta.</p>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Contacta al dueño</h3>
+            <p>Comunícate directamente con el propietario vía WhatsApp para coordinar lugar y hora.</p>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>¡Pedalea!</h3>
+            <p>Recoge la bici, disfruta tu paseo por Lima y devuélvela según lo acordado.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h2 style="text-align: left; margin-bottom: 40px;">¿Por qué Lima Bike Share?</h2>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div>
+              <h3>Comunidad confiable</h3>
+              <p>Todos los usuarios son verificados para garantizar transacciones seguras.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🌱</div>
+            <div>
+              <h3>Transporte sostenible</h3>
+              <p>Contribuye a reducir la contaminación en Lima con movilidad limpia.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">💰</div>
+            <div>
+              <h3>Precios justos</h3>
+              <p>Alquila por horas a precios accesibles, o gana dinero compartiendo tu bici.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Ciclistas en Lima" style="width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bikes Section -->
+  <section id="bicicletas" class="bg-light">
+    <div class="container">
+      <h2>Bicicletas Disponibles</h2>
+      <div id="bikeList" class="row"></div>
+    </div>
+  </section>
+
+  <!-- Add Bike Section -->
+  <section id="agregar">
+    <div class="container">
+      <div class="form-container">
+        <h2 style="margin-bottom: 20px;">Comparte tu Bicicleta</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 40px;">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
+        
+        <form id="addBikeForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bikeName">Nombre/Marca de la bici *</label>
+              <input type="text" id="bikeName" required>
+            </div>
+            <div class="form-group">
+              <label for="bikePrice">Precio por hora (S/) *</label>
+              <input type="number" id="bikePrice" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bikeLocation">Ubicación (distrito) *</label>
+              <input type="text" id="bikeLocation" required>
+            </div>
+            <div class="form-group">
+              <label for="bikeWhatsapp">WhatsApp *</label>
+              <input type="text" id="bikeWhatsapp" placeholder="+51 999 999 999" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="photoInput">Foto de la bici *</label>
+            <input type="file" id="photoInput" accept="image/*" required>
+          </div>
+          <div style="text-align: center;">
+            <button type="submit" class="btn btn-green">Publicar Bicicleta</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Transporte sostenible para una ciudad mejor</p>
+    </div>
+  </footer>
+
+  <!-- Modals -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
-      <span class="close" onclick="closeModal('loginModal')">&times;</span>
-      <h2>Iniciar sesión</h2>
-      <input type="text" placeholder="Usuario">
-      <input type="password" placeholder="Contraseña">
-      <button>Entrar</button>
-      <p>¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); openModal('signupModal'); return false;">Regístrate aquí</a></p>
+      <span class="close">&times;</span>
+      <h3>Iniciar Sesión</h3>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">Accede a tu cuenta para gestionar tus bicicletas</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" onclick="closeModal('loginModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-green">Iniciar Sesión</button>
+        </div>
+      </form>
+      <p style="text-align: center; margin-top: 20px; color: #666;">
+        ¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); openModal('signupModal')" style="color: #4caf50;">Regístrate aquí</a>
+      </p>
     </div>
   </div>
 
-  <!-- Signup Modal -->
   <div id="signupModal" class="modal">
     <div class="modal-content">
-      <span class="close" onclick="closeModal('signupModal')">&times;</span>
-      <h2>Crear cuenta</h2>
-      <input type="text" placeholder="Usuario">
-      <input type="email" placeholder="Email">
-      <input type="password" placeholder="Contraseña">
-      <button>Registrar</button>
-      <p>¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); openModal('loginModal'); return false;">Inicia sesión aquí</a></p>
+      <span class="close">&times;</span>
+      <h3>Crear Cuenta</h3>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">Únete a la comunidad de ciclistas de Lima</p>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Contraseña</label>
+          <input type="password" id="signupPassword" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Contraseña</label>
+          <input type="password" id="confirmPassword" minlength="6" required>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" onclick="closeModal('signupModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-green">Crear Cuenta</button>
+        </div>
+      </form>
+      <p style="text-align: center; margin-top: 20px; color: #666;">
+        ¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); openModal('loginModal')" style="color: #4caf50;">Inicia sesión aquí</a>
+      </p>
     </div>
   </div>
 
-  <script>
+  <div id="editBikeModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>✏️ Editar Bicicleta</h3>
+      <form id="editBikeForm">
+        <input type="hidden" id="editBikeId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editBikeName">Nombre de la bici</label>
+            <input type="text" id="editBikeName" required>
+          </div>
+          <div class="form-group">
+            <label for="editBikePrice">Precio por hora (S/)</label>
+            <input type="number" id="editBikePrice" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editBikeLocation">Ubicación</label>
+            <input type="text" id="editBikeLocation" required>
+          </div>
+          <div class="form-group">
+            <label for="editBikeWhatsapp">WhatsApp</label>
+            <input type="text" id="editBikeWhatsapp" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editPhotoInput">Nueva Foto (opcional)</label>
+          <input type="file" id="editPhotoInput" accept="image/*">
+        </div>
+        <div class="modal-buttons">
+          <button type="button" onclick="closeModal('editBikeModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-green">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
+      authDomain: "bike-share-lima.firebaseapp.com",
+      projectId: "bike-share-lima",
+      storageBucket: "bike-share-lima.firebasestorage.app",
+      messagingSenderId: "742260721560",
+      appId: "1:742260721560:web:38831f59c1080a0b818ded",
+      measurementId: "G-B5E8FXD1P5"
+    };
+
+    let app, db, auth;
+    let currentUser = null;
+    let firebaseInitialized = false;
+
+    // Initialize Firebase
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      firebaseInitialized = true;
+      console.log("Firebase initialized successfully");
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      showError("Error de configuración: No se pudo conectar con Firebase");
+      firebaseInitialized = false;
+    }
+
+    // Utility functions
+    function showError(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.innerHTML = `<strong>❌ Error:</strong> ${message}`;
+      document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.container').firstChild);
+      setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    function showSuccess(message) {
+      const successDiv = document.createElement('div');
+      successDiv.style.cssText = 'background: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; padding: 16px; margin: 20px 0; color: #2e7d32;';
+      successDiv.innerHTML = `<strong>✅ Éxito:</strong> ${message}`;
+      document.querySelector('.container').insertBefore(successDiv, document.querySelector('.container').firstChild);
+      setTimeout(() => successDiv.remove(), 3000);
+    }
+
     function openModal(modalId) {
       document.getElementById(modalId).style.display = 'block';
     }
@@ -48,12 +855,321 @@
       document.getElementById(modalId).style.display = 'none';
     }
 
-    window.addEventListener('click', (event) => {
-      const loginModal = document.getElementById('loginModal');
-      const signupModal = document.getElementById('signupModal');
-      if (event.target === loginModal) loginModal.style.display = 'none';
-      if (event.target === signupModal) signupModal.style.display = 'none';
+    // Make functions available globally
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+
+    // Modal close functionality
+    document.querySelectorAll('.close').forEach(closeBtn => {
+      closeBtn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+      });
     });
-  </script>
-</body>
-</html>
+
+    window.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    });
+
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Authentication State Management
+    if (firebaseInitialized) {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          document.getElementById('userPanel').style.display = 'block';
+          document.getElementById('loginBtn').style.display = 'none';
+          document.getElementById('signupBtn').style.display = 'none';
+          document.getElementById('logoutBtn').style.display = 'block';
+          document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
+          showSuccess(`Bienvenido: ${user.email}`);
+          loadBikes();
+        } else {
+          currentUser = null;
+          document.getElementById('userPanel').style.display = 'none';
+          document.getElementById('loginBtn').style.display = 'block';
+          document.getElementById('signupBtn').style.display = 'block';
+          document.getElementById('logoutBtn').style.display = 'none';
+          loadBikes();
+        }
+      });
+    }
+
+    // Login - with debug
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('Login form submitted');
+      
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      console.log('Attempting login with:', email);
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        closeModal('loginModal');
+        document.getElementById('loginForm').reset();
+        console.log('Login successful');
+      } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = "Error de autenticación";
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = "No existe una cuenta con este email";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Contraseña incorrecta";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Demasiados intentos. Intenta más tarde";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showError(errorMessage);
+      }
+    });
+
+    // Signup - with debug
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('Signup form submitted');
+      
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      console.log('Attempting signup with:', email);
+
+      if (password !== confirmPassword) {
+        showError("Las contraseñas no coinciden");
+        return;
+      }
+
+      if (password.length < 6) {
+        showError("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+      
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        closeModal('signupModal');
+        document.getElementById('signupForm').reset();
+        showSuccess("Cuenta creada exitosamente");
+        console.log('Signup successful');
+      } catch (error) {
+        console.error('Signup error:', error);
+        let errorMessage = "Error al crear cuenta";
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Ya existe una cuenta con este email";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "La contraseña es muy débil";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showError(errorMessage);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (!firebaseInitialized) return;
+      try {
+        await signOut(auth);
+        showSuccess("Sesión cerrada correctamente");
+      } catch (error) {
+        showError("Error al cerrar sesión");
+      }
+    });
+
+    // Show modals - with debug
+    document.getElementById('loginBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Login button clicked');
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+      openModal('loginModal');
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Signup button clicked');
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+      openModal('signupModal');
+    });
+
+    // Cloudinary upload
+    async function uploadToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mdidemll");
+
+      const response = await fetch(url, { method: "POST", body: formData });
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      return data.secure_url;
+    }
+
+    // Add bike
+    document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      if (!currentUser) {
+        showError("Debes iniciar sesión para publicar una bicicleta");
+        return;
+      }
+
+      const file = document.getElementById("photoInput").files[0];
+      if (!file) {
+        showError("Debes subir una foto de la bicicleta");
+        return;
+      }
+
+      try {
+        showSuccess("Subiendo foto...");
+        const photoURL = await uploadToCloudinary(file);
+
+        await addDoc(collection(db, "bikes"), {
+          name: document.getElementById("bikeName").value,
+          location: document.getElementById("bikeLocation").value,
+          whatsapp: document.getElementById("bikeWhatsapp").value,
+          price: document.getElementById("bikePrice").value,
+          photo: photoURL,
+          ownerId: currentUser.uid,
+          ownerEmail: currentUser.email,
+          createdAt: serverTimestamp()
+        });
+
+        document.getElementById("addBikeForm").reset();
+        showSuccess("Bicicleta publicada correctamente");
+        
+        // Scroll to bikes section
+        document.getElementById('bicicletas').scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        showError(`Error al publicar bicicleta: ${error.message}`);
+      }
+    });
+
+    // Delete bike
+    window.deleteBike = async (bikeId, ownerId) => {
+      if (!currentUser || !firebaseInitialized) return;
+      
+      // Only allow owner to delete their bike
+      if (currentUser.uid !== ownerId) {
+        showError("Solo puedes eliminar tus propias bicicletas");
+        return;
+      }
+
+      if (confirm('¿Estás seguro de que quieres eliminar esta bicicleta?')) {
+        try {
+          await deleteDoc(doc(db, "bikes", bikeId));
+          showSuccess("Bicicleta eliminada correctamente");
+        } catch (error) {
+          showError("Error al eliminar la bicicleta");
+        }
+      }
+    };
+
+    // Edit bike - simplified version
+    window.editBike = async (bikeId, ownerId) => {
+      if (!currentUser || !firebaseInitialized) return;
+      
+      if (currentUser.uid !== ownerId) {
+        showError("Solo puedes editar tus propias bicicletas");
+        return;
+      }
+
+      // Get bike data from DOM instead of parameter
+      const bikeCard = document.querySelector(`[onclick*="${bikeId}"]`).closest('.card');
+      const name = bikeCard.querySelector('.card-title').textContent;
+      const location = bikeCard.querySelector('.bike-info').textContent;
+      const price = bikeCard.querySelector('.price').textContent.replace(/[^\d]/g, '');
+      
+      // Try to get WhatsApp from the button
+      const whatsappBtn = bikeCard.querySelector('.btn-whatsapp');
+      const whatsapp = whatsappBtn ? whatsappBtn.getAttribute('onclick').match(/\d+/)?.[0] || '' : '';
+      
+      document.getElementById('editBikeId').value = bikeId;
+      document.getElementById('editBikeName').value = name;
+      document.getElementById('editBikeLocation').value = location;
+      document.getElementById('editBikePrice').value = price;
+      document.getElementById('editBikeWhatsapp').value = whatsapp;
+      
+      openModal('editBikeModal');
+    };
+
+    // Save bike edits
+    document.getElementById("editBikeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      if (!firebaseInitialized) {
+        showError("Firebase no está configurado correctamente");
+        return;
+      }
+
+      const bikeId = document.getElementById("editBikeId").value;
+      const file = document.getElementById("editPhotoInput").files[0];
+      
+      try {
+        const updateData = {
+          name: document.getElementById("editBikeName").value,
+          location: document.getElementById("editBikeLocation").value,
+          whatsapp: document.getElementById("editBikeWhatsapp").value,
+          price: document.getElementById("editBikePrice").value
+        };
+
+        if (file) {
+          showSuccess("Actualizando foto...");
+          const photoURL = await uploadToCloudinary(file);
+          updateData.photo = photoURL;
+        }
+
+        await updateDoc(doc(db, "bikes", bikeId), updateData);
+        
+        closeModal('editBikeModal');
+        document.getElementById("editBikeForm").reset();
+        showSuccess("Bicicleta actualizada correctamente");
+      } catch (error) {
+        showError(`Error al actualizar bicicleta: ${error.message}`);
+      }
+    });
