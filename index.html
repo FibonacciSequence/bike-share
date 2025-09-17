@@ -482,6 +482,45 @@
   </style>
 </head>
 <body>
+  <script>
+    // Define functions IMMEDIATELY when body starts loading
+    console.log('Defining functions...');
+    
+    function testLogin() {
+      console.log('Login clicked - opening modal');
+      var modal = document.getElementById('loginModal');
+      if (modal) {
+        modal.style.display = 'block';
+      } else {
+        console.error('Login modal not found');
+      }
+    }
+
+    function testSignup() {
+      console.log('Signup clicked - opening modal');
+      var modal = document.getElementById('signupModal');
+      if (modal) {
+        modal.style.display = 'block';
+      } else {
+        console.error('Signup modal not found');
+      }
+    }
+
+    function closeModal(modalId) {
+      console.log('Closing modal:', modalId);
+      var modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // Make functions global
+    window.testLogin = testLogin;
+    window.testSignup = testSignup; 
+    window.closeModal = closeModal;
+    
+    console.log('Functions defined:', typeof testLogin, typeof testSignup);
+  </script>
   <!-- Navigation -->
   <nav>
     <div class="container">
