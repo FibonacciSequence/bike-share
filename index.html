@@ -4,6 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lima Bike Share - Comparte tu bici, alquila una bici</title>
+  
+  <!-- JavaScript functions defined FIRST -->
+  <script>
+    console.log('Head script loading...');
+    
+    function testLogin() {
+      console.log('testLogin called');
+      document.getElementById('loginModal').style.display = 'block';
+    }
+    
+    function testSignup() {
+      console.log('testSignup called');
+      document.getElementById('signupModal').style.display = 'block';
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Make sure they're global
+    window.testLogin = testLogin;
+    window.testSignup = testSignup;
+    window.closeModal = closeModal;
+    
+    console.log('Head functions defined:', typeof testLogin);
+  </script>
+  
   <style>
     * {
       margin: 0;
