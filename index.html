@@ -754,7 +754,13 @@
     };
 
     // Initialize Firebase
-    let auth, db, currentUser = null;
+    let auth, db, currentUser = null, isAdmin = false;
+    
+    // Define admin users (you can add more emails here)
+    const adminEmails = [
+      'tilmankneepkens@gmail.com',
+      'tilmannathaniel@gmail.com'  // Add your email here
+    ];
     
     try {
       firebase.initializeApp(firebaseConfig);
@@ -841,9 +847,18 @@
       
       if (user) {
         currentUser = user;
+        isAdmin = adminEmails.includes(user.email);
+        console.log('Is admin:', isAdmin);
+        
         document.getElementById('userPanel').style.display = 'block';
         document.getElementById('logoutBtn').style.display = 'block';
-        document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
+        
+        if (isAdmin) {
+          document.getElementById('userInfo').innerHTML = `🔧 ADMIN: ${user.email}`;
+          document.getElementById('userPanel').style.background = '#ff6b35';
+        } else {
+          document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
+        }
         
         // Hide login/signup from navigation when logged in
         const loginLink = document.querySelector('[onclick*="testLogin"]');
@@ -851,10 +866,12 @@
         if (loginLink) loginLink.style.display = 'none';
         if (signupLink) signupLink.style.display = 'none';
         
-        showMessage(`Bienvenido ${user.email}`);
+        showMessage(isAdmin ? `Bienvenido ADMIN: ${user.email}` : `Bienvenido ${user.email}`);
         loadBikes();
+        loadUsers(); // Load users for admin
       } else {
         currentUser = null;
+        isAdmin = false;
         document.getElementById('userPanel').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
         
@@ -907,11 +924,13 @@
             const bike = doc.data();
             const bikeId = doc.id;
             
-            // Show edit/delete controls only for bike owner
-            const ownerControls = (currentUser && currentUser.uid === bike.ownerId) ? `
+            // Show edit/delete controls for bike owner OR admin
+            const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
+            const ownerControls = canManage ? `
               <div class="admin-controls">
                 <button class="btn-edit" onclick="editBike('${bikeId}', '${bike.ownerId}')" title="Editar">✏️</button>
                 <button class="btn-delete" onclick="deleteBike('${bikeId}', '${bike.ownerId}')" title="Eliminar">🗑️</button>
+                ${isAdmin && currentUser.uid !== bike.ownerId ? '<span style="color: red; font-size: 10px;">ADMIN</span>' : ''}
               </div>
             ` : '';
             
@@ -924,6 +943,7 @@
                     <h3 class="card-title">${bike.name}</h3>
                     <div class="bike-info">${bike.location}</div>
                     <div class="price">S/ ${bike.price} por hora</div>
+                    ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Dueño: ${bike.ownerEmail}</div>` : ''}
                     <button class="btn btn-whatsapp" onclick="window.open('https://wa.me/${bike.whatsapp.replace(/\D/g,'')}', '_blank')">
                       Contactar por WhatsApp
                     </button>
@@ -938,27 +958,76 @@
         });
     }
 
-    // Delete bike function
+    // Delete bike function (owner or admin)
     window.deleteBike = function(bikeId, ownerId) {
-      if (!currentUser || currentUser.uid !== ownerId) {
-        showMessage("Solo puedes eliminar tus propias bicicletas", "error");
+      const canDelete = currentUser && (currentUser.uid === ownerId || isAdmin);
+      
+      if (!canDelete) {
+        showMessage("No tienes permisos para eliminar esta bicicleta", "error");
         return;
       }
 
-      if (confirm('¿Estás seguro de que quieres eliminar esta bicicleta?')) {
+      const confirmMsg = isAdmin && currentUser.uid !== ownerId 
+        ? '¿Estás seguro de eliminar esta bicicleta? (ADMIN: No es tuya)'
+        : '¿Estás seguro de que quieres eliminar esta bicicleta?';
+
+      if (confirm(confirmMsg)) {
         db.collection("bikes").doc(bikeId).delete()
           .then(() => showMessage("Bicicleta eliminada correctamente"))
           .catch((error) => showMessage("Error al eliminar la bicicleta", "error"));
       }
     };
 
-    // Edit bike function (simplified for now - just show data)
+    // Edit bike function (owner or admin)
     window.editBike = function(bikeId, ownerId) {
-      if (!currentUser || currentUser.uid !== ownerId) {
-        showMessage("Solo puedes editar tus propias bicicletas", "error");
+      const canEdit = currentUser && (currentUser.uid === ownerId || isAdmin);
+      
+      if (!canEdit) {
+        showMessage("No tienes permisos para editar esta bicicleta", "error");
         return;
       }
-      showMessage("Función de edición en desarrollo");
+      
+      if (isAdmin && currentUser.uid !== ownerId) {
+        showMessage("Función de edición (ADMIN) en desarrollo");
+      } else {
+        showMessage("Función de edición en desarrollo");
+      }
+    };
+
+    // Load users function (admin only)
+    function loadUsers() {
+      if (!isAdmin) return;
+      
+      console.log('Loading users for admin...');
+      // This would require additional Firestore setup to track users
+      // For now, we'll show a basic implementation
+    }
+
+    // Block user function (admin only)
+    window.blockUser = function(userId, userEmail) {
+      if (!isAdmin) {
+        showMessage("Solo los administradores pueden bloquear usuarios", "error");
+        return;
+      }
+
+      if (confirm(`¿Bloquear usuario: ${userEmail}?`)) {
+        // This would require additional backend logic
+        // For now, we'll delete all their bikes
+        db.collection("bikes").where("ownerId", "==", userId).get()
+          .then((querySnapshot) => {
+            const batch = db.batch();
+            querySnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            return batch.commit();
+          })
+          .then(() => {
+            showMessage(`Usuario ${userEmail} bloqueado - Se eliminaron todas sus bicicletas`);
+          })
+          .catch((error) => {
+            showMessage("Error al bloquear usuario", "error");
+          });
+      }
     };
     
     // Check if DOM is already loaded
@@ -1061,7 +1130,15 @@
       }
       
       try {
-        await auth.createUserWithEmailAndPassword(email, password);
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        
+        // Store user info in Firestore for admin management
+        await db.collection("users").doc(userCredential.user.uid).set({
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          blocked: false
+        });
+        
         closeModal('signupModal');
         document.getElementById('signupForm').reset();
         showMessage('Cuenta creada exitosamente');
