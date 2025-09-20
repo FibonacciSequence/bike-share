@@ -24,10 +24,16 @@
       document.getElementById(modalId).style.display = 'none';
     }
     
+    function openModal(modalId) {
+      console.log('openModal called for:', modalId);
+      document.getElementById(modalId).style.display = 'block';
+    }
+    
     // Make sure they're global
     window.testLogin = testLogin;
     window.testSignup = testSignup;
     window.closeModal = closeModal;
+    window.openModal = openModal;
     
     console.log('Head functions defined:', typeof testLogin);
   </script>
@@ -724,9 +730,64 @@
     </div>
   </div>
 
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <!-- Main JavaScript -->
   <script>
     console.log('Setting up page functionality...');
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
+      authDomain: "bike-share-lima.firebaseapp.com",
+      projectId: "bike-share-lima",
+      storageBucket: "bike-share-lima.firebasestorage.app",
+      messagingSenderId: "742260721560",
+      appId: "1:742260721560:web:38831f59c1080a0b818ded",
+      measurementId: "G-B5E8FXD1P5"
+    };
+
+    // Initialize Firebase
+    let auth, db, currentUser = null;
+    
+    try {
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      console.log('Firebase initialized successfully');
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+
+    // Utility functions
+    function showMessage(message, type = 'info') {
+      const messageDiv = document.createElement('div');
+      const bgColor = type === 'error' ? '#ffebee' : '#e8f5e8';
+      const textColor = type === 'error' ? '#c62828' : '#2e7d32';
+      const borderColor = type === 'error' ? '#f44336' : '#4caf50';
+      
+      messageDiv.style.cssText = `
+        background: ${bgColor}; 
+        border: 1px solid ${borderColor}; 
+        border-radius: 8px; 
+        padding: 16px; 
+        margin: 20px auto; 
+        color: ${textColor}; 
+        max-width: 600px; 
+        text-align: center;
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3000;
+      `;
+      messageDiv.innerHTML = `<strong>${type === 'error' ? '❌ Error:' : '✅ Éxito:'}</strong> ${message}`;
+      document.body.appendChild(messageDiv);
+      setTimeout(() => messageDiv.remove(), 5000);
+    }
     
     function setupCloseHandlers() {
       console.log('Setting up close handlers...');
@@ -771,42 +832,267 @@
       console.log('Close handlers setup complete');
     }
     
+    // Authentication state observer
+    auth.onAuthStateChanged(function(user) {
+      console.log('Auth state changed:', user ? user.email : 'logged out');
+      
+      if (user) {
+        currentUser = user;
+        document.getElementById('userPanel').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'block';
+        document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
+        
+        // Hide login/signup from navigation when logged in
+        const loginLink = document.querySelector('[onclick*="testLogin"]');
+        const signupLink = document.querySelector('[onclick*="testSignup"]');
+        if (loginLink) loginLink.style.display = 'none';
+        if (signupLink) signupLink.style.display = 'none';
+        
+        showMessage(`Bienvenido ${user.email}`);
+        loadBikes();
+      } else {
+        currentUser = null;
+        document.getElementById('userPanel').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'none';
+        
+        // Show login/signup in navigation when logged out
+        const loginLink = document.querySelector('[onclick*="testLogin"]');
+        const signupLink = document.querySelector('[onclick*="testSignup"]');
+        if (loginLink) loginLink.style.display = 'block';
+        if (signupLink) signupLink.style.display = 'block';
+        
+        loadBikes();
+      }
+    });
+
+    // Cloudinary upload function
+    async function uploadToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mdidemll");
+
+      const response = await fetch(url, { method: "POST", body: formData });
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      return data.secure_url;
+    }
+
+    // Load bikes from Firestore
+    function loadBikes() {
+      console.log('Loading bikes...');
+      
+      db.collection("bikes")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(function(snapshot) {
+          const bikeList = document.getElementById("bikeList");
+          bikeList.innerHTML = "";
+          
+          if (snapshot.empty) {
+            bikeList.innerHTML = `
+              <div class="col">
+                <div class="card" style="padding: 40px; text-align: center;">
+                  <h3 style="color: #2e7d32;">🚲 ¡Sé el primero!</h3>
+                  <p style="color: #666;">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: #ff6b35; text-decoration: none;">Comparte la tuya</a> y empieza la comunidad.</p>
+                </div>
+              </div>
+            `;
+            return;
+          }
+          
+          snapshot.forEach(function(doc) {
+            const bike = doc.data();
+            const bikeId = doc.id;
+            
+            // Show edit/delete controls only for bike owner
+            const ownerControls = (currentUser && currentUser.uid === bike.ownerId) ? `
+              <div class="admin-controls">
+                <button class="btn-edit" onclick="editBike('${bikeId}', '${bike.ownerId}')" title="Editar">✏️</button>
+                <button class="btn-delete" onclick="deleteBike('${bikeId}', '${bike.ownerId}')" title="Eliminar">🗑️</button>
+              </div>
+            ` : '';
+            
+            bikeList.innerHTML += `
+              <div class="col-3">
+                <div class="card" style="position: relative;">
+                  ${ownerControls}
+                  <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'">
+                  <div class="card-content">
+                    <h3 class="card-title">${bike.name}</h3>
+                    <div class="bike-info">${bike.location}</div>
+                    <div class="price">S/ ${bike.price} por hora</div>
+                    <button class="btn btn-whatsapp" onclick="window.open('https://wa.me/${bike.whatsapp.replace(/\D/g,'')}', '_blank')">
+                      Contactar por WhatsApp
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        }, function(error) {
+          console.error("Error loading bikes:", error);
+          showMessage("Error al cargar las bicicletas", "error");
+        });
+    }
+
+    // Delete bike function
+    window.deleteBike = function(bikeId, ownerId) {
+      if (!currentUser || currentUser.uid !== ownerId) {
+        showMessage("Solo puedes eliminar tus propias bicicletas", "error");
+        return;
+      }
+
+      if (confirm('¿Estás seguro de que quieres eliminar esta bicicleta?')) {
+        db.collection("bikes").doc(bikeId).delete()
+          .then(() => showMessage("Bicicleta eliminada correctamente"))
+          .catch((error) => showMessage("Error al eliminar la bicicleta", "error"));
+      }
+    };
+
+    // Edit bike function (simplified for now - just show data)
+    window.editBike = function(bikeId, ownerId) {
+      if (!currentUser || currentUser.uid !== ownerId) {
+        showMessage("Solo puedes editar tus propias bicicletas", "error");
+        return;
+      }
+      showMessage("Función de edición en desarrollo");
+    };
+    
     // Check if DOM is already loaded
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', setupCloseHandlers);
     } else {
-      // DOM is already loaded
       setupCloseHandlers();
     }
     
-    // Form submission handlers (basic alerts for now)
-    document.getElementById('addBikeForm').addEventListener('submit', function(e) {
+    // Form submission handlers
+    document.getElementById('addBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      alert('Para publicar bicicletas necesitas crear una cuenta primero.');
-    });
-    
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Sistema de login en desarrollo. Por favor intenta más tarde.');
-    });
-    
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var password = document.getElementById('signupPassword').value;
-      var confirm = document.getElementById('confirmPassword').value;
       
-      if (password !== confirm) {
-        alert('Las contraseñas no coinciden');
+      if (!currentUser) {
+        showMessage('Debes iniciar sesión para publicar una bicicleta', 'error');
+        testLogin();
         return;
       }
+
+      const file = document.getElementById("photoInput").files[0];
+      if (!file) {
+        showMessage('Debes subir una foto de la bicicleta', 'error');
+        return;
+      }
+
+      try {
+        showMessage('Subiendo foto...', 'info');
+        const photoURL = await uploadToCloudinary(file);
+
+        await db.collection("bikes").add({
+          name: document.getElementById("bikeName").value,
+          location: document.getElementById("bikeLocation").value,
+          whatsapp: document.getElementById("bikeWhatsapp").value,
+          price: document.getElementById("bikePrice").value,
+          photo: photoURL,
+          ownerId: currentUser.uid,
+          ownerEmail: currentUser.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("addBikeForm").reset();
+        showMessage('Bicicleta publicada correctamente');
+        
+        // Scroll to bikes section
+        document.getElementById('bicicletas').scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        console.error('Add bike error:', error);
+        showMessage(`Error al publicar bicicleta: ${error.message}`, 'error');
+      }
+    });
+    
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
       
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        closeModal('loginModal');
+        document.getElementById('loginForm').reset();
+      } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = "Error de autenticación";
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = "No existe una cuenta con este email";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Contraseña incorrecta";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Demasiados intentos. Intenta más tarde";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showMessage(errorMessage, 'error');
+      }
+    });
+    
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showMessage('Las contraseñas no coinciden', 'error');
+        return;
+      }
+
       if (password.length < 6) {
-        alert('La contraseña debe tener al menos 6 caracteres');
+        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
         return;
       }
       
-      alert('Sistema de registro en desarrollo. Por favor intenta más tarde.');
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        closeModal('signupModal');
+        document.getElementById('signupForm').reset();
+        showMessage('Cuenta creada exitosamente');
+      } catch (error) {
+        console.error('Signup error:', error);
+        let errorMessage = "Error al crear cuenta";
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Ya existe una cuenta con este email";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Email inválido";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "La contraseña es muy débil";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+        showMessage(errorMessage, 'error');
+      }
     });
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      auth.signOut().then(() => {
+        showMessage('Sesión cerrada correctamente');
+      }).catch((error) => {
+        showMessage('Error al cerrar sesión', 'error');
+      });
+    });
+
+    // Initial load
+    loadBikes();
   </script>
 </body>
 </html>
