@@ -887,28 +887,34 @@
       console.error('Firebase initialization error:', error);
     }
 
-    // Main page sections
-    const mainSections = ['hero', 'como-funciona', 'bicicletas', 'agregar'];
+    // Global variables
     let currentBike = null;
+
+    // Make functions globally available
+    window.showMainPage = showMainPage;
+    window.showBikeDetail = showBikeDetail;
 
     function showMainPage() {
       document.getElementById('bikeDetailPage').style.display = 'none';
-      mainSections.forEach(section => {
-        const element = document.querySelector(`#${section}, .${section}`);
-        if (element) element.style.display = 'block';
-      });
+      
+      // Show main page elements
+      document.querySelector('.hero').style.display = 'block';
+      document.querySelector('#como-funciona').style.display = 'block';
+      document.querySelector('#bicicletas').style.display = 'block';
+      document.querySelector('#agregar').style.display = 'block';
       document.querySelector('nav').style.display = 'block';
       document.querySelector('footer').style.display = 'block';
+      
       // Reset URL without hash
       history.pushState('', document.title, window.location.pathname);
     }
 
     function showBikeDetail(bikeId) {
       // Hide main sections
-      mainSections.forEach(section => {
-        const element = document.querySelector(`#${section}, .${section}`);
-        if (element) element.style.display = 'none';
-      });
+      document.querySelector('.hero').style.display = 'none';
+      document.querySelector('#como-funciona').style.display = 'none';
+      document.querySelector('#bicicletas').style.display = 'none';
+      document.querySelector('#agregar').style.display = 'none';
       
       // Show bike detail page
       document.getElementById('bikeDetailPage').style.display = 'block';
@@ -1184,7 +1190,7 @@
                       <div style="font-size: 1rem; opacity: 0.8;">S/ ${bike.dailyPrice}/día</div>
                     </div>
                     <div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;">
-                      <strong>Propietario:</strong> ${bike.ownerName}
+                      <strong>Propietario:</strong> ${bike.ownerName || 'Usuario'}
                     </div>
                     ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}
                     <div style="margin-top: 15px;">
