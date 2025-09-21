@@ -645,23 +645,37 @@
               <input type="text" id="bikeName" required>
             </div>
             <div class="form-group">
-              <label for="bikePrice">Precio por hora (S/) *</label>
-              <input type="number" id="bikePrice" required>
+              <label for="bikeLocation">Ubicación (distrito) *</label>
+              <input type="text" id="bikeLocation" required>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="bikeLocation">Ubicación (distrito) *</label>
-              <input type="text" id="bikeLocation" required>
+              <label for="bikeHourlyPrice">Precio por hora (S/) *</label>
+              <input type="number" id="bikeHourlyPrice" min="1" required>
             </div>
             <div class="form-group">
-              <label for="bikeWhatsapp">WhatsApp *</label>
-              <input type="text" id="bikeWhatsapp" placeholder="+51 999 999 999" required>
+              <label for="bikeDailyPrice">Precio por día (S/) *</label>
+              <input type="number" id="bikeDailyPrice" min="1" required>
             </div>
           </div>
           <div class="form-group">
-            <label for="photoInput">Foto de la bici *</label>
+            <label for="bikeWhatsapp">WhatsApp *</label>
+            <input type="text" id="bikeWhatsapp" placeholder="+51 999 999 999" required>
+          </div>
+          <div class="form-group">
+            <label for="bikeDescription">Descripción de la bicicleta *</label>
+            <textarea id="bikeDescription" rows="4" style="width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;" maxlength="500" required placeholder="Describe tu bicicleta, su estado, características especiales, etc. (máximo 500 caracteres)"></textarea>
+            <small style="color: #666;">Máximo 500 caracteres</small>
+          </div>
+          <div class="form-group">
+            <label for="photoInput">Foto principal de la bici *</label>
             <input type="file" id="photoInput" accept="image/*" required>
+          </div>
+          <div class="form-group">
+            <label for="additionalPhotos">Fotos adicionales (opcional)</label>
+            <input type="file" id="additionalPhotos" accept="image/*" multiple>
+            <small style="color: #666;">Puedes subir hasta 4 fotos adicionales</small>
           </div>
           <div style="text-align: center;">
             <button type="submit" class="btn btn-green">Publicar Bicicleta</button>
@@ -671,7 +685,96 @@
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Individual Bike Page -->
+  <div id="bikeDetailPage" style="display: none;">
+    <div class="container" style="margin-top: 80px;">
+      <div style="margin: 20px 0;">
+        <button class="btn btn-secondary" onclick="showMainPage()">← Volver a todas las bicicletas</button>
+      </div>
+      
+      <div class="row">
+        <!-- Left side - Photos -->
+        <div class="col" style="flex: 0 0 60%;">
+          <div id="bikePhotos">
+            <img id="mainBikePhoto" style="width: 100%; height: 400px; object-fit: cover; border-radius: 15px; margin-bottom: 15px;" alt="Bike photo">
+            <div id="photoThumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <!-- Thumbnails will be inserted here -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right side - Details -->
+        <div class="col" style="flex: 1; padding-left: 40px;">
+          <h1 id="bikeDetailName" style="color: #2e7d32; margin-bottom: 20px;"></h1>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+              <div>
+                <strong>Por hora:</strong> <span id="bikeDetailHourlyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span>
+              </div>
+              <div>
+                <strong>Por día:</strong> <span id="bikeDetailDailyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span>
+              </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <strong>Ubicación:</strong> <span id="bikeDetailLocation"></span>
+            </div>
+          </div>
+
+          <!-- Owner info -->
+          <div style="display: flex; align-items: center; margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div id="ownerAvatar" style="width: 50px; height: 50px; border-radius: 50%; background: #4caf50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">
+              <!-- Owner initial will go here -->
+            </div>
+            <div>
+              <strong id="bikeOwnerName"></strong>
+              <div style="font-size: 0.9em; color: #666;">Propietario verificado</div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: #2e7d32; margin-bottom: 15px;">Descripción</h3>
+            <p id="bikeDetailDescription" style="line-height: 1.6; color: #555;"></p>
+          </div>
+
+          <!-- Map placeholder -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: #2e7d32; margin-bottom: 15px;">Ubicación</h3>
+            <div id="bikeMapPlaceholder" style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666;">
+              📍 Mapa de <span id="mapLocationName"></span>
+            </div>
+          </div>
+
+          <!-- Booking section -->
+          <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            <h3 style="color: #2e7d32; margin-bottom: 20px;">Solicitar Reserva</h3>
+            <form id="bookingRequestForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="bookingStartDate">Fecha de inicio</label>
+                  <input type="date" id="bookingStartDate" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-group">
+                  <label for="bookingEndDate">Fecha de fin</label>
+                  <input type="date" id="bookingEndDate" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bookingMessage">Mensaje (opcional)</label>
+                <textarea id="bookingMessage" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="Cuéntale al propietario sobre tu plan de uso..."></textarea>
+              </div>
+              <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                <div><strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span></div>
+                <small style="color: #666;">El precio final se confirmará con el propietario</small>
+              </div>
+              <button type="submit" class="btn btn-green" style="width: 100%;">Enviar solicitud por WhatsApp</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <footer>
     <div class="container">
       <p>Transporte sostenible para una ciudad mejor</p>
@@ -710,17 +813,30 @@
       <h3>Crear Cuenta</h3>
       <p style="text-align: center; color: #666; margin-bottom: 20px;">Únete a la comunidad de ciclistas de Lima</p>
       <form id="signupForm">
-        <div class="form-group">
-          <label for="signupEmail">Email</label>
-          <input type="email" id="signupEmail" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="signupName">Nombre completo *</label>
+            <input type="text" id="signupName" required>
+          </div>
+          <div class="form-group">
+            <label for="signupEmail">Email *</label>
+            <input type="email" id="signupEmail" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="signupPassword">Contraseña *</label>
+            <input type="password" id="signupPassword" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Contraseña *</label>
+            <input type="password" id="confirmPassword" minlength="6" required>
+          </div>
         </div>
         <div class="form-group">
-          <label for="signupPassword">Contraseña</label>
-          <input type="password" id="signupPassword" minlength="6" required>
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar Contraseña</label>
-          <input type="password" id="confirmPassword" minlength="6" required>
+          <label for="signupDocument">DNI o Pasaporte *</label>
+          <input type="file" id="signupDocument" accept="image/*,.pdf" required>
+          <small style="color: #666;">Sube una foto clara de tu DNI o pasaporte para verificación</small>
         </div>
         <div class="modal-buttons">
           <button type="button" onclick="closeModal('signupModal')" class="btn btn-secondary">Cancelar</button>
@@ -758,8 +874,8 @@
     
     // Define admin users (you can add more emails here)
     const adminEmails = [
-      'tilmankneepkens@gmail.com',
-      'tilmannathaniel@gmail.com'  // Add your email here
+      'admin@limabikeshare.com',
+      'your-email@gmail.com'  // Add your email here
     ];
     
     try {
@@ -771,7 +887,54 @@
       console.error('Firebase initialization error:', error);
     }
 
-    // Utility functions
+    // Main page sections
+    const mainSections = ['hero', 'como-funciona', 'bicicletas', 'agregar'];
+    let currentBike = null;
+
+    function showMainPage() {
+      document.getElementById('bikeDetailPage').style.display = 'none';
+      mainSections.forEach(section => {
+        const element = document.querySelector(`#${section}, .${section}`);
+        if (element) element.style.display = 'block';
+      });
+      document.querySelector('nav').style.display = 'block';
+      document.querySelector('footer').style.display = 'block';
+      // Reset URL without hash
+      history.pushState('', document.title, window.location.pathname);
+    }
+
+    function showBikeDetail(bikeId) {
+      // Hide main sections
+      mainSections.forEach(section => {
+        const element = document.querySelector(`#${section}, .${section}`);
+        if (element) element.style.display = 'none';
+      });
+      
+      // Show bike detail page
+      document.getElementById('bikeDetailPage').style.display = 'block';
+      loadBikeDetail(bikeId);
+      
+      // Update URL
+      history.pushState({bikeId: bikeId}, '', `#bike/${bikeId}`);
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', function(event) {
+      if (event.state && event.state.bikeId) {
+        showBikeDetail(event.state.bikeId);
+      } else {
+        showMainPage();
+      }
+    });
+
+    // Check URL on page load
+    function checkInitialRoute() {
+      const hash = window.location.hash;
+      const bikeMatch = hash.match(/^#bike\/(.+)$/);
+      if (bikeMatch) {
+        showBikeDetail(bikeMatch[1]);
+      }
+    }
     function showMessage(message, type = 'info') {
       const messageDiv = document.createElement('div');
       const bgColor = type === 'error' ? '#ffebee' : '#e8f5e8';
@@ -898,7 +1061,81 @@
       return data.secure_url;
     }
 
-    // Load bikes from Firestore
+    // Load individual bike details
+    async function loadBikeDetail(bikeId) {
+      try {
+        const doc = await db.collection("bikes").doc(bikeId).get();
+        if (!doc.exists) {
+          showMessage("Bicicleta no encontrada", "error");
+          showMainPage();
+          return;
+        }
+
+        const bike = doc.data();
+        currentBike = { id: bikeId, ...bike };
+
+        // Populate bike details
+        document.getElementById('bikeDetailName').textContent = bike.name;
+        document.getElementById('bikeDetailHourlyPrice').textContent = `S/ ${bike.hourlyPrice}`;
+        document.getElementById('bikeDetailDailyPrice').textContent = `S/ ${bike.dailyPrice}`;
+        document.getElementById('bikeDetailLocation').textContent = bike.location;
+        document.getElementById('mapLocationName').textContent = bike.location;
+        document.getElementById('bikeDetailDescription').textContent = bike.description || 'Sin descripción disponible.';
+        document.getElementById('bikeOwnerName').textContent = bike.ownerName;
+
+        // Owner avatar (first letter of name)
+        const ownerInitial = bike.ownerName ? bike.ownerName.charAt(0).toUpperCase() : 'U';
+        document.getElementById('ownerAvatar').textContent = ownerInitial;
+
+        // Main photo
+        document.getElementById('mainBikePhoto').src = bike.photo;
+
+        // Handle multiple photos
+        const thumbnailsContainer = document.getElementById('photoThumbnails');
+        thumbnailsContainer.innerHTML = '';
+        
+        // Add main photo as first thumbnail
+        const mainThumb = createThumbnail(bike.photo, true);
+        thumbnailsContainer.appendChild(mainThumb);
+
+        // Add additional photos if they exist
+        if (bike.additionalPhotos && bike.additionalPhotos.length > 0) {
+          bike.additionalPhotos.forEach(photoUrl => {
+            const thumb = createThumbnail(photoUrl, false);
+            thumbnailsContainer.appendChild(thumb);
+          });
+        }
+
+      } catch (error) {
+        console.error('Error loading bike details:', error);
+        showMessage('Error al cargar los detalles de la bicicleta', 'error');
+        showMainPage();
+      }
+    }
+
+    // Create photo thumbnail
+    function createThumbnail(photoUrl, isActive) {
+      const thumb = document.createElement('img');
+      thumb.src = photoUrl;
+      thumb.style.cssText = `
+        width: 80px; 
+        height: 60px; 
+        object-fit: cover; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        border: ${isActive ? '3px solid #4caf50' : '2px solid #ddd'};
+        transition: border-color 0.3s;
+      `;
+      thumb.onclick = () => {
+        document.getElementById('mainBikePhoto').src = photoUrl;
+        // Update thumbnail borders
+        document.querySelectorAll('#photoThumbnails img').forEach(img => {
+          img.style.border = '2px solid #ddd';
+        });
+        thumb.style.border = '3px solid #4caf50';
+      };
+      return thumb;
+    }
     function loadBikes() {
       console.log('Loading bikes...');
       
@@ -936,17 +1173,23 @@
             
             bikeList.innerHTML += `
               <div class="col-3">
-                <div class="card" style="position: relative;">
+                <div class="card" style="position: relative; cursor: pointer;" onclick="showBikeDetail('${bikeId}')">
                   ${ownerControls}
                   <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'">
                   <div class="card-content">
                     <h3 class="card-title">${bike.name}</h3>
                     <div class="bike-info">${bike.location}</div>
-                    <div class="price">S/ ${bike.price} por hora</div>
-                    ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Dueño: ${bike.ownerEmail}</div>` : ''}
-                    <button class="btn btn-whatsapp" onclick="window.open('https://wa.me/${bike.whatsapp.replace(/\D/g,'')}', '_blank')">
-                      Contactar por WhatsApp
-                    </button>
+                    <div class="price">
+                      <div style="font-size: 1.2rem;">S/ ${bike.hourlyPrice}/hora</div>
+                      <div style="font-size: 1rem; opacity: 0.8;">S/ ${bike.dailyPrice}/día</div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;">
+                      <strong>Propietario:</strong> ${bike.ownerName}
+                    </div>
+                    ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}
+                    <div style="margin-top: 15px;">
+                      <button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="event.stopPropagation(); showBikeDetail('${bikeId}')">Ver detalles</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1047,26 +1290,52 @@
         return;
       }
 
-      const file = document.getElementById("photoInput").files[0];
-      if (!file) {
-        showMessage('Debes subir una foto de la bicicleta', 'error');
+      const mainFile = document.getElementById("photoInput").files[0];
+      const additionalFiles = document.getElementById("additionalPhotos").files;
+      
+      if (!mainFile) {
+        showMessage('Debes subir al menos una foto de la bicicleta', 'error');
+        return;
+      }
+
+      if (additionalFiles.length > 4) {
+        showMessage('Máximo 4 fotos adicionales permitidas', 'error');
         return;
       }
 
       try {
-        showMessage('Subiendo foto...', 'info');
-        const photoURL = await uploadToCloudinary(file);
+        showMessage('Subiendo fotos...', 'info');
+        
+        // Upload main photo
+        const mainPhotoURL = await uploadToCloudinary(mainFile);
+        
+        // Upload additional photos
+        const additionalPhotos = [];
+        for (let i = 0; i < additionalFiles.length; i++) {
+          const photoURL = await uploadToCloudinary(additionalFiles[i]);
+          additionalPhotos.push(photoURL);
+        }
 
-        await db.collection("bikes").add({
+        // Get user data to include name
+        const userDoc = await db.collection("users").doc(currentUser.uid).get();
+        const userName = userDoc.exists ? userDoc.data().name : 'Usuario';
+
+        const bikeData = {
           name: document.getElementById("bikeName").value,
           location: document.getElementById("bikeLocation").value,
+          description: document.getElementById("bikeDescription").value,
           whatsapp: document.getElementById("bikeWhatsapp").value,
-          price: document.getElementById("bikePrice").value,
-          photo: photoURL,
+          hourlyPrice: document.getElementById("bikeHourlyPrice").value,
+          dailyPrice: document.getElementById("bikeDailyPrice").value,
+          photo: mainPhotoURL,
+          additionalPhotos: additionalPhotos,
           ownerId: currentUser.uid,
           ownerEmail: currentUser.email,
+          ownerName: userName,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+
+        await db.collection("bikes").add(bikeData);
 
         document.getElementById("addBikeForm").reset();
         showMessage('Bicicleta publicada correctamente');
@@ -1115,9 +1384,22 @@
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value;
       const password = document.getElementById('signupPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
+      const documentFile = document.getElementById('signupDocument').files[0];
+
+      // Validations
+      if (!name) {
+        showMessage('El nombre es obligatorio', 'error');
+        return;
+      }
+
+      if (!documentFile) {
+        showMessage('Debes subir tu DNI o pasaporte', 'error');
+        return;
+      }
 
       if (password !== confirmPassword) {
         showMessage('Las contraseñas no coinciden', 'error');
@@ -1130,18 +1412,27 @@
       }
       
       try {
+        showMessage('Creando cuenta y subiendo documento...', 'info');
+        
+        // Upload document to Cloudinary
+        const documentURL = await uploadToCloudinary(documentFile);
+        
+        // Create user account
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         
-        // Store user info in Firestore for admin management
+        // Store user info in Firestore
         await db.collection("users").doc(userCredential.user.uid).set({
+          name: name,
           email: email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          blocked: false
+          documentUrl: documentURL,
+          verified: false, // Admin needs to verify documents
+          blocked: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         closeModal('signupModal');
         document.getElementById('signupForm').reset();
-        showMessage('Cuenta creada exitosamente');
+        showMessage('Cuenta creada exitosamente. Tu documento será verificado pronto.');
       } catch (error) {
         console.error('Signup error:', error);
         let errorMessage = "Error al crear cuenta";
@@ -1171,8 +1462,73 @@
       });
     });
 
-    // Initial load
+    // Booking functionality
+    document.getElementById('bookingRequestForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!currentBike) return;
+
+      const startDate = document.getElementById('bookingStartDate').value;
+      const endDate = document.getElementById('bookingEndDate').value;
+      const message = document.getElementById('bookingMessage').value;
+
+      if (!startDate || !endDate) {
+        showMessage('Por favor selecciona las fechas de reserva', 'error');
+        return;
+      }
+
+      if (new Date(startDate) >= new Date(endDate)) {
+        showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error');
+        return;
+      }
+
+      // Calculate days
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      const total = days * parseInt(currentBike.dailyPrice);
+
+      // Create WhatsApp message
+      const whatsappMessage = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com
+
+📅 Fechas: ${startDate} al ${endDate} (${days} día${days > 1 ? 's' : ''})
+💰 Precio estimado: S/ ${total}
+📍 Ubicación: ${currentBike.location}
+
+${message ? `Mensaje adicional: ${message}` : ''}
+
+¿Está disponible para esas fechas?`;
+
+      const whatsappUrl = `https://wa.me/${currentBike.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(whatsappMessage)}`;
+      window.open(whatsappUrl, '_blank');
+    });
+
+    // Update booking total when dates change
+    ['bookingStartDate', 'bookingEndDate'].forEach(id => {
+      document.getElementById(id).addEventListener('change', updateBookingTotal);
+    });
+
+    function updateBookingTotal() {
+      const startDate = document.getElementById('bookingStartDate').value;
+      const endDate = document.getElementById('bookingEndDate').value;
+      
+      if (startDate && endDate && currentBike) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        if (start < end) {
+          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          const total = days * parseInt(currentBike.dailyPrice);
+          document.getElementById('bookingTotal').textContent = `S/ ${total} (${days} día${days > 1 ? 's' : ''})`;
+        } else {
+          document.getElementById('bookingTotal').textContent = 'S/ 0';
+        }
+      }
+    }
+
+    // Initial setup
     loadBikes();
+    checkInitialRoute();
   </script>
 </body>
 </html>
