@@ -1,48 +1,10 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lima Bike Share</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -187,13 +149,13 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
-    .steps, .features {
+    .steps, .features, .bikes {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 2rem;
       margin-top: 2rem;
     }
-    .steps > div, .features > div {
+    .steps > div, .features > div, .bikes > div {
       background: white;
       padding: 1.5rem;
       border-radius: 8px;
@@ -243,7 +205,7 @@
     <a href="#agregar" class="cta">Compartir mi Bici</a>
   </section>
 
-  <section>
+  <section id="bienvenido" style="display: none;">
     <h2>✅ Bienvenido</h2>
     <p>Ahora puedes gestionar tus bicicletas publicadas.</p>
   </section>
@@ -292,7 +254,7 @@
 
   <section id="bicicletas">
     <h2>Bicicletas Disponibles</h2>
-    <div>
+    <div class="bikes" id="bikes-container">
       <div>
         <h3>🚲 ¡Sé el primero!</h3>
         <p>Aún no hay bicicletas disponibles. Comparte la tuya y empieza la comunidad.</p>
@@ -303,7 +265,7 @@
   <section id="agregar">
     <h2>Comparte tu Bicicleta</h2>
     <p>Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
-    <form>
+    <form id="add-bike-form">
       <div>
         <label>Nombre/Marca de la bici *</label>
         <input type="text" required>
@@ -402,7 +364,7 @@
       <span onclick="closeModal('login-modal')">×</span>
       <h2>Iniciar Sesión</h2>
       <p>Accede a tu cuenta para gestionar tus bicicletas</p>
-      <form>
+      <form id="login-form">
         <input type="email" placeholder="Email" required>
         <input type="password" placeholder="Contraseña" required>
         <button type="button" class="cancel-button">Cancelar</button>
@@ -417,7 +379,7 @@
       <span onclick="closeModal('signup-modal')">×</span>
       <h2>Crear Cuenta</h2>
       <p>Únete a la comunidad de ciclistas de Lima</p>
-      <form>
+      <form id="signup-form">
         <div>
           <label>Nombre completo *</label>
           <input type="text" required>
@@ -451,24 +413,41 @@
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
+        console.log(`Clicked link: ${this.getAttribute('href')}`);
         const targetId = this.getAttribute('href').substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
-        } else if (targetId === 'iniciar-sesion' || targetId === 'registrarse') {
-          document.getElementById(targetId + '-modal').style.display = 'flex';
+        if (targetId === 'iniciar-sesion' || targetId === 'registrarse') {
+          const modal = document.getElementById(`${targetId}-modal`);
+          if (modal) {
+            console.log(`Opening modal: ${targetId}-modal`);
+            modal.style.display = 'flex';
+          } else {
+            console.error(`Modal not found: ${targetId}-modal`);
+          }
+        } else {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            console.log(`Scrolling to: ${targetId}`);
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            console.error(`Section not found: ${targetId}`);
+          }
         }
       });
     });
 
     // Modal close functionality
     function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
+      console.log(`Closing modal: ${modalId}`);
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+      }
     }
 
     document.querySelectorAll('.modal > div > span').forEach(closeBtn => {
       closeBtn.addEventListener('click', () => {
         const modal = closeBtn.closest('.modal');
+        console.log('Close button clicked');
         modal.style.display = 'none';
       });
     });
@@ -476,6 +455,7 @@
     document.querySelectorAll('.modal').forEach(modal => {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
+          console.log('Clicked outside modal');
           modal.style.display = 'none';
         }
       });
@@ -484,8 +464,74 @@
     document.querySelectorAll('.cancel-button').forEach(button => {
       button.addEventListener('click', () => {
         const modal = button.closest('.modal');
+        console.log('Cancel button clicked');
         modal.style.display = 'none';
       });
+    });
+
+    // Debug Firebase and bike loading
+    window.addEventListener('load', () => {
+      console.log('Page loaded');
+      // Check if Firebase is defined
+      if (typeof firebase === 'undefined') {
+        console.error('Firebase is not defined. Check SDK script tags and load order.');
+        document.getElementById('bikes-container').innerHTML = `
+          <div>
+            <h3>🚲 Error</h3>
+            <p>No se pudo cargar Firebase. Por favor, intenta de nuevo más tarde.</p>
+          </div>
+        `;
+      } else {
+        console.log('Firebase is defined');
+        // Check auth
+        try {
+          firebase.auth().onAuthStateChanged(user => {
+            console.log('Auth state:', user ? 'logged in' : 'logged out');
+            const welcomeSection = document.getElementById('bienvenido');
+            welcomeSection.style.display = user ? 'block' : 'none';
+          });
+        } catch (error) {
+          console.error('Auth error:', error);
+        }
+        // Load bikes
+        try {
+          const db = firebase.firestore();
+          console.log('Loading bikes...');
+          db.collection('bikes').get().then(snapshot => {
+            const bikesContainer = document.getElementById('bikes-container');
+            bikesContainer.innerHTML = '';
+            console.log(`Found ${snapshot.docs.length} bikes`);
+            if (snapshot.empty) {
+              bikesContainer.innerHTML = `
+                <div>
+                  <h3>🚲 ¡Sé el primero!</h3>
+                  <p>Aún no hay bicicletas disponibles. Comparte la tuya y empieza la comunidad.</p>
+                </div>
+              `;
+            } else {
+              snapshot.forEach(doc => {
+                const bike = doc.data();
+                const bikeElement = document.createElement('div');
+                bikeElement.innerHTML = `
+                  <h3>🚲 ${bike.name || 'Bicicleta'}</h3>
+                  <p>Marca: ${bike.brand || 'N/A'} | Precio/hora: S/${bike.pricePerHour || 'N/A'} | Distrito: ${bike.district || 'N/A'}</p>
+                `;
+                bikesContainer.appendChild(bikeElement);
+              });
+            }
+          }).catch(error => {
+            console.error('Bike load error:', error);
+            document.getElementById('bikes-container').innerHTML = `
+              <div>
+                <h3>🚲 Error</h3>
+                <p>No se pudieron cargar las bicicletas: ${error.message}</p>
+              </div>
+            `;
+          });
+        } catch (error) {
+          console.error('Firestore init error:', error);
+        }
+      }
     });
   </script>
 </body>
