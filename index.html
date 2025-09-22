@@ -895,18 +895,36 @@
     window.showBikeDetail = showBikeDetail;
 
     function showMainPage() {
+      console.log('showMainPage called');
       document.getElementById('bikeDetailPage').style.display = 'none';
       
       // Show main page elements
-      document.querySelector('.hero').style.display = 'block';
-      document.querySelector('#como-funciona').style.display = 'block';
-      document.querySelector('#bicicletas').style.display = 'block';
-      document.querySelector('#agregar').style.display = 'block';
-      document.querySelector('nav').style.display = 'block';
-      document.querySelector('footer').style.display = 'block';
+      const heroSection = document.querySelector('.hero');
+      const comoFuncionaSection = document.querySelector('#como-funciona');
+      const bicicletasSection = document.querySelector('#bicicletas');
+      const agregarSection = document.querySelector('#agregar');
+      const nav = document.querySelector('nav');
+      const footer = document.querySelector('footer');
+      
+      console.log('Elements found:', {
+        hero: !!heroSection,
+        comoFunciona: !!comoFuncionaSection,
+        bicicletas: !!bicicletasSection,
+        agregar: !!agregarSection,
+        nav: !!nav,
+        footer: !!footer
+      });
+      
+      if (heroSection) heroSection.style.display = 'block';
+      if (comoFuncionaSection) comoFuncionaSection.style.display = 'block';
+      if (bicicletasSection) bicicletasSection.style.display = 'block';
+      if (agregarSection) agregarSection.style.display = 'block';
+      if (nav) nav.style.display = 'block';
+      if (footer) footer.style.display = 'block';
       
       // Reset URL without hash
       history.pushState('', document.title, window.location.pathname);
+      console.log('showMainPage completed');
     }
 
     function showBikeDetail(bikeId) {
