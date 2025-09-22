@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lima Bike Share</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDKs (namespaced, for non-module environments) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js" crossorigin="anonymous" onerror="console.error('Failed to load firebase-app.js:', event)"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js" crossorigin="anonymous" onerror="console.error('Failed to load firebase-auth.js:', event)"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js" crossorigin="anonymous" onerror="console.error('Failed to load firebase-firestore.js:', event)"></script>
   <style>
     * {
       margin: 0;
@@ -409,19 +413,64 @@
   </div>
 
   <script>
-    // Smooth scrolling for navigation links
+    // Global error handler to catch syntax errors
+    window.onerror = function (message, source, lineno, colno, error) {
+      console.error(`Global error: ${message} at ${source}:${lineno}:${colno}`, error);
+      return true; // Prevent default error handling
+    };
+
+    // Initialize Firebase (replace with your actual config)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    try {
+      console.log('Attempting to initialize Firebase...');
+      firebase.initializeApp(firebaseConfig);
+      console.log('Firebase initialized successfully');
+    } catch (error) {
+      console.error('Firebase init error:', error.message);
+    }
+
+    // Smooth scrolling and modal handling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
         console.log(`Clicked link: ${this.getAttribute('href')}`);
         const targetId = this.getAttribute('href').substring(1);
-        if (targetId === 'iniciar-sesion' || targetId === 'registrarse') {
-          const modal = document.getElementById(`${targetId}-modal`);
+        if (targetId === 'iniciar-sesion') {
+          const modal = document.getElementById('login-modal');
           if (modal) {
-            console.log(`Opening modal: ${targetId}-modal`);
+            console.log('Opening modal: login-modal');
             modal.style.display = 'flex';
           } else {
-            console.error(`Modal not found: ${targetId}-modal`);
+            console.error('Modal not found: login-modal');
+          }
+        } else if (targetId === 'registrarse') {
+          const modal = document.getElementById('signup-modal');
+          if (modal) {
+            console.log('Opening modal: signup-modal');
+            modal.style.display = 'flex';
+          } else {
+            console.error('Modal not found: signup-modal');
+          }
+        } else if (targetId === 'salir') {
+          console.log('Attempting to sign out');
+          if (typeof firebase !== 'undefined' && firebase.auth()) {
+            firebase.auth().signOut().then(() => {
+              console.log('Sign out successful');
+              alert('Has cerrado sesión');
+            }).catch(error => {
+              console.error('Sign out error:', error.message);
+              alert('Error al cerrar sesión: ' + error.message);
+            });
+          } else {
+            console.error('Firebase not available for sign out');
+            alert('Error: Firebase no está disponible');
           }
         } else {
           const targetElement = document.getElementById(targetId);
@@ -469,10 +518,9 @@
       });
     });
 
-    // Debug Firebase and bike loading
+    // Firebase Auth and Bike Loading
     window.addEventListener('load', () => {
-      console.log('Page loaded');
-      // Check if Firebase is defined
+      console.log('Page loaded at', new Date().toISOString());
       if (typeof firebase === 'undefined') {
         console.error('Firebase is not defined. Check SDK script tags and load order.');
         document.getElementById('bikes-container').innerHTML = `
@@ -481,56 +529,106 @@
             <p>No se pudo cargar Firebase. Por favor, intenta de nuevo más tarde.</p>
           </div>
         `;
-      } else {
-        console.log('Firebase is defined');
-        // Check auth
-        try {
-          firebase.auth().onAuthStateChanged(user => {
-            console.log('Auth state:', user ? 'logged in' : 'logged out');
-            const welcomeSection = document.getElementById('bienvenido');
-            welcomeSection.style.display = user ? 'block' : 'none';
-          });
-        } catch (error) {
-          console.error('Auth error:', error);
+        return;
+      }
+
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Auth state listener
+      try {
+        auth.onAuthStateChanged(user => {
+          console.log('Auth state:', user ? `logged in as ${user.email}` : 'logged out');
+          const welcomeSection = document.getElementById('bienvenido');
+          welcomeSection.style.display = user ? 'block' : 'none';
+        });
+      } catch (error) {
+        console.error('Auth error:', error.message);
+      }
+
+      // Login form handler
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!firebase) {
+          console.error('Firebase not available for login');
+          alert('Error: Firebase no está disponible. Intenta de nuevo más tarde.');
+          return;
         }
-        // Load bikes
+        const email = e.target[0].value;
+        const password = e.target[1].value;
         try {
-          const db = firebase.firestore();
-          console.log('Loading bikes...');
-          db.collection('bikes').get().then(snapshot => {
-            const bikesContainer = document.getElementById('bikes-container');
-            bikesContainer.innerHTML = '';
-            console.log(`Found ${snapshot.docs.length} bikes`);
-            if (snapshot.empty) {
-              bikesContainer.innerHTML = `
-                <div>
-                  <h3>🚲 ¡Sé el primero!</h3>
-                  <p>Aún no hay bicicletas disponibles. Comparte la tuya y empieza la comunidad.</p>
-                </div>
-              `;
-            } else {
-              snapshot.forEach(doc => {
-                const bike = doc.data();
-                const bikeElement = document.createElement('div');
-                bikeElement.innerHTML = `
-                  <h3>🚲 ${bike.name || 'Bicicleta'}</h3>
-                  <p>Marca: ${bike.brand || 'N/A'} | Precio/hora: S/${bike.pricePerHour || 'N/A'} | Distrito: ${bike.district || 'N/A'}</p>
-                `;
-                bikesContainer.appendChild(bikeElement);
-              });
-            }
-          }).catch(error => {
-            console.error('Bike load error:', error);
-            document.getElementById('bikes-container').innerHTML = `
+          await auth.signInWithEmailAndPassword(email, password);
+          console.log('Login successful');
+          closeModal('login-modal');
+        } catch (error) {
+          console.error('Login error:', error.message);
+          alert('Error al iniciar sesión: ' + error.message);
+        }
+      });
+
+      // Sign-up form handler
+      document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!firebase) {
+          console.error('Firebase not available for sign-up');
+          alert('Error: Firebase no está disponible. Intenta de nuevo más tarde.');
+          return;
+        }
+        const name = e.target[0].value;
+        const email = e.target[1].value;
+        const password = e.target[2].value;
+        const confirmPassword = e.target[3].value;
+        if (password !== confirmPassword) {
+          console.error('Passwords do not match');
+          alert('Error: Las contraseñas no coinciden');
+          return;
+        }
+        try {
+          await auth.createUserWithEmailAndPassword(email, password);
+          console.log('Sign-up successful');
+          closeModal('signup-modal');
+        } catch (error) {
+          console.error('Sign-up error:', error.message);
+          alert('Error al crear cuenta: ' + error.message);
+        }
+      });
+
+      // Load bikes from Firestore
+      try {
+        console.log('Loading bikes...');
+        db.collection('bikes').get().then(snapshot => {
+          const bikesContainer = document.getElementById('bikes-container');
+          bikesContainer.innerHTML = '';
+          console.log(`Found ${snapshot.docs.length} bikes`);
+          if (snapshot.empty) {
+            bikesContainer.innerHTML = `
               <div>
-                <h3>🚲 Error</h3>
-                <p>No se pudieron cargar las bicicletas: ${error.message}</p>
+                <h3>🚲 ¡Sé el primero!</h3>
+                <p>Aún no hay bicicletas disponibles. Comparte la tuya y empieza la comunidad.</p>
               </div>
             `;
-          });
-        } catch (error) {
-          console.error('Firestore init error:', error);
-        }
+          } else {
+            snapshot.forEach(doc => {
+              const bike = doc.data();
+              const bikeElement = document.createElement('div');
+              bikeElement.innerHTML = `
+                <h3>🚲 ${bike.name || 'Bicicleta'}</h3>
+                <p>Marca: ${bike.brand || 'N/A'} | Precio/hora: S/${bike.pricePerHour || 'N/A'} | Distrito: ${bike.district || 'N/A'}</p>
+              `;
+              bikesContainer.appendChild(bikeElement);
+            });
+          }
+        }).catch(error => {
+          console.error('Bike load error:', error.message);
+          document.getElementById('bikes-container').innerHTML = `
+            <div>
+              <h3>🚲 Error</h3>
+              <p>No se pudieron cargar las bicicletas: ${error.message}</p>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error('Firestore init error:', error.message);
       }
     });
   </script>
