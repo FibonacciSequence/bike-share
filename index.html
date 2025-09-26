@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -669,6 +669,28 @@
             <small style="color: #666;">Máximo 500 caracteres</small>
           </div>
           <div class="form-group">
+            <label>Accesorios incluidos (opcional)</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
+                <input type="checkbox" id="includesHelmet" style="margin-right: 8px;">
+                Casco de seguridad
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
+                <input type="checkbox" id="includesLock" style="margin-right: 8px;">
+                Candado/cadena
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
+                <input type="checkbox" id="includesLights" style="margin-right: 8px;">
+                Luces LED
+              </label>
+              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
+                <input type="checkbox" id="includesBasket" style="margin-right: 8px;">
+                Canasta/portaequipajes
+              </label>
+            </div>
+            <small style="color: #666;">Selecciona los accesorios que incluyes con el alquiler</small>
+          </div>
+          <div class="form-group">
             <label for="photoInput">Foto principal de la bici *</label>
             <input type="file" id="photoInput" accept="image/*" required>
           </div>
@@ -736,6 +758,14 @@
           <div style="margin-bottom: 25px;">
             <h3 style="color: #2e7d32; margin-bottom: 15px;">Descripción</h3>
             <p id="bikeDetailDescription" style="line-height: 1.6; color: #555;"></p>
+          </div>
+
+          <!-- Accessories -->
+          <div id="bikeAccessories" style="margin-bottom: 25px; display: none;">
+            <h3 style="color: #2e7d32; margin-bottom: 15px;">Accesorios incluidos</h3>
+            <div id="bikeAccessoriesList" style="display: flex; flex-wrap: wrap; gap: 10px;">
+              <!-- Accessories will be inserted here -->
+            </div>
           </div>
 
           <!-- Map placeholder -->
@@ -875,7 +905,7 @@
     // Define admin users (you can add more emails here)
     const adminEmails = [
       'tilmankneepkens@gmail.com',
-      'tilmannathaniel@gmail.com'  // Add your email here
+      'tilmannathaniel@gmail.com'   // Add your email here
     ];
     
     try {
@@ -1111,6 +1141,27 @@
         const ownerInitial = bike.ownerName ? bike.ownerName.charAt(0).toUpperCase() : 'U';
         document.getElementById('ownerAvatar').textContent = ownerInitial;
 
+        // Display accessories if available
+        const accessoriesSection = document.getElementById('bikeAccessories');
+        const accessoriesList = document.getElementById('bikeAccessoriesList');
+        
+        if (bike.accessories && bike.accessories.length > 0) {
+          accessoriesSection.style.display = 'block';
+          accessoriesList.innerHTML = bike.accessories.map(accessory => {
+            const icons = {
+              'Casco': '🪖',
+              'Candado': '🔒', 
+              'Luces LED': '💡',
+              'Canasta': '🧺'
+            };
+            return `<span style="background: #e8f5e8; padding: 8px 12px; border-radius: 20px; font-size: 0.9em; color: #2e7d32;">
+              ${icons[accessory] || '✓'} ${accessory}
+            </span>`;
+          }).join('');
+        } else {
+          accessoriesSection.style.display = 'none';
+        }
+
         // Main photo
         document.getElementById('mainBikePhoto').src = bike.photo;
 
@@ -1210,6 +1261,11 @@
                     <div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;">
                       <strong>Propietario:</strong> ${bike.ownerName || 'Usuario'}
                     </div>
+                    ${bike.accessories && bike.accessories.length > 0 ? `
+                      <div style="font-size: 0.8em; color: #666; margin: 8px 0;">
+                        <strong>Incluye:</strong> ${bike.accessories.join(', ')}
+                      </div>
+                    ` : ''}
                     ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}
                     <div style="margin-top: 15px;">
                       <button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="event.stopPropagation(); showBikeDetail('${bikeId}')">Ver detalles</button>
@@ -1344,6 +1400,13 @@
         const userDoc = await db.collection("users").doc(currentUser.uid).get();
         const userName = userDoc.exists ? userDoc.data().name : 'Usuario';
 
+        // Get selected accessories
+        const accessories = [];
+        if (document.getElementById("includesHelmet").checked) accessories.push("Casco");
+        if (document.getElementById("includesLock").checked) accessories.push("Candado");
+        if (document.getElementById("includesLights").checked) accessories.push("Luces LED");
+        if (document.getElementById("includesBasket").checked) accessories.push("Canasta");
+
         const bikeData = {
           name: document.getElementById("bikeName").value,
           location: document.getElementById("bikeLocation").value,
@@ -1353,6 +1416,7 @@
           dailyPrice: document.getElementById("bikeDailyPrice").value,
           photo: mainPhotoURL,
           additionalPhotos: additionalPhotos,
+          accessories: accessories,
           ownerId: currentUser.uid,
           ownerEmail: currentUser.email,
           ownerName: userName,
