@@ -1,521 +1,101 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lima Bike Share - Comparte tu bici, alquila una bici</title>
   
-  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚲</text></svg>">
   
-  <!-- JavaScript functions defined FIRST -->
   <script>
-    console.log('Head script loading...');
-    
     function testLogin() {
-      console.log('testLogin called');
       document.getElementById('loginModal').style.display = 'block';
     }
     
     function testSignup() {
-      console.log('testSignup called');
       document.getElementById('signupModal').style.display = 'block';
     }
     
     function closeModal(modalId) {
-      console.log('closeModal called for:', modalId);
       document.getElementById(modalId).style.display = 'none';
     }
     
-    function openModal(modalId) {
-      console.log('openModal called for:', modalId);
-      document.getElementById(modalId).style.display = 'block';
-    }
-    
-    // Make sure they're global
     window.testLogin = testLogin;
     window.testSignup = testSignup;
     window.closeModal = closeModal;
-    window.openModal = openModal;
-    
-    console.log('Head functions defined:', typeof testLogin);
   </script>
   
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      line-height: 1.6;
-      color: #333;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    /* Navigation */
-    nav {
-      background: #2e7d32;
-      color: white;
-      padding: 1rem 0;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 1000;
-    }
-    
-    nav .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-decoration: none;
-      color: white;
-    }
-    
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-    }
-    
-    nav a {
-      color: white;
-      text-decoration: none;
-      transition: opacity 0.3s;
-    }
-    
-    nav a:hover {
-      opacity: 0.8;
-    }
-    
-    /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(46, 125, 50, 0.85), rgba(76, 175, 80, 0.85)), url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1200&h=800&fit=crop') center/cover;
-      color: white;
-      padding: 150px 0 100px;
-      text-align: center;
-      position: relative;
-    }
-    
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.3);
-      z-index: 1;
-    }
-    
-    .hero .container {
-      position: relative;
-      z-index: 2;
-    }
-    
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-      color: white;
-    }
-    
-    .hero p {
-      font-size: 1.3rem;
-      margin-bottom: 2rem;
-      opacity: 0.95;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-      color: white;
-      line-height: 1.5;
-    }
-    
-    /* Buttons */
-    .btn {
-      display: inline-block;
-      padding: 15px 30px;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 0.5rem;
-      text-align: center;
-    }
-    
-    .btn-primary {
-      background: #ff6b35;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #e55a2b;
-      color: white;
-    }
-    
-    .btn-secondary {
-      background: transparent;
-      color: white;
-      border: 2px solid white;
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-    
-    .btn-green {
-      background: #4caf50;
-      color: white;
-    }
-    
-    .btn-green:hover {
-      background: #45a049;
-      color: white;
-    }
-    
-    .btn-whatsapp {
-      background: #25D366;
-      color: white;
-      width: 100%;
-      margin: 0;
-    }
-    
-    .btn-whatsapp:hover {
-      background: #128C7E;
-      color: white;
-    }
-    
-    /* Sections */
-    section {
-      padding: 80px 0;
-    }
-    
-    .bg-light {
-      background: #f8f9fa;
-    }
-    
-    h2 {
-      font-size: 2.5rem;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #2e7d32;
-      font-weight: 300;
-    }
-    
-    h3 {
-      color: #2e7d32;
-      margin-bottom: 1rem;
-    }
-    
-    /* Grid System */
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      margin: -15px;
-    }
-    
-    .col {
-      flex: 1;
-      padding: 15px;
-      min-width: 300px;
-    }
-    
-    .col-3 {
-      flex: 0 0 33.333%;
-      padding: 15px;
-    }
-    
-    .col-2 {
-      flex: 0 0 50%;
-      padding: 15px;
-    }
-    
-    /* Cards */
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      overflow: hidden;
-      transition: transform 0.3s ease;
-      height: 100%;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    
-    .card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-    }
-    
-    .card-content {
-      padding: 25px;
-    }
-    
-    .card-title {
-      font-size: 1.4rem;
-      color: #2e7d32;
-      margin-bottom: 15px;
-      font-weight: 500;
-    }
-    
-    .bike-info {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      color: #666;
-      font-size: 0.9rem;
-    }
-    
-    .bike-info::before {
-      content: "📍";
-      margin-right: 8px;
-    }
-    
-    .price {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #ff6b35;
-      margin: 15px 0;
-    }
-    
-    /* Step Cards */
-    .step-card {
-      text-align: center;
-      padding: 30px 20px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      height: 100%;
-    }
-    
-    .step-number {
-      width: 60px;
-      height: 60px;
-      background: #4caf50;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: white;
-    }
-    
-    /* Form */
-    .form-container {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .form-row .form-group {
-      flex: 1;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #2e7d32;
-    }
-    
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    input[type="password"],
-    input[type="file"] {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-    }
-    
-    input:focus {
-      outline: none;
-      border-color: #4caf50;
-    }
-    
-    /* User Panel */
-    .user-panel {
-      display: none;
-      background: #4caf50;
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      text-align: center;
-    }
-    
-    .admin-controls {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      z-index: 10;
-    }
-    
-    .admin-controls button {
-      margin-left: 5px;
-      padding: 8px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      color: white;
-      font-size: 0.8rem;
-    }
-    
-    .btn-edit {
-      background: #2196F3;
-    }
-    
-    .btn-delete {
-      background: #f44336;
-    }
-    
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-    }
-    
-    .modal-content {
-      background: white;
-      margin: 5% auto;
-      padding: 30px;
-      border-radius: 15px;
-      width: 90%;
-      max-width: 500px;
-      position: relative;
-    }
-    
-    .modal h3 {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    .modal-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-    
-    .close {
-      position: absolute;
-      right: 15px;
-      top: 15px;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-      font-weight: bold;
-      line-height: 1;
-    }
-    
-    .close:hover {
-      color: #000;
-    }
-    
-    /* Features */
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 30px;
-    }
-    
-    .feature-icon {
-      width: 50px;
-      height: 50px;
-      background: #4caf50;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 20px;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-    
-    /* Footer */
-    footer {
-      background: #2e7d32;
-      color: white;
-      padding: 40px 0;
-      text-align: center;
-    }
-    
-    /* Responsive */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    nav { background: #2e7d32; color: white; padding: 1rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; }
+    nav .container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
+    nav ul { display: flex; list-style: none; gap: 2rem; }
+    nav a { color: white; text-decoration: none; transition: opacity 0.3s; }
+    nav a:hover { opacity: 0.8; }
+    .hero { background: linear-gradient(rgba(46, 125, 50, 0.85), rgba(76, 175, 80, 0.85)), url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1200&h=800&fit=crop') center/cover; color: white; padding: 150px 0 100px; text-align: center; position: relative; }
+    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 1; }
+    .hero .container { position: relative; z-index: 2; }
+    .hero h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); color: white; }
+    .hero p { font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.95; max-width: 600px; margin-left: auto; margin-right: auto; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); color: white; line-height: 1.5; }
+    .btn { display: inline-block; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: 500; font-size: 1rem; border: none; cursor: pointer; transition: all 0.3s ease; margin: 0.5rem; text-align: center; }
+    .btn-primary { background: #ff6b35; color: white; }
+    .btn-primary:hover { background: #e55a2b; color: white; }
+    .btn-secondary { background: transparent; color: white; border: 2px solid white; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); color: white; }
+    .btn-green { background: #4caf50; color: white; }
+    .btn-green:hover { background: #45a049; color: white; }
+    section { padding: 80px 0; }
+    .bg-light { background: #f8f9fa; }
+    h2 { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; color: #2e7d32; font-weight: 300; }
+    h3 { color: #2e7d32; margin-bottom: 1rem; }
+    .row { display: flex; flex-wrap: wrap; margin: -15px; }
+    .col { flex: 1; padding: 15px; min-width: 300px; }
+    .col-3 { flex: 0 0 33.333%; padding: 15px; }
+    .card { background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.3s ease; height: 100%; }
+    .card:hover { transform: translateY(-5px); }
+    .card img { width: 100%; height: 220px; object-fit: cover; }
+    .card-content { padding: 25px; }
+    .card-title { font-size: 1.4rem; color: #2e7d32; margin-bottom: 15px; font-weight: 500; }
+    .bike-info { display: flex; align-items: center; margin-bottom: 10px; color: #666; font-size: 0.9rem; }
+    .bike-info::before { content: "📍"; margin-right: 8px; }
+    .price { font-size: 1.5rem; font-weight: bold; color: #ff6b35; margin: 15px 0; }
+    .step-card { text-align: center; padding: 30px 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: 100%; }
+    .step-number { width: 60px; height: 60px; background: #4caf50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.5rem; font-weight: bold; color: white; }
+    .form-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: flex; gap: 20px; }
+    .form-row .form-group { flex: 1; }
+    label { display: block; margin-bottom: 8px; font-weight: 500; color: #2e7d32; }
+    input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="file"] { width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s; }
+    input:focus { outline: none; border-color: #4caf50; }
+    .user-panel { display: none; background: #4caf50; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; }
+    .admin-controls { position: absolute; top: 15px; right: 15px; z-index: 10; }
+    .admin-controls button { margin-left: 5px; padding: 8px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 0.8rem; }
+    .btn-edit { background: #2196F3; }
+    .btn-delete { background: #f44336; }
+    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; }
+    .modal h3 { margin-bottom: 20px; text-align: center; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .close { position: absolute; right: 15px; top: 15px; font-size: 24px; cursor: pointer; color: #666; font-weight: bold; line-height: 1; }
+    .close:hover { color: #000; }
+    .feature-item { display: flex; align-items: flex-start; margin-bottom: 30px; }
+    .feature-icon { width: 50px; height: 50px; background: #4caf50; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-size: 1.5rem; flex-shrink: 0; }
+    footer { background: #2e7d32; color: white; padding: 40px 0; text-align: center; }
     @media (max-width: 768px) {
-      nav ul {
-        display: none;
-      }
-      
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-      
-      .col-3, .col-2 {
-        flex: 0 0 100%;
-      }
-      
-      .form-row {
-        flex-direction: column;
-        gap: 0;
-      }
-      
-      .feature-item {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .feature-icon {
-        margin: 0 auto 15px;
-      }
+      nav ul { display: none; }
+      .hero h1 { font-size: 2.5rem; }
+      .col-3 { flex: 0 0 100%; }
+      .form-row { flex-direction: column; gap: 0; }
+      .feature-item { flex-direction: column; text-align: center; }
+      .feature-icon { margin: 0 auto 15px; }
     }
   </style>
 </head>
 <body>
-  <!-- Navigation -->
   <nav>
     <div class="container">
       <a href="#" class="logo">🚲 Lima Bike Share</a>
@@ -530,7 +110,6 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
   <section class="hero">
     <div class="container">
       <h1>Comparte tu bici<br>Alquila una bici</h1>
@@ -542,7 +121,6 @@
     </div>
   </section>
 
-  <!-- User Panel -->
   <div class="container">
     <div id="userPanel" class="user-panel">
       <h3>✅ Bienvenido</h3>
@@ -551,7 +129,6 @@
     </div>
   </div>
 
-  <!-- How It Works -->
   <section id="como-funciona" class="bg-light">
     <div class="container">
       <h2>¿Cómo funciona?</h2>
@@ -581,7 +158,6 @@
     </div>
   </section>
 
-  <!-- Features -->
   <section>
     <div class="container">
       <div class="row">
@@ -616,7 +192,6 @@
     </div>
   </section>
 
-  <!-- Bikes Section -->
   <section id="bicicletas" class="bg-light">
     <div class="container">
       <h2>Bicicletas Disponibles</h2>
@@ -631,7 +206,6 @@
     </div>
   </section>
 
-  <!-- Add Bike Section -->
   <section id="agregar">
     <div class="container">
       <div class="form-container">
@@ -672,19 +246,19 @@
             <label>Accesorios incluidos (opcional)</label>
             <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
               <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesHelmet" style="margin-right: 8px;">
+                <input type="checkbox" id="includesHelmet" style="margin-right: 8px; width: auto;">
                 Casco de seguridad
               </label>
               <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesLock" style="margin-right: 8px;">
+                <input type="checkbox" id="includesLock" style="margin-right: 8px; width: auto;">
                 Candado/cadena
               </label>
               <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesLights" style="margin-right: 8px;">
+                <input type="checkbox" id="includesLights" style="margin-right: 8px; width: auto;">
                 Luces LED
               </label>
               <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesBasket" style="margin-right: 8px;">
+                <input type="checkbox" id="includesBasket" style="margin-right: 8px; width: auto;">
                 Canasta/portaequipajes
               </label>
             </div>
@@ -707,7 +281,6 @@
     </div>
   </section>
 
-  <!-- Individual Bike Page -->
   <div id="bikeDetailPage" style="display: none;">
     <div class="container" style="margin-top: 80px;">
       <div style="margin: 20px 0;">
@@ -715,60 +288,42 @@
       </div>
       
       <div class="row">
-        <!-- Left side - Photos -->
         <div class="col" style="flex: 0 0 60%;">
           <div id="bikePhotos">
             <img id="mainBikePhoto" style="width: 100%; height: 400px; object-fit: cover; border-radius: 15px; margin-bottom: 15px;" alt="Bike photo">
-            <div id="photoThumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <!-- Thumbnails will be inserted here -->
-            </div>
+            <div id="photoThumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
           </div>
         </div>
         
-        <!-- Right side - Details -->
         <div class="col" style="flex: 1; padding-left: 40px;">
           <h1 id="bikeDetailName" style="color: #2e7d32; margin-bottom: 20px;"></h1>
           
           <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-              <div>
-                <strong>Por hora:</strong> <span id="bikeDetailHourlyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span>
-              </div>
-              <div>
-                <strong>Por día:</strong> <span id="bikeDetailDailyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span>
-              </div>
+              <div><strong>Por hora:</strong> <span id="bikeDetailHourlyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span></div>
+              <div><strong>Por día:</strong> <span id="bikeDetailDailyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span></div>
             </div>
-            <div style="margin-bottom: 15px;">
-              <strong>Ubicación:</strong> <span id="bikeDetailLocation"></span>
-            </div>
+            <div style="margin-bottom: 15px;"><strong>Ubicación:</strong> <span id="bikeDetailLocation"></span></div>
           </div>
 
-          <!-- Owner info -->
           <div style="display: flex; align-items: center; margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div id="ownerAvatar" style="width: 50px; height: 50px; border-radius: 50%; background: #4caf50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">
-              <!-- Owner initial will go here -->
-            </div>
+            <div id="ownerAvatar" style="width: 50px; height: 50px; border-radius: 50%; background: #4caf50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;"></div>
             <div>
               <strong id="bikeOwnerName"></strong>
               <div style="font-size: 0.9em; color: #666;">Propietario verificado</div>
             </div>
           </div>
 
-          <!-- Description -->
           <div style="margin-bottom: 25px;">
             <h3 style="color: #2e7d32; margin-bottom: 15px;">Descripción</h3>
             <p id="bikeDetailDescription" style="line-height: 1.6; color: #555;"></p>
           </div>
 
-          <!-- Accessories -->
           <div id="bikeAccessories" style="margin-bottom: 25px; display: none;">
             <h3 style="color: #2e7d32; margin-bottom: 15px;">Accesorios incluidos</h3>
-            <div id="bikeAccessoriesList" style="display: flex; flex-wrap: wrap; gap: 10px;">
-              <!-- Accessories will be inserted here -->
-            </div>
+            <div id="bikeAccessoriesList" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
           </div>
 
-          <!-- Map placeholder -->
           <div style="margin-bottom: 25px;">
             <h3 style="color: #2e7d32; margin-bottom: 15px;">Ubicación</h3>
             <div id="bikeMapPlaceholder" style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666;">
@@ -776,7 +331,6 @@
             </div>
           </div>
 
-          <!-- Booking section -->
           <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
             <h3 style="color: #2e7d32; margin-bottom: 20px;">Solicitar Reserva</h3>
             <form id="bookingRequestForm">
@@ -805,16 +359,16 @@
       </div>
     </div>
   </div>
+
   <footer>
     <div class="container">
       <p>Transporte sostenible para una ciudad mejor</p>
     </div>
   </footer>
 
-  <!-- Modals -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
+      <span class="close" onclick="closeModal('loginModal')">&times;</span>
       <h3>Iniciar Sesión</h3>
       <p style="text-align: center; color: #666; margin-bottom: 20px;">Accede a tu cuenta para gestionar tus bicicletas</p>
       <form id="loginForm">
@@ -839,7 +393,7 @@
 
   <div id="signupModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
+      <span class="close" onclick="closeModal('signupModal')">&times;</span>
       <h3>Crear Cuenta</h3>
       <p style="text-align: center; color: #666; margin-bottom: 20px;">Únete a la comunidad de ciclistas de Lima</p>
       <form id="signupForm">
@@ -879,16 +433,11 @@
     </div>
   </div>
 
-  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- Main JavaScript -->
   <script>
-    console.log('Setting up page functionality...');
-    
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyC1T-vMvh8YcNcUGcRkUEKDicGvlXjNEJc",
       authDomain: "bike-share-lima.firebaseapp.com",
@@ -899,13 +448,11 @@
       measurementId: "G-B5E8FXD1P5"
     };
 
-    // Initialize Firebase
     let auth, db, currentUser = null, isAdmin = false;
     
-    // Define admin users (you can add more emails here)
     const adminEmails = [
       'tilmankneepkens@gmail.com',
-      'tilmannathaniel@gmail.com'   // Add your email here
+      'tilmannathaniel@gmail.com'
     ];
     
     try {
@@ -917,62 +464,30 @@
       console.error('Firebase initialization error:', error);
     }
 
-    // Global variables
     let currentBike = null;
 
-    // Make functions globally available
     window.showMainPage = showMainPage;
     window.showBikeDetail = showBikeDetail;
 
     function showMainPage() {
-      console.log('showMainPage called');
       document.getElementById('bikeDetailPage').style.display = 'none';
-      
-      // Show main page elements
-      const heroSection = document.querySelector('.hero');
-      const comoFuncionaSection = document.querySelector('#como-funciona');
-      const bicicletasSection = document.querySelector('#bicicletas');
-      const agregarSection = document.querySelector('#agregar');
-      const nav = document.querySelector('nav');
-      const footer = document.querySelector('footer');
-      
-      console.log('Elements found:', {
-        hero: !!heroSection,
-        comoFunciona: !!comoFuncionaSection,
-        bicicletas: !!bicicletasSection,
-        agregar: !!agregarSection,
-        nav: !!nav,
-        footer: !!footer
-      });
-      
-      if (heroSection) heroSection.style.display = 'block';
-      if (comoFuncionaSection) comoFuncionaSection.style.display = 'block';
-      if (bicicletasSection) bicicletasSection.style.display = 'block';
-      if (agregarSection) agregarSection.style.display = 'block';
-      if (nav) nav.style.display = 'block';
-      if (footer) footer.style.display = 'block';
-      
-      // Reset URL without hash
+      document.querySelector('.hero').style.display = 'block';
+      document.querySelector('#como-funciona').style.display = 'block';
+      document.querySelector('#bicicletas').style.display = 'block';
+      document.querySelector('#agregar').style.display = 'block';
       history.pushState('', document.title, window.location.pathname);
-      console.log('showMainPage completed');
     }
 
     function showBikeDetail(bikeId) {
-      // Hide main sections
       document.querySelector('.hero').style.display = 'none';
       document.querySelector('#como-funciona').style.display = 'none';
       document.querySelector('#bicicletas').style.display = 'none';
       document.querySelector('#agregar').style.display = 'none';
-      
-      // Show bike detail page
       document.getElementById('bikeDetailPage').style.display = 'block';
       loadBikeDetail(bikeId);
-      
-      // Update URL
       history.pushState({bikeId: bikeId}, '', `#bike/${bikeId}`);
     }
 
-    // Handle browser back/forward
     window.addEventListener('popstate', function(event) {
       if (event.state && event.state.bikeId) {
         showBikeDetail(event.state.bikeId);
@@ -981,7 +496,6 @@
       }
     });
 
-    // Check URL on page load
     function checkInitialRoute() {
       const hash = window.location.hash;
       const bikeMatch = hash.match(/^#bike\/(.+)$/);
@@ -989,83 +503,54 @@
         showBikeDetail(bikeMatch[1]);
       }
     }
+
     function showMessage(message, type = 'info') {
       const messageDiv = document.createElement('div');
       const bgColor = type === 'error' ? '#ffebee' : '#e8f5e8';
       const textColor = type === 'error' ? '#c62828' : '#2e7d32';
       const borderColor = type === 'error' ? '#f44336' : '#4caf50';
       
-      messageDiv.style.cssText = `
-        background: ${bgColor}; 
-        border: 1px solid ${borderColor}; 
-        border-radius: 8px; 
-        padding: 16px; 
-        margin: 20px auto; 
-        color: ${textColor}; 
-        max-width: 600px; 
-        text-align: center;
-        position: fixed;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 3000;
-      `;
+      messageDiv.style.cssText = `background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 16px; margin: 20px auto; color: ${textColor}; max-width: 600px; text-align: center; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 3000;`;
       messageDiv.innerHTML = `<strong>${type === 'error' ? '❌ Error:' : '✅ Éxito:'}</strong> ${message}`;
       document.body.appendChild(messageDiv);
       setTimeout(() => messageDiv.remove(), 5000);
     }
     
     function setupCloseHandlers() {
-      console.log('Setting up close handlers...');
-      
-      // Add click handlers to close buttons
-      var closeButtons = document.querySelectorAll('.close');
-      console.log('Found close buttons:', closeButtons.length);
-      
-      closeButtons.forEach(function(btn, index) {
-        console.log('Setting up close button', index);
+      document.querySelectorAll('.close').forEach(function(btn) {
         btn.onclick = function(e) {
           e.preventDefault();
-          console.log('Close button clicked');
           var modal = btn.closest('.modal');
-          if (modal) {
-            modal.style.display = 'none';
-            console.log('Modal closed via X button');
-          }
+          if (modal) modal.style.display = 'none';
         };
       });
       
-      // Close modal when clicking outside
       window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
-          console.log('Clicked outside modal, closing');
           event.target.style.display = 'none';
         }
       };
       
-      // Smooth scrolling for anchor links
       document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
         anchor.addEventListener('click', function (e) {
-          if (this.getAttribute('onclick')) return; // Skip if has onclick
-          e.preventDefault();
-          var target = document.querySelector(this.getAttribute('href'));
+          if (this.getAttribute('onclick')) return;
+          
+          var href = this.getAttribute('href');
+          if (href === '#') return;
+          
+          var target = document.querySelector(href);
           if (target) {
+            e.preventDefault();
             target.scrollIntoView({ behavior: 'smooth' });
           }
         });
       });
-      
-      console.log('Close handlers setup complete');
     }
     
-    // Authentication state observer
     auth.onAuthStateChanged(function(user) {
-      console.log('Auth state changed:', user ? user.email : 'logged out');
-      
       if (user) {
         currentUser = user;
         isAdmin = adminEmails.includes(user.email);
-        console.log('Is admin:', isAdmin);
         
         document.getElementById('userPanel').style.display = 'block';
         document.getElementById('logoutBtn').style.display = 'block';
@@ -1077,7 +562,6 @@
           document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
         }
         
-        // Hide login/signup from navigation when logged in
         const loginLink = document.querySelector('[onclick*="testLogin"]');
         const signupLink = document.querySelector('[onclick*="testSignup"]');
         if (loginLink) loginLink.style.display = 'none';
@@ -1085,14 +569,12 @@
         
         showMessage(isAdmin ? `Bienvenido ADMIN: ${user.email}` : `Bienvenido ${user.email}`);
         loadBikes();
-        loadUsers(); // Load users for admin
       } else {
         currentUser = null;
         isAdmin = false;
         document.getElementById('userPanel').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
         
-        // Show login/signup in navigation when logged out
         const loginLink = document.querySelector('[onclick*="testLogin"]');
         const signupLink = document.querySelector('[onclick*="testSignup"]');
         if (loginLink) loginLink.style.display = 'block';
@@ -1102,20 +584,17 @@
       }
     });
 
-    // Cloudinary upload function
     async function uploadToCloudinary(file) {
       const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "mdidemll");
-
       const response = await fetch(url, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
       return data.secure_url;
     }
 
-    // Load individual bike details
     async function loadBikeDetail(bikeId) {
       try {
         const doc = await db.collection("bikes").doc(bikeId).get();
@@ -1128,7 +607,6 @@
         const bike = doc.data();
         currentBike = { id: bikeId, ...bike };
 
-        // Populate bike details
         document.getElementById('bikeDetailName').textContent = bike.name;
         document.getElementById('bikeDetailHourlyPrice').textContent = `S/ ${bike.hourlyPrice}`;
         document.getElementById('bikeDetailDailyPrice').textContent = `S/ ${bike.dailyPrice}`;
@@ -1137,50 +615,36 @@
         document.getElementById('bikeDetailDescription').textContent = bike.description || 'Sin descripción disponible.';
         document.getElementById('bikeOwnerName').textContent = bike.ownerName;
 
-        // Owner avatar (first letter of name)
         const ownerInitial = bike.ownerName ? bike.ownerName.charAt(0).toUpperCase() : 'U';
         document.getElementById('ownerAvatar').textContent = ownerInitial;
 
-        // Display accessories if available
         const accessoriesSection = document.getElementById('bikeAccessories');
         const accessoriesList = document.getElementById('bikeAccessoriesList');
         
         if (bike.accessories && bike.accessories.length > 0) {
           accessoriesSection.style.display = 'block';
           accessoriesList.innerHTML = bike.accessories.map(accessory => {
-            const icons = {
-              'Casco': '🪖',
-              'Candado': '🔒', 
-              'Luces LED': '💡',
-              'Canasta': '🧺'
-            };
-            return `<span style="background: #e8f5e8; padding: 8px 12px; border-radius: 20px; font-size: 0.9em; color: #2e7d32;">
-              ${icons[accessory] || '✓'} ${accessory}
-            </span>`;
+            const icons = {'Casco': '🪖', 'Candado': '🔒', 'Luces LED': '💡', 'Canasta': '🧺'};
+            return `<span style="background: #e8f5e8; padding: 8px 12px; border-radius: 20px; font-size: 0.9em; color: #2e7d32;">${icons[accessory] || '✓'} ${accessory}</span>`;
           }).join('');
         } else {
           accessoriesSection.style.display = 'none';
         }
 
-        // Main photo
         document.getElementById('mainBikePhoto').src = bike.photo;
 
-        // Handle multiple photos
         const thumbnailsContainer = document.getElementById('photoThumbnails');
         thumbnailsContainer.innerHTML = '';
         
-        // Add main photo as first thumbnail
         const mainThumb = createThumbnail(bike.photo, true);
         thumbnailsContainer.appendChild(mainThumb);
 
-        // Add additional photos if they exist
         if (bike.additionalPhotos && bike.additionalPhotos.length > 0) {
           bike.additionalPhotos.forEach(photoUrl => {
             const thumb = createThumbnail(photoUrl, false);
             thumbnailsContainer.appendChild(thumb);
           });
         }
-
       } catch (error) {
         console.error('Error loading bike details:', error);
         showMessage('Error al cargar los detalles de la bicicleta', 'error');
@@ -1188,22 +652,12 @@
       }
     }
 
-    // Create photo thumbnail
     function createThumbnail(photoUrl, isActive) {
       const thumb = document.createElement('img');
       thumb.src = photoUrl;
-      thumb.style.cssText = `
-        width: 80px; 
-        height: 60px; 
-        object-fit: cover; 
-        border-radius: 8px; 
-        cursor: pointer; 
-        border: ${isActive ? '3px solid #4caf50' : '2px solid #ddd'};
-        transition: border-color 0.3s;
-      `;
+      thumb.style.cssText = `width: 80px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: ${isActive ? '3px solid #4caf50' : '2px solid #ddd'}; transition: border-color 0.3s;`;
       thumb.onclick = () => {
         document.getElementById('mainBikePhoto').src = photoUrl;
-        // Update thumbnail borders
         document.querySelectorAll('#photoThumbnails img').forEach(img => {
           img.style.border = '2px solid #ddd';
         });
@@ -1211,202 +665,88 @@
       };
       return thumb;
     }
+
     function loadBikes() {
-      console.log('Loading bikes...');
-      
-      db.collection("bikes")
-        .orderBy("createdAt", "desc")
-        .onSnapshot(function(snapshot) {
-          const bikeList = document.getElementById("bikeList");
-          bikeList.innerHTML = "";
+      db.collection("bikes").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
+        const bikeList = document.getElementById("bikeList");
+        bikeList.innerHTML = "";
+        
+        if (snapshot.empty) {
+          bikeList.innerHTML = `<div class="col"><div class="card" style="padding: 40px; text-align: center;"><h3 style="color: #2e7d32;">🚲 ¡Sé el primero!</h3><p style="color: #666;">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: #ff6b35; text-decoration: none;">Comparte la tuya</a> y empieza la comunidad.</p></div></div>`;
+          return;
+        }
+        
+        snapshot.forEach(function(doc) {
+          const bike = doc.data();
+          const bikeId = doc.id;
           
-          if (snapshot.empty) {
-            bikeList.innerHTML = `
-              <div class="col">
-                <div class="card" style="padding: 40px; text-align: center;">
-                  <h3 style="color: #2e7d32;">🚲 ¡Sé el primero!</h3>
-                  <p style="color: #666;">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: #ff6b35; text-decoration: none;">Comparte la tuya</a> y empieza la comunidad.</p>
-                </div>
-              </div>
-            `;
-            return;
-          }
+          const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
+          const ownerControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="editBike('${bikeId}', '${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="deleteBike('${bikeId}', '${bike.ownerId}')" title="Eliminar">🗑️</button>${isAdmin && currentUser.uid !== bike.ownerId ? '<span style="color: red; font-size: 10px;">ADMIN</span>' : ''}</div>` : '';
           
-          snapshot.forEach(function(doc) {
-            const bike = doc.data();
-            const bikeId = doc.id;
-            
-            // Show edit/delete controls for bike owner OR admin
-            const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
-            const ownerControls = canManage ? `
-              <div class="admin-controls">
-                <button class="btn-edit" onclick="editBike('${bikeId}', '${bike.ownerId}')" title="Editar">✏️</button>
-                <button class="btn-delete" onclick="deleteBike('${bikeId}', '${bike.ownerId}')" title="Eliminar">🗑️</button>
-                ${isAdmin && currentUser.uid !== bike.ownerId ? '<span style="color: red; font-size: 10px;">ADMIN</span>' : ''}
-              </div>
-            ` : '';
-            
-            bikeList.innerHTML += `
-              <div class="col-3">
-                <div class="card" style="position: relative; cursor: pointer;" onclick="showBikeDetail('${bikeId}')">
-                  ${ownerControls}
-                  <img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'">
-                  <div class="card-content">
-                    <h3 class="card-title">${bike.name}</h3>
-                    <div class="bike-info">${bike.location}</div>
-                    <div class="price">
-                      <div style="font-size: 1.2rem;">S/ ${bike.hourlyPrice}/hora</div>
-                      <div style="font-size: 1rem; opacity: 0.8;">S/ ${bike.dailyPrice}/día</div>
-                    </div>
-                    <div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;">
-                      <strong>Propietario:</strong> ${bike.ownerName || 'Usuario'}
-                    </div>
-                    ${bike.accessories && bike.accessories.length > 0 ? `
-                      <div style="font-size: 0.8em; color: #666; margin: 8px 0;">
-                        <strong>Incluye:</strong> ${bike.accessories.join(', ')}
-                      </div>
-                    ` : ''}
-                    ${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}
-                    <div style="margin-top: 15px;">
-                      <button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="event.stopPropagation(); showBikeDetail('${bikeId}')">Ver detalles</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-        }, function(error) {
-          console.error("Error loading bikes:", error);
-          showMessage("Error al cargar las bicicletas", "error");
+          bikeList.innerHTML += `<div class="col-3"><div class="card" style="position: relative; cursor: pointer;" onclick="showBikeDetail('${bikeId}')">${ownerControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'"><div class="card-content"><h3 class="card-title">${bike.name}</h3><div class="bike-info">${bike.location}</div><div class="price"><div style="font-size: 1.2rem;">S/ ${bike.hourlyPrice}/hora</div><div style="font-size: 1rem; opacity: 0.8;">S/ ${bike.dailyPrice}/día</div></div><div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;"><strong>Propietario:</strong> ${bike.ownerName || 'Usuario'}</div>${bike.accessories && bike.accessories.length > 0 ? `<div style="font-size: 0.8em; color: #666; margin: 8px 0;"><strong>Incluye:</strong> ${bike.accessories.join(', ')}</div>` : ''}${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}<div style="margin-top: 15px;"><button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="event.stopPropagation(); showBikeDetail('${bikeId}')">Ver detalles</button></div></div></div></div>`;
         });
+      });
     }
 
-    // Delete bike function (owner or admin)
     window.deleteBike = function(bikeId, ownerId) {
       const canDelete = currentUser && (currentUser.uid === ownerId || isAdmin);
-      
       if (!canDelete) {
         showMessage("No tienes permisos para eliminar esta bicicleta", "error");
         return;
       }
-
-      const confirmMsg = isAdmin && currentUser.uid !== ownerId 
-        ? '¿Estás seguro de eliminar esta bicicleta? (ADMIN: No es tuya)'
-        : '¿Estás seguro de que quieres eliminar esta bicicleta?';
-
+      const confirmMsg = isAdmin && currentUser.uid !== ownerId ? '¿Estás seguro de eliminar esta bicicleta? (ADMIN: No es tuya)' : '¿Estás seguro de que quieres eliminar esta bicicleta?';
       if (confirm(confirmMsg)) {
-        db.collection("bikes").doc(bikeId).delete()
-          .then(() => showMessage("Bicicleta eliminada correctamente"))
-          .catch((error) => showMessage("Error al eliminar la bicicleta", "error"));
+        db.collection("bikes").doc(bikeId).delete().then(() => showMessage("Bicicleta eliminada correctamente")).catch(() => showMessage("Error al eliminar la bicicleta", "error"));
       }
     };
 
-    // Edit bike function (owner or admin)
     window.editBike = function(bikeId, ownerId) {
       const canEdit = currentUser && (currentUser.uid === ownerId || isAdmin);
-      
       if (!canEdit) {
         showMessage("No tienes permisos para editar esta bicicleta", "error");
         return;
       }
-      
-      if (isAdmin && currentUser.uid !== ownerId) {
-        showMessage("Función de edición (ADMIN) en desarrollo");
-      } else {
-        showMessage("Función de edición en desarrollo");
-      }
-    };
-
-    // Load users function (admin only)
-    function loadUsers() {
-      if (!isAdmin) return;
-      
-      console.log('Loading users for admin...');
-      // This would require additional Firestore setup to track users
-      // For now, we'll show a basic implementation
-    }
-
-    // Block user function (admin only)
-    window.blockUser = function(userId, userEmail) {
-      if (!isAdmin) {
-        showMessage("Solo los administradores pueden bloquear usuarios", "error");
-        return;
-      }
-
-      if (confirm(`¿Bloquear usuario: ${userEmail}?`)) {
-        // This would require additional backend logic
-        // For now, we'll delete all their bikes
-        db.collection("bikes").where("ownerId", "==", userId).get()
-          .then((querySnapshot) => {
-            const batch = db.batch();
-            querySnapshot.forEach((doc) => {
-              batch.delete(doc.ref);
-            });
-            return batch.commit();
-          })
-          .then(() => {
-            showMessage(`Usuario ${userEmail} bloqueado - Se eliminaron todas sus bicicletas`);
-          })
-          .catch((error) => {
-            showMessage("Error al bloquear usuario", "error");
-          });
-      }
+      showMessage(isAdmin && currentUser.uid !== ownerId ? "Función de edición (ADMIN) en desarrollo" : "Función de edición en desarrollo");
     };
     
-    // Check if DOM is already loaded
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', setupCloseHandlers);
     } else {
       setupCloseHandlers();
     }
     
-    // Form submission handlers
     document.getElementById('addBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       if (!currentUser) {
         showMessage('Debes iniciar sesión para publicar una bicicleta', 'error');
         testLogin();
         return;
       }
-
       const mainFile = document.getElementById("photoInput").files[0];
       const additionalFiles = document.getElementById("additionalPhotos").files;
-      
       if (!mainFile) {
         showMessage('Debes subir al menos una foto de la bicicleta', 'error');
         return;
       }
-
       if (additionalFiles.length > 4) {
         showMessage('Máximo 4 fotos adicionales permitidas', 'error');
         return;
       }
-
       try {
         showMessage('Subiendo fotos...', 'info');
-        
-        // Upload main photo
         const mainPhotoURL = await uploadToCloudinary(mainFile);
-        
-        // Upload additional photos
         const additionalPhotos = [];
         for (let i = 0; i < additionalFiles.length; i++) {
           const photoURL = await uploadToCloudinary(additionalFiles[i]);
           additionalPhotos.push(photoURL);
         }
-
-        // Get user data to include name
         const userDoc = await db.collection("users").doc(currentUser.uid).get();
         const userName = userDoc.exists ? userDoc.data().name : 'Usuario';
-
-        // Get selected accessories
         const accessories = [];
         if (document.getElementById("includesHelmet").checked) accessories.push("Casco");
         if (document.getElementById("includesLock").checked) accessories.push("Candado");
         if (document.getElementById("includesLights").checked) accessories.push("Luces LED");
         if (document.getElementById("includesBasket").checked) accessories.push("Canasta");
-
         const bikeData = {
           name: document.getElementById("bikeName").value,
           location: document.getElementById("bikeLocation").value,
@@ -1422,13 +762,9 @@
           ownerName: userName,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-
         await db.collection("bikes").add(bikeData);
-
         document.getElementById("addBikeForm").reset();
         showMessage('Bicicleta publicada correctamente');
-        
-        // Scroll to bikes section
         document.getElementById('bicicletas').scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
         console.error('Add bike error:', error);
@@ -1438,32 +774,20 @@
     
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
-      
       try {
         await auth.signInWithEmailAndPassword(email, password);
         closeModal('loginModal');
         document.getElementById('loginForm').reset();
       } catch (error) {
-        console.error('Login error:', error);
         let errorMessage = "Error de autenticación";
         switch (error.code) {
-          case 'auth/user-not-found':
-            errorMessage = "No existe una cuenta con este email";
-            break;
-          case 'auth/wrong-password':
-            errorMessage = "Contraseña incorrecta";
-            break;
-          case 'auth/invalid-email':
-            errorMessage = "Email inválido";
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = "Demasiados intentos. Intenta más tarde";
-            break;
-          default:
-            errorMessage = error.message;
+          case 'auth/user-not-found': errorMessage = "No existe una cuenta con este email"; break;
+          case 'auth/wrong-password': errorMessage = "Contraseña incorrecta"; break;
+          case 'auth/invalid-email': errorMessage = "Email inválido"; break;
+          case 'auth/too-many-requests': errorMessage = "Demasiados intentos. Intenta más tarde"; break;
+          default: errorMessage = error.message;
         }
         showMessage(errorMessage, 'error');
       }
@@ -1471,127 +795,85 @@
     
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value;
       const password = document.getElementById('signupPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const documentFile = document.getElementById('signupDocument').files[0];
-
-      // Validations
       if (!name) {
         showMessage('El nombre es obligatorio', 'error');
         return;
       }
-
       if (!documentFile) {
         showMessage('Debes subir tu DNI o pasaporte', 'error');
         return;
       }
-
       if (password !== confirmPassword) {
         showMessage('Las contraseñas no coinciden', 'error');
         return;
       }
-
       if (password.length < 6) {
         showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
         return;
       }
-      
       try {
         showMessage('Creando cuenta y subiendo documento...', 'info');
-        
-        // Upload document to Cloudinary
         const documentURL = await uploadToCloudinary(documentFile);
-        
-        // Create user account
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
-        // Store user info in Firestore
         await db.collection("users").doc(userCredential.user.uid).set({
           name: name,
           email: email,
           documentUrl: documentURL,
-          verified: false, // Admin needs to verify documents
+          verified: false,
           blocked: false,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
         closeModal('signupModal');
         document.getElementById('signupForm').reset();
         showMessage('Cuenta creada exitosamente. Tu documento será verificado pronto.');
       } catch (error) {
-        console.error('Signup error:', error);
         let errorMessage = "Error al crear cuenta";
         switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = "Ya existe una cuenta con este email";
-            break;
-          case 'auth/invalid-email':
-            errorMessage = "Email inválido";
-            break;
-          case 'auth/weak-password':
-            errorMessage = "La contraseña es muy débil";
-            break;
-          default:
-            errorMessage = error.message;
+          case 'auth/email-already-in-use': errorMessage = "Ya existe una cuenta con este email"; break;
+          case 'auth/invalid-email': errorMessage = "Email inválido"; break;
+          case 'auth/weak-password': errorMessage = "La contraseña es muy débil"; break;
+          default: errorMessage = error.message;
         }
         showMessage(errorMessage, 'error');
       }
     });
 
-    // Logout functionality
     document.getElementById('logoutBtn').addEventListener('click', function() {
       auth.signOut().then(() => {
         showMessage('Sesión cerrada correctamente');
-      }).catch((error) => {
+      }).catch(() => {
         showMessage('Error al cerrar sesión', 'error');
       });
     });
 
-    // Booking functionality
     document.getElementById('bookingRequestForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      
       if (!currentBike) return;
-
       const startDate = document.getElementById('bookingStartDate').value;
       const endDate = document.getElementById('bookingEndDate').value;
       const message = document.getElementById('bookingMessage').value;
-
       if (!startDate || !endDate) {
         showMessage('Por favor selecciona las fechas de reserva', 'error');
         return;
       }
-
       if (new Date(startDate) >= new Date(endDate)) {
         showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error');
         return;
       }
-
-      // Calculate days
       const start = new Date(startDate);
       const end = new Date(endDate);
       const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
       const total = days * parseInt(currentBike.dailyPrice);
-
-      // Create WhatsApp message
-      const whatsappMessage = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com
-
-📅 Fechas: ${startDate} al ${endDate} (${days} día${days > 1 ? 's' : ''})
-💰 Precio estimado: S/ ${total}
-📍 Ubicación: ${currentBike.location}
-
-${message ? `Mensaje adicional: ${message}` : ''}
-
-¿Está disponible para esas fechas?`;
-
+      const whatsappMessage = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com\n\n📅 Fechas: ${startDate} al ${endDate} (${days} día${days > 1 ? 's' : ''})\n💰 Precio estimado: S/ ${total}\n📍 Ubicación: ${currentBike.location}\n\n${message ? `Mensaje adicional: ${message}` : ''}\n\n¿Está disponible para esas fechas?`;
       const whatsappUrl = `https://wa.me/${currentBike.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(whatsappMessage)}`;
       window.open(whatsappUrl, '_blank');
     });
 
-    // Update booking total when dates change
     ['bookingStartDate', 'bookingEndDate'].forEach(id => {
       document.getElementById(id).addEventListener('change', updateBookingTotal);
     });
@@ -1599,11 +881,9 @@ ${message ? `Mensaje adicional: ${message}` : ''}
     function updateBookingTotal() {
       const startDate = document.getElementById('bookingStartDate').value;
       const endDate = document.getElementById('bookingEndDate').value;
-      
       if (startDate && endDate && currentBike) {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
         if (start < end) {
           const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
           const total = days * parseInt(currentBike.dailyPrice);
@@ -1614,7 +894,6 @@ ${message ? `Mensaje adicional: ${message}` : ''}
       }
     }
 
-    // Initial setup
     loadBikes();
     checkInitialRoute();
   </script>
