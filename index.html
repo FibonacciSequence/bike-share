@@ -100,9 +100,9 @@
     <div class="container">
       <a href="#" class="logo">🚲 Lima Bike Share</a>
       <ul>
-        <li><a href="#como-funciona">Cómo funciona</a></li>
-        <li><a href="#bicicletas">Bicicletas</a></li>
-        <li><a href="#agregar">Agregar bici</a></li>
+        <li><a href="#como-funciona" class="nav-scroll">Cómo funciona</a></li>
+        <li><a href="#bicicletas" class="nav-scroll">Bicicletas</a></li>
+        <li><a href="#agregar" class="nav-scroll">Agregar bici</a></li>
         <li><a href="#" onclick="testLogin(); return false;">Iniciar sesión</a></li>
         <li><a href="#" onclick="testSignup(); return false;">Registrarse</a></li>
         <li><a href="#" id="logoutBtn" style="display: none;">Salir</a></li>
@@ -531,7 +531,20 @@
         }
       };
       
-      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      // Handle navigation scroll links
+      document.querySelectorAll('a.nav-scroll').forEach(function(anchor) {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          var href = this.getAttribute('href');
+          var target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+      
+      // Handle other anchor links (like in hero section)
+      document.querySelectorAll('a[href^="#"]:not(.nav-scroll)').forEach(function(anchor) {
         anchor.addEventListener('click', function (e) {
           if (this.getAttribute('onclick')) return;
           
