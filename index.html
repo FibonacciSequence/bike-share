@@ -20,9 +20,25 @@
       document.getElementById(modalId).style.display = 'none';
     }
     
+    function scrollToSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        const navHeight = 70; // altura del nav fijo
+        const elementPosition = section.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+      return false;
+    }
+    
     window.testLogin = testLogin;
     window.testSignup = testSignup;
     window.closeModal = closeModal;
+    window.scrollToSection = scrollToSection;
   </script>
   
   <style>
@@ -100,9 +116,9 @@
     <div class="container">
       <a href="#" class="logo">🚲 Lima Bike Share</a>
       <ul>
-        <li><a href="#como-funciona" class="nav-scroll">Cómo funciona</a></li>
-        <li><a href="#bicicletas" class="nav-scroll">Bicicletas</a></li>
-        <li><a href="#agregar" class="nav-scroll">Agregar bici</a></li>
+        <li><a href="#como-funciona" onclick="scrollToSection('como-funciona'); return false;">Cómo funciona</a></li>
+        <li><a href="#bicicletas" onclick="scrollToSection('bicicletas'); return false;">Bicicletas</a></li>
+        <li><a href="#agregar" onclick="scrollToSection('agregar'); return false;">Agregar bici</a></li>
         <li><a href="#" onclick="testLogin(); return false;">Iniciar sesión</a></li>
         <li><a href="#" onclick="testSignup(); return false;">Registrarse</a></li>
         <li><a href="#" id="logoutBtn" style="display: none;">Salir</a></li>
@@ -531,23 +547,11 @@
         }
       };
       
-      // Handle navigation scroll links
-      document.querySelectorAll('a.nav-scroll').forEach(function(anchor) {
+      // Handle other anchor links (like in hero section) that don't have onclick
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        if (anchor.getAttribute('onclick')) return; // Skip links with onclick
+        
         anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          var href = this.getAttribute('href');
-          var target = document.querySelector(href);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
-        });
-      });
-      
-      // Handle other anchor links (like in hero section)
-      document.querySelectorAll('a[href^="#"]:not(.nav-scroll)').forEach(function(anchor) {
-        anchor.addEventListener('click', function (e) {
-          if (this.getAttribute('onclick')) return;
-          
           var href = this.getAttribute('href');
           if (href === '#') return;
           
