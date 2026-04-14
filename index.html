@@ -98,7 +98,7 @@
     .btn-edit { background: #2196F3; }
     .btn-delete { background: #f44336; }
     .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; }
+    .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; max-height: 90vh; overflow-y: auto; }
     .modal h3 { margin-bottom: 20px; text-align: center; }
     .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
     .close { position: absolute; right: 15px; top: 15px; font-size: 24px; cursor: pointer; color: #666; font-weight: bold; line-height: 1; }
@@ -352,9 +352,17 @@
 
           <div style="margin-bottom: 25px;">
             <h3 style="color: #2e7d32; margin-bottom: 15px;">Ubicación</h3>
-            <div id="bikeMapPlaceholder" style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666;">
-              📍 Mapa de <span id="mapLocationName"></span>
+            <div style="width:100%; height:220px; border-radius:10px; overflow:hidden;">
+              <iframe id="bikeMapIframe"
+                width="100%" height="220"
+                style="border:0; border-radius:10px;"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+                src="">
+              </iframe>
             </div>
+            <p style="font-size:0.85rem; color:#888; margin-top:6px;">📍 <span id="mapLocationName"></span></p>
           </div>
 
           <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
@@ -720,6 +728,9 @@
         document.getElementById('bikeDetailDailyPrice').textContent = `S/ ${bike.dailyPrice}`;
         document.getElementById('bikeDetailLocation').textContent = bike.location;
         document.getElementById('mapLocationName').textContent = bike.location;
+        const mapQuery = encodeURIComponent((bike.location || '') + ', Lima, Peru');
+        document.getElementById('bikeMapIframe').src =
+          `https://maps.google.com/maps?q=${mapQuery}&output=embed&z=14`;
         document.getElementById('bikeDetailDescription').textContent = bike.description || 'Sin descripción disponible.';
         document.getElementById('bikeOwnerName').textContent = bike.ownerName;
 
