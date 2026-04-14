@@ -228,6 +228,11 @@
         <h2 style="margin-bottom: 20px;">Comparte tu Bicicleta</h2>
         <p style="text-align: center; color: #666; margin-bottom: 40px;">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
         
+        <div id="loginWarning" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:10px; padding:14px 20px; margin-bottom:20px; color:#856404; text-align:center; font-size:0.95rem;">
+          ⚠️ <strong>Para publicar tu bicicleta necesitas una cuenta.</strong>
+          <a href="#" onclick="testLogin(); return false;" style="color:#4caf50; font-weight:bold; margin-left:6px;">Inicia sesión</a> o
+          <a href="#" onclick="closeModal('loginModal'); testSignup();" style="color:#4caf50; font-weight:bold; margin-left:4px;">Regístrate gratis</a>
+        </div>
         <form id="addBikeForm">
           <div class="form-row">
             <div class="form-group">
@@ -472,12 +477,22 @@
     ];
     
     try {
+      if (typeof firebase === 'undefined') {
+        throw new Error('Firebase SDK no cargó. Comprueba tu conexión a internet.');
+      }
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
       console.log('Firebase initialized successfully');
     } catch (error) {
       console.error('Firebase initialization error:', error);
+      // Mostrar aviso visible al usuario si Firebase no pudo iniciar
+      window.addEventListener('DOMContentLoaded', function() {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;padding:14px 20px;text-align:center;position:fixed;top:70px;left:0;right:0;z-index:9999;font-size:0.95rem;';
+        banner.textContent = '⚠️ Error de conexión con el servidor. Recarga la página o comprueba tu internet.';
+        document.body.appendChild(banner);
+      });
     }
 
     let currentBike = null;
@@ -564,7 +579,9 @@
       });
     }
     
-    auth.onAuthStateChanged(function(user) {
+    if (!auth) {
+      console.warn('Firebase auth no disponible, saltando onAuthStateChanged');
+    } else auth.onAuthStateChanged(function(user) {
       if (user) {
         currentUser = user;
         isAdmin = adminEmails.includes(user.email);
@@ -584,6 +601,10 @@
         if (loginLink) loginLink.style.display = 'none';
         if (signupLink) signupLink.style.display = 'none';
         
+        // Ocultar aviso de login del formulario si el usuario acaba de iniciar sesión
+        const loginWarning = document.getElementById('loginWarning');
+        if (loginWarning) loginWarning.style.display = 'none';
+
         showMessage(isAdmin ? `Bienvenido ADMIN: ${user.email}` : `Bienvenido ${user.email}`);
         loadBikes();
       } else {
@@ -732,6 +753,34 @@
       setupCloseHandlers();
     }
     
+    // Aviso temprano: mostrar alerta cuando el usuario empieza a escribir sin estar logueado
+    (function() {
+      const form = document.getElementById('addBikeForm');
+      const warning = document.getElementById('loginWarning');
+      let warningShown = false;
+
+      function handleEarlyInteraction() {
+        if (!currentUser && !warningShown) {
+          warningShown = true;
+          warning.style.display = 'block';
+          warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Si ya inició sesión, ocultar el aviso
+        if (currentUser && warning.style.display !== 'none') {
+          warning.style.display = 'none';
+        }
+      }
+
+      // Escuchar en todos los inputs, textareas y selects del formulario
+      form.querySelectorAll('input, textarea, select').forEach(function(el) {
+        el.addEventListener('focus', handleEarlyInteraction);
+        el.addEventListener('input', handleEarlyInteraction);
+      });
+
+      // Ocultar aviso si el usuario inicia sesión mientras el modal está abierto
+      const origAuthChanged = auth && auth.onAuthStateChanged ? null : null;
+    })();
+
     document.getElementById('addBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       if (!currentUser) {
@@ -861,6 +910,7 @@
     });
 
     document.getElementById('logoutBtn').addEventListener('click', function() {
+      if (!auth) return;
       auth.signOut().then(() => {
         showMessage('Sesión cerrada correctamente');
       }).catch(() => {
