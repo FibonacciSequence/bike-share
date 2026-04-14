@@ -21,16 +21,21 @@
     }
     
     function scrollToSection(sectionId) {
+      // Si estamos en la vista de detalle, volver a la página principal primero
+      const detailPage = document.getElementById('bikeDetailPage');
+      if (detailPage && detailPage.style.display !== 'none') {
+        if (typeof showMainPage === 'function') showMainPage();
+        // Esperar al reflow antes de hacer scroll
+        setTimeout(function() { scrollToSection(sectionId); }, 50);
+        return false;
+      }
+
       const section = document.getElementById(sectionId);
       if (section) {
-        const navHeight = 70; // altura del nav fijo
+        const navHeight = 70;
         const elementPosition = section.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - navHeight;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
       return false;
     }
@@ -454,6 +459,71 @@
     </div>
   </div>
 
+  <!-- Modal editar bicicleta -->
+  <div id="editBikeModal" class="modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <span class="close" onclick="closeModal('editBikeModal')">&times;</span>
+      <h3>Editar Bicicleta</h3>
+      <form id="editBikeForm" style="margin-top: 20px;">
+        <input type="hidden" id="editBikeId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editBikeName">Nombre/Marca *</label>
+            <input type="text" id="editBikeName" required>
+          </div>
+          <div class="form-group">
+            <label for="editBikeLocation">Ubicación (distrito) *</label>
+            <input type="text" id="editBikeLocation" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editBikeHourlyPrice">Precio por hora (S/) *</label>
+            <input type="number" id="editBikeHourlyPrice" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="editBikeDailyPrice">Precio por día (S/) *</label>
+            <input type="number" id="editBikeDailyPrice" min="1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editBikeWhatsapp">WhatsApp *</label>
+          <input type="text" id="editBikeWhatsapp" placeholder="+51 999 999 999" required>
+        </div>
+        <div class="form-group">
+          <label for="editBikeDescription">Descripción *</label>
+          <textarea id="editBikeDescription" rows="4" style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;font-size:1rem;resize:vertical;" maxlength="500" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Accesorios incluidos</label>
+          <div style="display:flex;flex-wrap:wrap;gap:15px;margin-top:10px;">
+            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
+              <input type="checkbox" id="editIncludesHelmet" style="margin-right:8px;width:auto;"> Casco
+            </label>
+            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
+              <input type="checkbox" id="editIncludesLock" style="margin-right:8px;width:auto;"> Candado
+            </label>
+            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
+              <input type="checkbox" id="editIncludesLights" style="margin-right:8px;width:auto;"> Luces LED
+            </label>
+            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
+              <input type="checkbox" id="editIncludesBasket" style="margin-right:8px;width:auto;"> Canasta
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editPhotoInput">Cambiar foto principal (opcional)</label>
+          <input type="file" id="editPhotoInput" accept="image/*">
+          <small style="color:#666;">Déjalo vacío para mantener la foto actual</small>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" onclick="closeModal('editBikeModal')" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-green">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -738,14 +808,85 @@
       }
     };
 
-    window.editBike = function(bikeId, ownerId) {
+    window.editBike = async function(bikeId, ownerId) {
       const canEdit = currentUser && (currentUser.uid === ownerId || isAdmin);
       if (!canEdit) {
         showMessage("No tienes permisos para editar esta bicicleta", "error");
         return;
       }
-      showMessage(isAdmin && currentUser.uid !== ownerId ? "Función de edición (ADMIN) en desarrollo" : "Función de edición en desarrollo");
+      try {
+        const doc = await db.collection("bikes").doc(bikeId).get();
+        if (!doc.exists) { showMessage("Bicicleta no encontrada", "error"); return; }
+        const bike = doc.data();
+
+        // Rellenar el formulario con los datos actuales
+        document.getElementById('editBikeId').value = bikeId;
+        document.getElementById('editBikeName').value = bike.name || '';
+        document.getElementById('editBikeLocation').value = bike.location || '';
+        document.getElementById('editBikeHourlyPrice').value = bike.hourlyPrice || '';
+        document.getElementById('editBikeDailyPrice').value = bike.dailyPrice || '';
+        document.getElementById('editBikeWhatsapp').value = bike.whatsapp || '';
+        document.getElementById('editBikeDescription').value = bike.description || '';
+        document.getElementById('editIncludesHelmet').checked  = (bike.accessories || []).includes('Casco');
+        document.getElementById('editIncludesLock').checked    = (bike.accessories || []).includes('Candado');
+        document.getElementById('editIncludesLights').checked  = (bike.accessories || []).includes('Luces LED');
+        document.getElementById('editIncludesBasket').checked  = (bike.accessories || []).includes('Canasta');
+        document.getElementById('editPhotoInput').value = '';
+
+        document.getElementById('editBikeModal').style.display = 'block';
+      } catch (error) {
+        showMessage("Error al cargar los datos: " + error.message, "error");
+      }
     };
+
+    document.getElementById('editBikeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const bikeId = document.getElementById('editBikeId').value;
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Guardando...';
+
+      try {
+        const accessories = [];
+        if (document.getElementById('editIncludesHelmet').checked)  accessories.push('Casco');
+        if (document.getElementById('editIncludesLock').checked)    accessories.push('Candado');
+        if (document.getElementById('editIncludesLights').checked)  accessories.push('Luces LED');
+        if (document.getElementById('editIncludesBasket').checked)  accessories.push('Canasta');
+
+        const updates = {
+          name:         document.getElementById('editBikeName').value,
+          location:     document.getElementById('editBikeLocation').value,
+          hourlyPrice:  document.getElementById('editBikeHourlyPrice').value,
+          dailyPrice:   document.getElementById('editBikeDailyPrice').value,
+          whatsapp:     document.getElementById('editBikeWhatsapp').value,
+          description:  document.getElementById('editBikeDescription').value,
+          accessories:  accessories,
+          updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Si subió una foto nueva, subirla primero
+        const newPhoto = document.getElementById('editPhotoInput').files[0];
+        if (newPhoto) {
+          showMessage('Subiendo nueva foto...', 'info');
+          updates.photo = await uploadToCloudinary(newPhoto);
+        }
+
+        await db.collection("bikes").doc(bikeId).update(updates);
+        closeModal('editBikeModal');
+        showMessage('Bicicleta actualizada correctamente ✅');
+
+        // Refrescar la vista de detalle si está abierta
+        if (currentBike && currentBike.id === bikeId) {
+          loadBikeDetail(bikeId);
+        }
+        loadBikes();
+      } catch (error) {
+        showMessage("Error al guardar: " + error.message, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar cambios';
+      }
+    });
     
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', setupCloseHandlers);
