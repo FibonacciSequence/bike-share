@@ -233,12 +233,19 @@
         <h2 style="margin-bottom: 20px;">Comparte tu Bicicleta</h2>
         <p style="text-align: center; color: #666; margin-bottom: 40px;">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
         
-        <div id="loginWarning" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:10px; padding:14px 20px; margin-bottom:20px; color:#856404; text-align:center; font-size:0.95rem;">
-          ⚠️ <strong>Para publicar tu bicicleta necesitas una cuenta.</strong>
-          <a href="#" onclick="testLogin(); return false;" style="color:#4caf50; font-weight:bold; margin-left:6px;">Inicia sesión</a> o
-          <a href="#" onclick="closeModal('loginModal'); testSignup();" style="color:#4caf50; font-weight:bold; margin-left:4px;">Regístrate gratis</a>
+        <!-- Mostrado cuando NO hay sesión iniciada -->
+        <div id="addBikeGate" style="text-align:center; padding: 40px 20px;">
+          <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
+          <h3 style="color:#2e7d32; margin-bottom:12px;">Necesitas una cuenta para publicar</h3>
+          <p style="color:#666; margin-bottom:28px;">Crea tu cuenta gratis o inicia sesión para compartir tu bicicleta y empezar a ganar dinero.</p>
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button onclick="testSignup(); return false;" class="btn btn-green" style="padding:12px 28px; font-size:1rem;">Crear cuenta gratis</button>
+            <button onclick="testLogin(); return false;" class="btn btn-secondary" style="padding:12px 28px; font-size:1rem;">Ya tengo cuenta</button>
+          </div>
         </div>
-        <form id="addBikeForm">
+
+        <!-- Mostrado cuando SÍ hay sesión iniciada -->
+        <form id="addBikeForm" style="display:none;">
           <div class="form-row">
             <div class="form-group">
               <label for="bikeName">Nombre/Marca de la bici *</label>
@@ -679,9 +686,9 @@
         if (loginLink) loginLink.style.display = 'none';
         if (signupLink) signupLink.style.display = 'none';
         
-        // Ocultar aviso de login del formulario si el usuario acaba de iniciar sesión
-        const loginWarning = document.getElementById('loginWarning');
-        if (loginWarning) loginWarning.style.display = 'none';
+        // Mostrar formulario, ocultar gate
+        document.getElementById('addBikeForm').style.display = 'block';
+        document.getElementById('addBikeGate').style.display = 'none';
 
         showMessage(isAdmin ? `Bienvenido ADMIN: ${user.email}` : `Bienvenido ${user.email}`);
         loadBikes();
@@ -690,12 +697,16 @@
         isAdmin = false;
         document.getElementById('userPanel').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
-        
+
+        // Ocultar formulario, mostrar gate
+        document.getElementById('addBikeForm').style.display = 'none';
+        document.getElementById('addBikeGate').style.display = 'block';
+
         const loginLink = document.querySelector('[onclick*="testLogin"]');
         const signupLink = document.querySelector('[onclick*="testSignup"]');
         if (loginLink) loginLink.style.display = 'block';
         if (signupLink) signupLink.style.display = 'block';
-        
+
         loadBikes();
       }
     });
@@ -905,34 +916,6 @@
       setupCloseHandlers();
     }
     
-    // Aviso temprano: mostrar alerta cuando el usuario empieza a escribir sin estar logueado
-    (function() {
-      const form = document.getElementById('addBikeForm');
-      const warning = document.getElementById('loginWarning');
-      let warningShown = false;
-
-      function handleEarlyInteraction() {
-        if (!currentUser && !warningShown) {
-          warningShown = true;
-          warning.style.display = 'block';
-          warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        // Si ya inició sesión, ocultar el aviso
-        if (currentUser && warning.style.display !== 'none') {
-          warning.style.display = 'none';
-        }
-      }
-
-      // Escuchar en todos los inputs, textareas y selects del formulario
-      form.querySelectorAll('input, textarea, select').forEach(function(el) {
-        el.addEventListener('focus', handleEarlyInteraction);
-        el.addEventListener('input', handleEarlyInteraction);
-      });
-
-      // Ocultar aviso si el usuario inicia sesión mientras el modal está abierto
-      const origAuthChanged = auth && auth.onAuthStateChanged ? null : null;
-    })();
-
     document.getElementById('addBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       if (!currentUser) {
