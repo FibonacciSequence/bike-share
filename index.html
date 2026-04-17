@@ -4,119 +4,237 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lima Bike Share - Comparte tu bici, alquila una bici</title>
-  
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚲</text></svg>">
-  
+
   <script>
-    function testLogin() {
-      document.getElementById('loginModal').style.display = 'block';
-    }
-    
-    function testSignup() {
-      document.getElementById('signupModal').style.display = 'block';
-    }
-    
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-    
+    function testLogin() { document.getElementById('loginModal').style.display = 'block'; }
+    function testSignup() { document.getElementById('signupModal').style.display = 'block'; }
+    function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
     function scrollToSection(sectionId) {
-      // Si estamos en la vista de detalle, volver a la página principal primero
       const detailPage = document.getElementById('bikeDetailPage');
       if (detailPage && detailPage.style.display !== 'none') {
         if (typeof showMainPage === 'function') showMainPage();
-        // Esperar al reflow antes de hacer scroll
         setTimeout(function() { scrollToSection(sectionId); }, 50);
         return false;
       }
-
       const section = document.getElementById(sectionId);
       if (section) {
-        const navHeight = 70;
+        const navHeight = 64;
         const elementPosition = section.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - navHeight;
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
       return false;
     }
-    
     window.testLogin = testLogin;
     window.testSignup = testSignup;
     window.closeModal = closeModal;
     window.scrollToSection = scrollToSection;
   </script>
-  
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    nav { background: #2e7d32; color: white; padding: 1rem 0; position: fixed; width: 100%; top: 0; z-index: 1000; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #2e7d32;
+      --green-light: #4caf50;
+      --green-pale: #e8f5e9;
+      --orange: #ff6b35;
+      --orange-dark: #e55a2b;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9fafb;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --radius-pill: 999px;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: var(--text); background: var(--white); }
+
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: fixed; width: 100%; top: 0; z-index: 1000;
+      height: 64px; display: flex; align-items: center;
+    }
     nav .container { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
-    nav ul { display: flex; list-style: none; gap: 2rem; }
-    nav a { color: white; text-decoration: none; transition: opacity 0.3s; }
-    nav a:hover { opacity: 0.8; }
-    .hero { background: linear-gradient(rgba(46, 125, 50, 0.85), rgba(76, 175, 80, 0.85)), url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1200&h=800&fit=crop') center/cover; color: white; padding: 150px 0 100px; text-align: center; position: relative; }
-    .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 1; }
-    .hero .container { position: relative; z-index: 2; }
-    .hero h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); color: white; }
-    .hero p { font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.95; max-width: 600px; margin-left: auto; margin-right: auto; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); color: white; line-height: 1.5; }
-    .btn { display: inline-block; padding: 15px 30px; border-radius: 50px; text-decoration: none; font-weight: 500; font-size: 1rem; border: none; cursor: pointer; transition: all 0.3s ease; margin: 0.5rem; text-align: center; }
-    .btn-primary { background: #ff6b35; color: white; }
-    .btn-primary:hover { background: #e55a2b; color: white; }
-    .btn-secondary { background: transparent; color: white; border: 2px solid white; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.1); color: white; }
-    .btn-green { background: #4caf50; color: white; }
-    .btn-green:hover { background: #45a049; color: white; }
+    .logo { font-size: 1.2rem; font-weight: 700; text-decoration: none; color: var(--green); }
+    nav ul { display: flex; list-style: none; gap: 0.25rem; align-items: center; }
+    nav ul a {
+      color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+      font-weight: 500; padding: 7px 14px; border-radius: var(--radius-pill); transition: all 0.2s;
+    }
+    nav ul a:hover { color: var(--text); background: var(--bg); }
+    nav ul .nav-btn-login { color: var(--green); border: 1.5px solid var(--green); }
+    nav ul .nav-btn-login:hover { background: var(--green-pale); }
+    nav ul .nav-btn-signup { background: var(--green); color: var(--white) !important; }
+    nav ul .nav-btn-signup:hover { background: #256427; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+    .hero {
+      padding: 120px 0 80px;
+      background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 40%, #f0f9ff 100%);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('https://images.unsplash.com/photo-1544191696-15693bf57285?w=1400&h=700&fit=crop') center/cover no-repeat;
+      opacity: 0.07;
+    }
+    .hero .container { position: relative; }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-pale); color: var(--green);
+      font-size: 0.8rem; font-weight: 600; padding: 5px 14px;
+      border-radius: var(--radius-pill); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; color: var(--text);
+      letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem;
+    }
+    .hero h1 span { color: var(--green); }
+    .hero p { font-size: 1.15rem; color: var(--text-muted); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 26px; border-radius: var(--radius-pill); font-size: 0.95rem;
+      font-weight: 600; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
+    }
+    .btn-primary { background: var(--orange); color: white; box-shadow: 0 4px 14px rgba(255,107,53,0.3); }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-1px); color: white; }
+    .btn-outline { background: var(--white); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--text-muted); transform: translateY(-1px); }
+    .btn-green { background: var(--green); color: white; }
+    .btn-green:hover { background: #256427; transform: translateY(-1px); color: white; }
+    .btn-secondary { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+    .trust-bar { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 16px 0; }
+    .trust-bar .container { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; }
+    .trust-item { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--text-muted); font-weight: 500; }
+
+    .user-panel {
+      display: none; background: var(--green-pale); border: 1px solid #c8e6c9; color: var(--green);
+      padding: 12px 20px; border-radius: var(--radius); margin: 80px 0 0;
+      text-align: center; font-weight: 500; font-size: 0.9rem;
+    }
+
     section { padding: 80px 0; }
-    .bg-light { background: #f8f9fa; }
-    h2 { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; color: #2e7d32; font-weight: 300; }
-    h3 { color: #2e7d32; margin-bottom: 1rem; }
-    .row { display: flex; flex-wrap: wrap; margin: -15px; }
-    .col { flex: 1; padding: 15px; min-width: 300px; }
-    .col-3 { flex: 0 0 33.333%; padding: 15px; }
-    .card { background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.3s ease; height: 100%; }
-    .card:hover { transform: translateY(-5px); }
-    .card img { width: 100%; height: 220px; object-fit: cover; }
-    .card-content { padding: 25px; }
-    .card-title { font-size: 1.4rem; color: #2e7d32; margin-bottom: 15px; font-weight: 500; }
-    .bike-info { display: flex; align-items: center; margin-bottom: 10px; color: #666; font-size: 0.9rem; }
-    .bike-info::before { content: "📍"; margin-right: 8px; }
-    .price { font-size: 1.5rem; font-weight: bold; color: #ff6b35; margin: 15px 0; }
-    .step-card { text-align: center; padding: 30px 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: 100%; }
-    .step-number { width: 60px; height: 60px; background: #4caf50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.5rem; font-weight: bold; color: white; }
-    .form-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
-    .form-group { margin-bottom: 20px; }
-    .form-row { display: flex; gap: 20px; }
-    .form-row .form-group { flex: 1; }
-    label { display: block; margin-bottom: 8px; font-weight: 500; color: #2e7d32; }
-    input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="file"] { width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s; }
-    input:focus { outline: none; border-color: #4caf50; }
-    .user-panel { display: none; background: #4caf50; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; }
-    .admin-controls { position: absolute; top: 15px; right: 15px; z-index: 10; }
-    .admin-controls button { margin-left: 5px; padding: 8px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 0.8rem; }
-    .btn-edit { background: #2196F3; }
-    .btn-delete { background: #f44336; }
-    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { margin-bottom: 20px; text-align: center; }
-    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-    .close { position: absolute; right: 15px; top: 15px; font-size: 24px; cursor: pointer; color: #666; font-weight: bold; line-height: 1; }
-    .close:hover { color: #000; }
-    .feature-item { display: flex; align-items: flex-start; margin-bottom: 30px; }
-    .feature-icon { width: 50px; height: 50px; background: #4caf50; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-size: 1.5rem; flex-shrink: 0; }
-    footer { background: #2e7d32; color: white; padding: 40px 0; text-align: center; }
+    .bg-light { background: var(--bg); }
+
+    h2.section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--text); letter-spacing: -0.8px; margin-bottom: 0.5rem; text-align: center; }
+    .section-sub { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 3rem; }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .step-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; transition: box-shadow 0.25s, transform 0.25s; }
+    .step-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .step-number { width: 52px; height: 52px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; margin: 0 auto 1.25rem; }
+    .step-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.6rem; }
+    .step-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+    .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .feature-list { display: flex; flex-direction: column; gap: 1.5rem; }
+    .feature-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .feature-icon { width: 44px; height: 44px; flex-shrink: 0; background: var(--green-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .feature-item h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+    .feature-item p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+    .features-img { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); height: 400px; }
+    .features-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .bikes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .bike-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: box-shadow 0.25s, transform 0.25s; position: relative; }
+    .bike-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .bike-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .bike-card-body { padding: 1.25rem; }
+    .bike-card-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .bike-card-location { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .bike-card-price { font-size: 1.3rem; font-weight: 800; color: var(--orange); }
+    .bike-card-price-day { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.5rem; }
+    .bike-card-owner { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .bike-card-accessories { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .badge-verified { display: inline-flex; align-items: center; gap: 4px; background: var(--green-pale); color: var(--green); font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); margin-bottom: 0.5rem; }
+    .admin-controls { position: absolute; top: 12px; right: 12px; z-index: 10; display: flex; gap: 6px; }
+    .admin-controls button { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .btn-edit { background: #3b82f6; }
+    .btn-delete { background: #ef4444; }
+
+    .form-container { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; max-width: 800px; margin: 0 auto; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { display: block; margin-bottom: 6px; font-size: 0.88rem; font-weight: 600; color: var(--text); }
+    input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="file"], input[type="date"], textarea {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit; color: var(--text); background: var(--white);
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }
+    small { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: block; }
+
+    .add-gate { text-align: center; padding: 3rem 1.5rem; }
+    .gate-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .add-gate h3 { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .add-gate p { color: var(--text-muted); margin-bottom: 1.75rem; max-width: 400px; margin-left: auto; margin-right: auto; font-size: 0.95rem; }
+    .gate-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 0.5rem; }
+    .checkbox-label { display: flex; align-items: center; gap: 7px; font-weight: 500; font-size: 0.88rem; color: var(--text); cursor: pointer; }
+    .checkbox-label input[type="checkbox"] { width: auto; accent-color: var(--green); }
+
+    #bikeDetailPage { display: none; padding-top: 80px; padding-bottom: 60px; }
+    .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2.5rem; margin-top: 1.5rem; }
+    .detail-back { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 8px 0; border: none; background: none; transition: color 0.2s; }
+    .detail-back:hover { color: var(--text); }
+    .main-photo { width: 100%; height: 380px; object-fit: cover; border-radius: var(--radius); margin-bottom: 10px; }
+    .detail-info-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.25rem; }
+    .price-row { display: flex; gap: 2rem; margin-bottom: 0.5rem; }
+    .price-block strong { font-size: 1.5rem; color: var(--orange); font-weight: 800; }
+    .price-block span { font-size: 0.82rem; color: var(--text-muted); display: block; }
+    .owner-card { display: flex; align-items: center; gap: 12px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.25rem; }
+    .owner-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--green); color: white; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .owner-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    .owner-tag { font-size: 0.8rem; color: var(--text-muted); }
+    .detail-section-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+    .accessories-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .accessory-badge { background: var(--green-pale); color: var(--green); padding: 6px 12px; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 600; }
+    .booking-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); }
+    .booking-box h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text); }
+    .booking-total-box { background: var(--green-pale); border: 1px solid #c8e6c9; border-radius: var(--radius-sm); padding: 12px 16px; margin: 1rem 0; font-size: 0.9rem; }
+
+    .modal { display: none; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+    .modal-content { background: var(--white); margin: 4% auto; padding: 2rem; border-radius: var(--radius); width: 92%; max-width: 500px; position: relative; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; text-align: center; color: var(--text); }
+    .modal .modal-sub { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .close { position: absolute; right: 16px; top: 16px; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); background: var(--bg); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-weight: bold; line-height: 1; }
+    .close:hover { color: var(--text); background: var(--border); }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.25rem; }
+    .modal-link { text-align: center; margin-top: 1rem; font-size: 0.88rem; color: var(--text-muted); }
+    .modal-link a { color: var(--green); font-weight: 600; text-decoration: none; }
+
+    .empty-state { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 3rem; text-align: center; grid-column: 1/-1; }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+    .empty-state a { color: var(--orange); font-weight: 600; text-decoration: none; }
+
+    footer { background: var(--text); color: rgba(255,255,255,0.65); padding: 2.5rem 0; text-align: center; font-size: 0.9rem; }
+    footer .footer-logo { color: white; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; display: block; }
+
     @media (max-width: 768px) {
       nav ul { display: none; }
-      .hero h1 { font-size: 2.5rem; }
-      .col-3 { flex: 0 0 100%; }
-      .form-row { flex-direction: column; gap: 0; }
-      .feature-item { flex-direction: column; text-align: center; }
-      .feature-icon { margin: 0 auto 15px; }
+      .steps-grid, .bikes-grid { grid-template-columns: 1fr; }
+      .features-grid, .detail-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero { padding: 100px 0 60px; }
+      .trust-bar .container { gap: 1.5rem; }
     }
   </style>
 </head>
 <body>
+
   <nav>
     <div class="container">
       <a href="#" class="logo">🚲 Lima Bike Share</a>
@@ -124,56 +242,57 @@
         <li><a href="#como-funciona" onclick="scrollToSection('como-funciona'); return false;">Cómo funciona</a></li>
         <li><a href="#bicicletas" onclick="scrollToSection('bicicletas'); return false;">Bicicletas</a></li>
         <li><a href="#agregar" onclick="scrollToSection('agregar'); return false;">Agregar bici</a></li>
-        <li><a href="#" onclick="testLogin(); return false;">Iniciar sesión</a></li>
-        <li><a href="#" onclick="testSignup(); return false;">Registrarse</a></li>
-        <li><a href="#" id="logoutBtn" style="display: none;">Salir</a></li>
+        <li><a href="#" class="nav-btn-login" onclick="testLogin(); return false;">Iniciar sesión</a></li>
+        <li><a href="#" class="nav-btn-signup" onclick="testSignup(); return false;">Registrarse</a></li>
+        <li><a href="#" id="logoutBtn" style="display: none;" class="nav-btn-login">Salir</a></li>
       </ul>
     </div>
   </nav>
 
+  <div class="container">
+    <div id="userPanel" class="user-panel">✅ <span id="userInfo"></span></div>
+  </div>
+
   <section class="hero">
     <div class="container">
-      <h1>Comparte tu bici<br>Alquila una bici</h1>
+      <div class="hero-tag">🌿 Lima · Transporte Sostenible</div>
+      <h1>Comparte tu bici.<br><span>Alquila una bici.</span></h1>
       <p>Conectamos ciclistas en Lima. Comparte tu bicicleta con otros ciclistas o alquila una bici local. Transacciones confiables, usuarios verificados.</p>
-      <div>
-        <a href="#bicicletas" class="btn btn-primary">Ver Bicicletas</a>
-        <a href="#agregar" class="btn btn-secondary">Compartir mi Bici</a>
+      <div class="hero-actions">
+        <a href="#bicicletas" class="btn btn-primary" onclick="scrollToSection('bicicletas'); return false;">Ver Bicicletas</a>
+        <a href="#agregar" class="btn btn-outline" onclick="scrollToSection('agregar'); return false;">Compartir mi Bici</a>
       </div>
     </div>
   </section>
 
-  <div class="container">
-    <div id="userPanel" class="user-panel">
-      <h3>✅ Bienvenido</h3>
-      <p>Ahora puedes gestionar tus bicicletas publicadas.</p>
-      <span id="userInfo"></span>
+  <div class="trust-bar">
+    <div class="container">
+      <div class="trust-item">✅ Usuarios verificados</div>
+      <div class="trust-item">💬 Contacto por WhatsApp</div>
+      <div class="trust-item">🌱 Movilidad sostenible</div>
+      <div class="trust-item">💰 Precios justos</div>
     </div>
   </div>
 
-  <section id="como-funciona" class="bg-light">
+  <section id="como-funciona">
     <div class="container">
-      <h2>¿Cómo funciona?</h2>
-      <div class="row">
-        <div class="col-3">
-          <div class="step-card">
-            <div class="step-number">1</div>
-            <h3>Encuentra una bici</h3>
-            <p>Explora las bicicletas disponibles en Lima. Filtra por ubicación, precio y tipo de bicicleta.</p>
-          </div>
+      <h2 class="section-title">¿Cómo funciona?</h2>
+      <p class="section-sub">En tres simples pasos</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Encuentra una bici</h3>
+          <p>Explora las bicicletas disponibles en Lima. Filtra por ubicación, precio y tipo de bicicleta.</p>
         </div>
-        <div class="col-3">
-          <div class="step-card">
-            <div class="step-number">2</div>
-            <h3>Contacta al dueño</h3>
-            <p>Comunícate directamente con el propietario vía WhatsApp para coordinar lugar y hora.</p>
-          </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Contacta al dueño</h3>
+          <p>Comunícate directamente con el propietario vía WhatsApp para coordinar lugar y hora.</p>
         </div>
-        <div class="col-3">
-          <div class="step-card">
-            <div class="step-number">3</div>
-            <h3>¡Pedalea!</h3>
-            <p>Recoge la bici, disfruta tu paseo por Lima y devuélvela según lo acordado.</p>
-          </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>¡Pedalea!</h3>
+          <p>Recoge la bici, disfruta tu paseo por Lima y devuélvela según lo acordado.</p>
         </div>
       </div>
     </div>
@@ -181,21 +300,21 @@
 
   <section>
     <div class="container">
-      <div class="row">
-        <div class="col">
-          <h2 style="text-align: left; margin-bottom: 40px;">¿Por qué Lima Bike Share?</h2>
+      <div class="features-grid">
+        <div class="feature-list">
+          <h2 class="section-title" style="text-align:left; margin-bottom:1.5rem;">¿Por qué<br>Lima Bike Share?</h2>
           <div class="feature-item">
             <div class="feature-icon">✓</div>
             <div>
               <h3>Comunidad confiable</h3>
-              <p>Todos los usuarios son verificados para garantizar transacciones seguras.</p>
+              <p>Todos los usuarios son verificados con DNI o pasaporte para garantizar transacciones seguras.</p>
             </div>
           </div>
           <div class="feature-item">
             <div class="feature-icon">🌱</div>
             <div>
               <h3>Transporte sostenible</h3>
-              <p>Contribuye a reducir la contaminación en Lima con movilidad limpia.</p>
+              <p>Contribuye a reducir la contaminación en Lima con movilidad limpia y accesible.</p>
             </div>
           </div>
           <div class="feature-item">
@@ -206,8 +325,8 @@
             </div>
           </div>
         </div>
-        <div class="col">
-          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Ciclistas en Lima" style="width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <div class="features-img">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&h=500&fit=crop" alt="Ciclistas en Lima">
         </div>
       </div>
     </div>
@@ -215,13 +334,12 @@
 
   <section id="bicicletas" class="bg-light">
     <div class="container">
-      <h2>Bicicletas Disponibles</h2>
-      <div id="bikeList" class="row">
-        <div class="col">
-          <div class="card" style="padding: 40px; text-align: center;">
-            <h3 style="color: #2e7d32;">🚲 ¡Sé el primero!</h3>
-            <p style="color: #666;">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: #ff6b35; text-decoration: none;">Comparte la tuya</a> y empieza la comunidad.</p>
-          </div>
+      <h2 class="section-title">Bicicletas Disponibles</h2>
+      <p class="section-sub">Encuentra tu bici ideal en Lima</p>
+      <div id="bikeList" class="bikes-grid">
+        <div class="empty-state">
+          <h3>🚲 ¡Sé el primero!</h3>
+          <p>Aún no hay bicicletas disponibles. <a href="#agregar" onclick="scrollToSection('agregar'); return false;">Comparte la tuya</a> y empieza la comunidad.</p>
         </div>
       </div>
     </div>
@@ -229,41 +347,37 @@
 
   <section id="agregar">
     <div class="container">
+      <h2 class="section-title">Comparte tu Bicicleta</h2>
+      <p class="section-sub">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
       <div class="form-container">
-        <h2 style="margin-bottom: 20px;">Comparte tu Bicicleta</h2>
-        <p style="text-align: center; color: #666; margin-bottom: 40px;">Ayuda a otros ciclistas y gana dinero compartiendo tu bicicleta</p>
-        
-        <!-- Mostrado cuando NO hay sesión iniciada -->
-        <div id="addBikeGate" style="text-align:center; padding: 40px 20px;">
-          <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
-          <h3 style="color:#2e7d32; margin-bottom:12px;">Necesitas una cuenta para publicar</h3>
-          <p style="color:#666; margin-bottom:28px;">Crea tu cuenta gratis o inicia sesión para compartir tu bicicleta y empezar a ganar dinero.</p>
-          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-            <button onclick="testSignup(); return false;" class="btn btn-green" style="padding:12px 28px; font-size:1rem;">Crear cuenta gratis</button>
-            <button onclick="testLogin(); return false;" class="btn btn-secondary" style="padding:12px 28px; font-size:1rem;">Ya tengo cuenta</button>
+        <div id="addBikeGate" class="add-gate">
+          <div class="gate-icon">🔒</div>
+          <h3>Necesitas una cuenta para publicar</h3>
+          <p>Crea tu cuenta gratis o inicia sesión para compartir tu bicicleta y empezar a ganar dinero.</p>
+          <div class="gate-actions">
+            <button onclick="testSignup(); return false;" class="btn btn-green">Crear cuenta gratis</button>
+            <button onclick="testLogin(); return false;" class="btn btn-outline">Ya tengo cuenta</button>
           </div>
         </div>
-
-        <!-- Mostrado cuando SÍ hay sesión iniciada -->
         <form id="addBikeForm" style="display:none;">
           <div class="form-row">
             <div class="form-group">
               <label for="bikeName">Nombre/Marca de la bici *</label>
-              <input type="text" id="bikeName" required>
+              <input type="text" id="bikeName" required placeholder="Ej. Trek Marlin 5">
             </div>
             <div class="form-group">
               <label for="bikeLocation">Ubicación (distrito) *</label>
-              <input type="text" id="bikeLocation" required>
+              <input type="text" id="bikeLocation" required placeholder="Ej. Miraflores">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="bikeHourlyPrice">Precio por hora (S/) *</label>
-              <input type="number" id="bikeHourlyPrice" min="1" required>
+              <input type="number" id="bikeHourlyPrice" min="1" required placeholder="10">
             </div>
             <div class="form-group">
               <label for="bikeDailyPrice">Precio por día (S/) *</label>
-              <input type="number" id="bikeDailyPrice" min="1" required>
+              <input type="number" id="bikeDailyPrice" min="1" required placeholder="50">
             </div>
           </div>
           <div class="form-group">
@@ -272,30 +386,18 @@
           </div>
           <div class="form-group">
             <label for="bikeDescription">Descripción de la bicicleta *</label>
-            <textarea id="bikeDescription" rows="4" style="width: 100%; padding: 12px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;" maxlength="500" required placeholder="Describe tu bicicleta, su estado, características especiales, etc. (máximo 500 caracteres)"></textarea>
-            <small style="color: #666;">Máximo 500 caracteres</small>
+            <textarea id="bikeDescription" rows="4" maxlength="500" required placeholder="Describe tu bicicleta, su estado, características especiales, etc. (máximo 500 caracteres)"></textarea>
+            <small>Máximo 500 caracteres</small>
           </div>
           <div class="form-group">
             <label>Accesorios incluidos (opcional)</label>
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
-              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesHelmet" style="margin-right: 8px; width: auto;">
-                Casco de seguridad
-              </label>
-              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesLock" style="margin-right: 8px; width: auto;">
-                Candado/cadena
-              </label>
-              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesLights" style="margin-right: 8px; width: auto;">
-                Luces LED
-              </label>
-              <label style="display: flex; align-items: center; font-weight: normal; margin-bottom: 0;">
-                <input type="checkbox" id="includesBasket" style="margin-right: 8px; width: auto;">
-                Canasta/portaequipajes
-              </label>
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" id="includesHelmet" style="width:auto;"> 🪖 Casco</label>
+              <label class="checkbox-label"><input type="checkbox" id="includesLock" style="width:auto;"> 🔒 Candado</label>
+              <label class="checkbox-label"><input type="checkbox" id="includesLights" style="width:auto;"> 💡 Luces LED</label>
+              <label class="checkbox-label"><input type="checkbox" id="includesBasket" style="width:auto;"> 🧺 Canasta</label>
             </div>
-            <small style="color: #666;">Selecciona los accesorios que incluyes con el alquiler</small>
+            <small>Selecciona los accesorios que incluyes con el alquiler</small>
           </div>
           <div class="form-group">
             <label for="photoInput">Foto principal de la bici *</label>
@@ -304,96 +406,69 @@
           <div class="form-group">
             <label for="additionalPhotos">Fotos adicionales (opcional)</label>
             <input type="file" id="additionalPhotos" accept="image/*" multiple>
-            <small style="color: #666;">Puedes subir hasta 4 fotos adicionales</small>
+            <small>Puedes subir hasta 4 fotos adicionales</small>
           </div>
-          <div style="text-align: center;">
-            <button type="submit" class="btn btn-green">Publicar Bicicleta</button>
+          <div style="text-align: center; margin-top: 1rem;">
+            <button type="submit" class="btn btn-green" style="padding: 14px 36px;">Publicar Bicicleta</button>
           </div>
         </form>
       </div>
     </div>
   </section>
 
-  <div id="bikeDetailPage" style="display: none;">
-    <div class="container" style="margin-top: 80px;">
-      <div style="margin: 20px 0;">
-        <button class="btn btn-secondary" onclick="showMainPage()">← Volver a todas las bicicletas</button>
-      </div>
-      
-      <div class="row">
-        <div class="col" style="flex: 0 0 60%;">
-          <div id="bikePhotos">
-            <img id="mainBikePhoto" style="width: 100%; height: 400px; object-fit: cover; border-radius: 15px; margin-bottom: 15px;" alt="Bike photo">
-            <div id="photoThumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
-          </div>
+  <!-- BIKE DETAIL -->
+  <div id="bikeDetailPage">
+    <div class="container">
+      <button class="detail-back" onclick="showMainPage()">← Volver a todas las bicicletas</button>
+      <div class="detail-grid">
+        <div>
+          <img id="mainBikePhoto" class="main-photo" alt="Bike photo">
+          <div id="photoThumbnails" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
         </div>
-        
-        <div class="col" style="flex: 1; padding-left: 40px;">
-          <h1 id="bikeDetailName" style="color: #2e7d32; margin-bottom: 20px;"></h1>
-          
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-              <div><strong>Por hora:</strong> <span id="bikeDetailHourlyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span></div>
-              <div><strong>Por día:</strong> <span id="bikeDetailDailyPrice" style="color: #ff6b35; font-size: 1.2rem;"></span></div>
+        <div>
+          <h1 id="bikeDetailName" style="font-size: 1.8rem; font-weight: 800; letter-spacing:-0.5px; margin-bottom: 1rem;"></h1>
+          <div class="detail-info-box">
+            <div class="price-row">
+              <div class="price-block"><strong id="bikeDetailHourlyPrice"></strong><span>por hora</span></div>
+              <div class="price-block"><strong id="bikeDetailDailyPrice"></strong><span>por día</span></div>
             </div>
-            <div style="margin-bottom: 15px;"><strong>Ubicación:</strong> <span id="bikeDetailLocation"></span></div>
+            <div style="font-size:0.9rem; color: var(--text-muted);">📍 <span id="bikeDetailLocation"></span></div>
           </div>
-
-          <div style="display: flex; align-items: center; margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div id="ownerAvatar" style="width: 50px; height: 50px; border-radius: 50%; background: #4caf50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;"></div>
-            <div>
-              <strong id="bikeOwnerName"></strong>
-              <div style="font-size: 0.9em; color: #666;">Propietario verificado</div>
+          <div class="owner-card">
+            <div class="owner-avatar" id="ownerAvatar"></div>
+            <div><div class="owner-name" id="bikeOwnerName"></div><div class="owner-tag">✅ Propietario verificado</div></div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <div class="detail-section-title">Descripción</div>
+            <p id="bikeDetailDescription" style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.7;"></p>
+          </div>
+          <div id="bikeAccessories" style="margin-bottom: 1.25rem; display: none;">
+            <div class="detail-section-title">Accesorios incluidos</div>
+            <div id="bikeAccessoriesList" class="accessories-list"></div>
+          </div>
+          <div style="margin-bottom: 1.25rem;">
+            <div class="detail-section-title">Ubicación</div>
+            <div style="width:100%; height:200px; border-radius:var(--radius-sm); overflow:hidden; border: 1px solid var(--border);">
+              <iframe id="bikeMapIframe" width="100%" height="200" style="border:0;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src=""></iframe>
             </div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:6px;">📍 <span id="mapLocationName"></span></p>
           </div>
-
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #2e7d32; margin-bottom: 15px;">Descripción</h3>
-            <p id="bikeDetailDescription" style="line-height: 1.6; color: #555;"></p>
-          </div>
-
-          <div id="bikeAccessories" style="margin-bottom: 25px; display: none;">
-            <h3 style="color: #2e7d32; margin-bottom: 15px;">Accesorios incluidos</h3>
-            <div id="bikeAccessoriesList" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-          </div>
-
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #2e7d32; margin-bottom: 15px;">Ubicación</h3>
-            <div style="width:100%; height:220px; border-radius:10px; overflow:hidden;">
-              <iframe id="bikeMapIframe"
-                width="100%" height="220"
-                style="border:0; border-radius:10px;"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade"
-                src="">
-              </iframe>
-            </div>
-            <p style="font-size:0.85rem; color:#888; margin-top:6px;">📍 <span id="mapLocationName"></span></p>
-          </div>
-
-          <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-            <h3 style="color: #2e7d32; margin-bottom: 20px;">Solicitar Reserva</h3>
+          <div class="booking-box">
+            <h3>Solicitar Reserva</h3>
             <form id="bookingRequestForm">
               <div class="form-row">
-                <div class="form-group">
-                  <label for="bookingStartDate">Fecha de inicio</label>
-                  <input type="date" id="bookingStartDate" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                </div>
-                <div class="form-group">
-                  <label for="bookingEndDate">Fecha de fin</label>
-                  <input type="date" id="bookingEndDate" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                </div>
+                <div class="form-group"><label for="bookingStartDate">Fecha de inicio</label><input type="date" id="bookingStartDate" required></div>
+                <div class="form-group"><label for="bookingEndDate">Fecha de fin</label><input type="date" id="bookingEndDate" required></div>
               </div>
               <div class="form-group">
                 <label for="bookingMessage">Mensaje (opcional)</label>
-                <textarea id="bookingMessage" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="Cuéntale al propietario sobre tu plan de uso..."></textarea>
+                <textarea id="bookingMessage" rows="3" placeholder="Cuéntale al propietario sobre tu plan de uso..."></textarea>
               </div>
-              <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 8px;">
-                <div><strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span></div>
-                <small style="color: #666;">El precio final se confirmará con el propietario</small>
+              <div class="booking-total-box">
+                <strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span><br>
+                <small>El precio final se confirmará con el propietario</small>
               </div>
-              <button type="submit" class="btn btn-green" style="width: 100%;">Enviar solicitud por WhatsApp</button>
+              <button type="submit" class="btn btn-green" style="width: 100%; margin-top: 0.5rem;">Enviar solicitud por WhatsApp 💬</button>
             </form>
           </div>
         </div>
@@ -403,133 +478,88 @@
 
   <footer>
     <div class="container">
+      <span class="footer-logo">🚲 Lima Bike Share</span>
       <p>Transporte sostenible para una ciudad mejor</p>
     </div>
   </footer>
 
+  <!-- LOGIN MODAL -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('loginModal')">&times;</span>
       <h3>Iniciar Sesión</h3>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">Accede a tu cuenta para gestionar tus bicicletas</p>
+      <p class="modal-sub">Accede a tu cuenta para gestionar tus bicicletas</p>
       <form id="loginForm">
-        <div class="form-group">
-          <label for="loginEmail">Email</label>
-          <input type="email" id="loginEmail" required>
-        </div>
-        <div class="form-group">
-          <label for="loginPassword">Contraseña</label>
-          <input type="password" id="loginPassword" required>
-        </div>
+        <div class="form-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required placeholder="tu@email.com"></div>
+        <div class="form-group"><label for="loginPassword">Contraseña</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
         <div class="modal-buttons">
           <button type="button" onclick="closeModal('loginModal')" class="btn btn-secondary">Cancelar</button>
           <button type="submit" class="btn btn-green">Iniciar Sesión</button>
         </div>
       </form>
-      <p style="text-align: center; margin-top: 20px; color: #666;">
-        ¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); testSignup();" style="color: #4caf50;">Regístrate aquí</a>
-      </p>
+      <p class="modal-link">¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); testSignup();">Regístrate aquí</a></p>
     </div>
   </div>
 
+  <!-- SIGNUP MODAL -->
   <div id="signupModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('signupModal')">&times;</span>
       <h3>Crear Cuenta</h3>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">Únete a la comunidad de ciclistas de Lima</p>
+      <p class="modal-sub">Únete a la comunidad de ciclistas de Lima</p>
       <form id="signupForm">
         <div class="form-row">
-          <div class="form-group">
-            <label for="signupName">Nombre completo *</label>
-            <input type="text" id="signupName" required>
-          </div>
-          <div class="form-group">
-            <label for="signupEmail">Email *</label>
-            <input type="email" id="signupEmail" required>
-          </div>
+          <div class="form-group"><label for="signupName">Nombre completo *</label><input type="text" id="signupName" required placeholder="Tu nombre"></div>
+          <div class="form-group"><label for="signupEmail">Email *</label><input type="email" id="signupEmail" required placeholder="tu@email.com"></div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label for="signupPassword">Contraseña *</label>
-            <input type="password" id="signupPassword" minlength="6" required>
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">Confirmar Contraseña *</label>
-            <input type="password" id="confirmPassword" minlength="6" required>
-          </div>
+          <div class="form-group"><label for="signupPassword">Contraseña *</label><input type="password" id="signupPassword" minlength="6" required placeholder="Mínimo 6 caracteres"></div>
+          <div class="form-group"><label for="confirmPassword">Confirmar Contraseña *</label><input type="password" id="confirmPassword" minlength="6" required placeholder="Repite tu contraseña"></div>
         </div>
         <div class="form-group">
           <label for="signupDocument">DNI o Pasaporte *</label>
           <input type="file" id="signupDocument" accept="image/*,.pdf" required>
-          <small style="color: #666;">Sube una foto clara de tu DNI o pasaporte para verificación</small>
+          <small>Sube una foto clara de tu DNI o pasaporte para verificación</small>
         </div>
         <div class="modal-buttons">
           <button type="button" onclick="closeModal('signupModal')" class="btn btn-secondary">Cancelar</button>
           <button type="submit" class="btn btn-green">Crear Cuenta</button>
         </div>
       </form>
-      <p style="text-align: center; margin-top: 20px; color: #666;">
-        ¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); testLogin();" style="color: #4caf50;">Inicia sesión aquí</a>
-      </p>
+      <p class="modal-link">¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); testLogin();">Inicia sesión aquí</a></p>
     </div>
   </div>
 
-  <!-- Modal editar bicicleta -->
+  <!-- EDIT BIKE MODAL -->
   <div id="editBikeModal" class="modal">
     <div class="modal-content" style="max-width: 680px;">
       <span class="close" onclick="closeModal('editBikeModal')">&times;</span>
       <h3>Editar Bicicleta</h3>
-      <form id="editBikeForm" style="margin-top: 20px;">
+      <form id="editBikeForm" style="margin-top: 1.25rem;">
         <input type="hidden" id="editBikeId">
         <div class="form-row">
-          <div class="form-group">
-            <label for="editBikeName">Nombre/Marca *</label>
-            <input type="text" id="editBikeName" required>
-          </div>
-          <div class="form-group">
-            <label for="editBikeLocation">Ubicación (distrito) *</label>
-            <input type="text" id="editBikeLocation" required>
-          </div>
+          <div class="form-group"><label for="editBikeName">Nombre/Marca *</label><input type="text" id="editBikeName" required></div>
+          <div class="form-group"><label for="editBikeLocation">Ubicación (distrito) *</label><input type="text" id="editBikeLocation" required></div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label for="editBikeHourlyPrice">Precio por hora (S/) *</label>
-            <input type="number" id="editBikeHourlyPrice" min="1" required>
-          </div>
-          <div class="form-group">
-            <label for="editBikeDailyPrice">Precio por día (S/) *</label>
-            <input type="number" id="editBikeDailyPrice" min="1" required>
-          </div>
+          <div class="form-group"><label for="editBikeHourlyPrice">Precio por hora (S/) *</label><input type="number" id="editBikeHourlyPrice" min="1" required></div>
+          <div class="form-group"><label for="editBikeDailyPrice">Precio por día (S/) *</label><input type="number" id="editBikeDailyPrice" min="1" required></div>
         </div>
-        <div class="form-group">
-          <label for="editBikeWhatsapp">WhatsApp *</label>
-          <input type="text" id="editBikeWhatsapp" placeholder="+51 999 999 999" required>
-        </div>
-        <div class="form-group">
-          <label for="editBikeDescription">Descripción *</label>
-          <textarea id="editBikeDescription" rows="4" style="width:100%;padding:12px 16px;border:2px solid #ddd;border-radius:8px;font-size:1rem;resize:vertical;" maxlength="500" required></textarea>
-        </div>
+        <div class="form-group"><label for="editBikeWhatsapp">WhatsApp *</label><input type="text" id="editBikeWhatsapp" placeholder="+51 999 999 999" required></div>
+        <div class="form-group"><label for="editBikeDescription">Descripción *</label><textarea id="editBikeDescription" rows="4" maxlength="500" required></textarea></div>
         <div class="form-group">
           <label>Accesorios incluidos</label>
-          <div style="display:flex;flex-wrap:wrap;gap:15px;margin-top:10px;">
-            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
-              <input type="checkbox" id="editIncludesHelmet" style="margin-right:8px;width:auto;"> Casco
-            </label>
-            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
-              <input type="checkbox" id="editIncludesLock" style="margin-right:8px;width:auto;"> Candado
-            </label>
-            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
-              <input type="checkbox" id="editIncludesLights" style="margin-right:8px;width:auto;"> Luces LED
-            </label>
-            <label style="display:flex;align-items:center;font-weight:normal;margin-bottom:0;">
-              <input type="checkbox" id="editIncludesBasket" style="margin-right:8px;width:auto;"> Canasta
-            </label>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesHelmet" style="width:auto;"> 🪖 Casco</label>
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesLock" style="width:auto;"> 🔒 Candado</label>
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesLights" style="width:auto;"> 💡 Luces LED</label>
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesBasket" style="width:auto;"> 🧺 Canasta</label>
           </div>
         </div>
         <div class="form-group">
           <label for="editPhotoInput">Cambiar foto principal (opcional)</label>
           <input type="file" id="editPhotoInput" accept="image/*">
-          <small style="color:#666;">Déjalo vacío para mantener la foto actual</small>
+          <small>Déjalo vacío para mantener la foto actual</small>
         </div>
         <div class="modal-buttons">
           <button type="button" onclick="closeModal('editBikeModal')" class="btn btn-secondary">Cancelar</button>
@@ -555,226 +585,140 @@
     };
 
     let auth, db, currentUser = null, isAdmin = false;
-    
-    const adminEmails = [
-      'tilmankneepkens@gmail.com',
-      'tilmannathaniel@gmail.com'
-    ];
-    
+    const adminEmails = ['tilmankneepkens@gmail.com', 'tilmannathaniel@gmail.com'];
+
     try {
-      if (typeof firebase === 'undefined') {
-        throw new Error('Firebase SDK no cargó. Comprueba tu conexión a internet.');
-      }
+      if (typeof firebase === 'undefined') throw new Error('Firebase SDK no cargó.');
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
-      console.log('Firebase initialized successfully');
     } catch (error) {
       console.error('Firebase initialization error:', error);
-      // Mostrar aviso visible al usuario si Firebase no pudo iniciar
       window.addEventListener('DOMContentLoaded', function() {
         const banner = document.createElement('div');
-        banner.style.cssText = 'background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;padding:14px 20px;text-align:center;position:fixed;top:70px;left:0;right:0;z-index:9999;font-size:0.95rem;';
+        banner.style.cssText = 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 20px;text-align:center;position:fixed;top:64px;left:0;right:0;z-index:9999;font-size:0.95rem;';
         banner.textContent = '⚠️ Error de conexión con el servidor. Recarga la página o comprueba tu internet.';
         document.body.appendChild(banner);
       });
     }
 
     let currentBike = null;
-
     window.showMainPage = showMainPage;
     window.showBikeDetail = showBikeDetail;
 
     function showMainPage() {
       document.getElementById('bikeDetailPage').style.display = 'none';
-      document.querySelector('.hero').style.display = 'block';
-      document.querySelector('#como-funciona').style.display = 'block';
-      document.querySelector('#bicicletas').style.display = 'block';
-      document.querySelector('#agregar').style.display = 'block';
+      document.querySelectorAll('section, .trust-bar').forEach(el => el.style.display = '');
       history.pushState('', document.title, window.location.pathname);
     }
 
     function showBikeDetail(bikeId) {
-      document.querySelector('.hero').style.display = 'none';
-      document.querySelector('#como-funciona').style.display = 'none';
-      document.querySelector('#bicicletas').style.display = 'none';
-      document.querySelector('#agregar').style.display = 'none';
+      document.querySelectorAll('section, .trust-bar').forEach(el => el.style.display = 'none');
       document.getElementById('bikeDetailPage').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       loadBikeDetail(bikeId);
-      history.pushState({bikeId: bikeId}, '', `#bike/${bikeId}`);
+      history.pushState({ bikeId }, '', `#bike/${bikeId}`);
     }
 
     window.addEventListener('popstate', function(event) {
-      if (event.state && event.state.bikeId) {
-        showBikeDetail(event.state.bikeId);
-      } else {
-        showMainPage();
-      }
+      if (event.state && event.state.bikeId) showBikeDetail(event.state.bikeId);
+      else showMainPage();
     });
 
     function checkInitialRoute() {
-      const hash = window.location.hash;
-      const bikeMatch = hash.match(/^#bike\/(.+)$/);
-      if (bikeMatch) {
-        showBikeDetail(bikeMatch[1]);
-      }
+      const bikeMatch = window.location.hash.match(/^#bike\/(.+)$/);
+      if (bikeMatch) showBikeDetail(bikeMatch[1]);
     }
 
     function showMessage(message, type = 'info') {
-      const messageDiv = document.createElement('div');
-      const bgColor = type === 'error' ? '#ffebee' : '#e8f5e8';
-      const textColor = type === 'error' ? '#c62828' : '#2e7d32';
-      const borderColor = type === 'error' ? '#f44336' : '#4caf50';
-      
-      messageDiv.style.cssText = `background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 16px; margin: 20px auto; color: ${textColor}; max-width: 600px; text-align: center; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 3000;`;
-      messageDiv.innerHTML = `<strong>${type === 'error' ? '❌ Error:' : '✅ Éxito:'}</strong> ${message}`;
-      document.body.appendChild(messageDiv);
-      setTimeout(() => messageDiv.remove(), 5000);
+      const div = document.createElement('div');
+      const isError = type === 'error';
+      div.style.cssText = `background:${isError?'#fef2f2':'#f0fdf4'};border:1px solid ${isError?'#fecaca':'#bbf7d0'};color:${isError?'#991b1b':'#166534'};border-radius:10px;padding:13px 20px;max-width:500px;text-align:center;position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:3000;font-size:0.9rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.1);`;
+      div.textContent = `${isError ? '❌' : '✅'} ${message}`;
+      document.body.appendChild(div);
+      setTimeout(() => div.remove(), 5000);
     }
-    
+
     function setupCloseHandlers() {
-      document.querySelectorAll('.close').forEach(function(btn) {
-        btn.onclick = function(e) {
-          e.preventDefault();
-          var modal = btn.closest('.modal');
-          if (modal) modal.style.display = 'none';
-        };
+      document.querySelectorAll('.close').forEach(btn => {
+        btn.onclick = e => { e.preventDefault(); const m = btn.closest('.modal'); if (m) m.style.display = 'none'; };
       });
-      
-      window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-          event.target.style.display = 'none';
-        }
-      };
-      
-      // Handle other anchor links (like in hero section) that don't have onclick
-      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-        if (anchor.getAttribute('onclick')) return; // Skip links with onclick
-        
-        anchor.addEventListener('click', function (e) {
-          var href = this.getAttribute('href');
-          if (href === '#') return;
-          
-          var target = document.querySelector(href);
-          if (target) {
-            e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
-        });
-      });
+      window.onclick = event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; };
     }
-    
+
     if (!auth) {
-      console.warn('Firebase auth no disponible, saltando onAuthStateChanged');
+      console.warn('Firebase auth no disponible');
     } else auth.onAuthStateChanged(function(user) {
       if (user) {
         currentUser = user;
         isAdmin = adminEmails.includes(user.email);
-        
-        document.getElementById('userPanel').style.display = 'block';
-        document.getElementById('logoutBtn').style.display = 'block';
-        
+        const panel = document.getElementById('userPanel');
+        panel.style.display = 'block';
         if (isAdmin) {
           document.getElementById('userInfo').innerHTML = `🔧 ADMIN: ${user.email}`;
-          document.getElementById('userPanel').style.background = '#ff6b35';
+          panel.style.background = '#fff7ed'; panel.style.borderColor = '#fed7aa'; panel.style.color = '#9a3412';
         } else {
           document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
         }
-        
-        const loginLink = document.querySelector('[onclick*="testLogin"]');
-        const signupLink = document.querySelector('[onclick*="testSignup"]');
+        document.getElementById('logoutBtn').style.display = 'block';
+        const loginLink = document.querySelector('a.nav-btn-login[onclick*="testLogin"]');
+        const signupLink = document.querySelector('a.nav-btn-signup[onclick*="testSignup"]');
         if (loginLink) loginLink.style.display = 'none';
         if (signupLink) signupLink.style.display = 'none';
-        
-        // Mostrar formulario, ocultar gate
         document.getElementById('addBikeForm').style.display = 'block';
         document.getElementById('addBikeGate').style.display = 'none';
-
         showMessage(isAdmin ? `Bienvenido ADMIN: ${user.email}` : `Bienvenido ${user.email}`);
         loadBikes();
       } else {
-        currentUser = null;
-        isAdmin = false;
+        currentUser = null; isAdmin = false;
         document.getElementById('userPanel').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
-
-        // Ocultar formulario, mostrar gate
         document.getElementById('addBikeForm').style.display = 'none';
         document.getElementById('addBikeGate').style.display = 'block';
-
-        const loginLink = document.querySelector('[onclick*="testLogin"]');
-        const signupLink = document.querySelector('[onclick*="testSignup"]');
-        if (loginLink) loginLink.style.display = 'block';
-        if (signupLink) signupLink.style.display = 'block';
-
+        const loginLink = document.querySelector('a.nav-btn-login[onclick*="testLogin"]');
+        const signupLink = document.querySelector('a.nav-btn-signup[onclick*="testSignup"]');
+        if (loginLink) loginLink.style.display = '';
+        if (signupLink) signupLink.style.display = '';
         loadBikes();
       }
     });
 
     async function uploadToCloudinary(file) {
-      const url = `https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`;
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "mdidemll");
-      const response = await fetch(url, { method: "POST", body: formData });
+      const response = await fetch(`https://api.cloudinary.com/v1_1/dzscwbwey/image/upload`, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-      const data = await response.json();
-      return data.secure_url;
+      return (await response.json()).secure_url;
     }
 
     async function loadBikeDetail(bikeId) {
       try {
         const doc = await db.collection("bikes").doc(bikeId).get();
-        if (!doc.exists) {
-          showMessage("Bicicleta no encontrada", "error");
-          showMainPage();
-          return;
-        }
-
+        if (!doc.exists) { showMessage("Bicicleta no encontrada", "error"); showMainPage(); return; }
         const bike = doc.data();
         currentBike = { id: bikeId, ...bike };
-
         document.getElementById('bikeDetailName').textContent = bike.name;
         document.getElementById('bikeDetailHourlyPrice').textContent = `S/ ${bike.hourlyPrice}`;
         document.getElementById('bikeDetailDailyPrice').textContent = `S/ ${bike.dailyPrice}`;
         document.getElementById('bikeDetailLocation').textContent = bike.location;
         document.getElementById('mapLocationName').textContent = bike.location;
-        const mapQuery = encodeURIComponent((bike.location || '') + ', Lima, Peru');
-        document.getElementById('bikeMapIframe').src =
-          `https://maps.google.com/maps?q=${mapQuery}&output=embed&z=14`;
+        document.getElementById('bikeMapIframe').src = `https://maps.google.com/maps?q=${encodeURIComponent((bike.location||'')+', Lima, Peru')}&output=embed&z=14`;
         document.getElementById('bikeDetailDescription').textContent = bike.description || 'Sin descripción disponible.';
         document.getElementById('bikeOwnerName').textContent = bike.ownerName;
-
-        const ownerInitial = bike.ownerName ? bike.ownerName.charAt(0).toUpperCase() : 'U';
-        document.getElementById('ownerAvatar').textContent = ownerInitial;
-
+        document.getElementById('ownerAvatar').textContent = bike.ownerName ? bike.ownerName.charAt(0).toUpperCase() : 'U';
         const accessoriesSection = document.getElementById('bikeAccessories');
         const accessoriesList = document.getElementById('bikeAccessoriesList');
-        
         if (bike.accessories && bike.accessories.length > 0) {
           accessoriesSection.style.display = 'block';
-          accessoriesList.innerHTML = bike.accessories.map(accessory => {
-            const icons = {'Casco': '🪖', 'Candado': '🔒', 'Luces LED': '💡', 'Canasta': '🧺'};
-            return `<span style="background: #e8f5e8; padding: 8px 12px; border-radius: 20px; font-size: 0.9em; color: #2e7d32;">${icons[accessory] || '✓'} ${accessory}</span>`;
-          }).join('');
-        } else {
-          accessoriesSection.style.display = 'none';
-        }
-
+          const icons = { 'Casco': '🪖', 'Candado': '🔒', 'Luces LED': '💡', 'Canasta': '🧺' };
+          accessoriesList.innerHTML = bike.accessories.map(a => `<span class="accessory-badge">${icons[a]||'✓'} ${a}</span>`).join('');
+        } else { accessoriesSection.style.display = 'none'; }
         document.getElementById('mainBikePhoto').src = bike.photo;
-
-        const thumbnailsContainer = document.getElementById('photoThumbnails');
-        thumbnailsContainer.innerHTML = '';
-        
-        const mainThumb = createThumbnail(bike.photo, true);
-        thumbnailsContainer.appendChild(mainThumb);
-
-        if (bike.additionalPhotos && bike.additionalPhotos.length > 0) {
-          bike.additionalPhotos.forEach(photoUrl => {
-            const thumb = createThumbnail(photoUrl, false);
-            thumbnailsContainer.appendChild(thumb);
-          });
-        }
+        const thumbs = document.getElementById('photoThumbnails');
+        thumbs.innerHTML = '';
+        thumbs.appendChild(createThumbnail(bike.photo, true));
+        if (bike.additionalPhotos) bike.additionalPhotos.forEach(url => thumbs.appendChild(createThumbnail(url, false)));
       } catch (error) {
         console.error('Error loading bike details:', error);
         showMessage('Error al cargar los detalles de la bicicleta', 'error');
@@ -785,63 +729,48 @@
     function createThumbnail(photoUrl, isActive) {
       const thumb = document.createElement('img');
       thumb.src = photoUrl;
-      thumb.style.cssText = `width: 80px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; border: ${isActive ? '3px solid #4caf50' : '2px solid #ddd'}; transition: border-color 0.3s;`;
+      thumb.style.cssText = `width:76px;height:58px;object-fit:cover;border-radius:8px;cursor:pointer;border:${isActive?'2.5px solid var(--green-light)':'1.5px solid var(--border)'};transition:border-color 0.2s;`;
       thumb.onclick = () => {
         document.getElementById('mainBikePhoto').src = photoUrl;
-        document.querySelectorAll('#photoThumbnails img').forEach(img => {
-          img.style.border = '2px solid #ddd';
-        });
-        thumb.style.border = '3px solid #4caf50';
+        document.querySelectorAll('#photoThumbnails img').forEach(img => img.style.border = '1.5px solid var(--border)');
+        thumb.style.border = '2.5px solid var(--green-light)';
       };
       return thumb;
     }
 
     function loadBikes() {
+      if (!db) return;
       db.collection("bikes").orderBy("createdAt", "desc").onSnapshot(function(snapshot) {
         const bikeList = document.getElementById("bikeList");
         bikeList.innerHTML = "";
-        
         if (snapshot.empty) {
-          bikeList.innerHTML = `<div class="col"><div class="card" style="padding: 40px; text-align: center;"><h3 style="color: #2e7d32;">🚲 ¡Sé el primero!</h3><p style="color: #666;">Aún no hay bicicletas disponibles. <a href="#agregar" style="color: #ff6b35; text-decoration: none;">Comparte la tuya</a> y empieza la comunidad.</p></div></div>`;
+          bikeList.innerHTML = `<div class="empty-state"><h3>🚲 ¡Sé el primero!</h3><p>Aún no hay bicicletas disponibles. <a href="#agregar" onclick="scrollToSection('agregar'); return false;">Comparte la tuya</a> y empieza la comunidad.</p></div>`;
           return;
         }
-        
         snapshot.forEach(function(doc) {
-          const bike = doc.data();
-          const bikeId = doc.id;
-          
+          const bike = doc.data(); const bikeId = doc.id;
           const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
-          const ownerControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="editBike('${bikeId}', '${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="deleteBike('${bikeId}', '${bike.ownerId}')" title="Eliminar">🗑️</button>${isAdmin && currentUser.uid !== bike.ownerId ? '<span style="color: red; font-size: 10px;">ADMIN</span>' : ''}</div>` : '';
-          
-          bikeList.innerHTML += `<div class="col-3"><div class="card" style="position: relative; cursor: pointer;" onclick="showBikeDetail('${bikeId}')">${ownerControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/300x220?text=Sin+Imagen'"><div class="card-content"><h3 class="card-title">${bike.name}</h3><div class="bike-info">${bike.location}</div><div class="price"><div style="font-size: 1.2rem;">S/ ${bike.hourlyPrice}/hora</div><div style="font-size: 1rem; opacity: 0.8;">S/ ${bike.dailyPrice}/día</div></div><div style="font-size: 0.9em; color: #4caf50; margin: 10px 0;"><strong>Propietario:</strong> ${bike.ownerName || 'Usuario'}</div>${bike.accessories && bike.accessories.length > 0 ? `<div style="font-size: 0.8em; color: #666; margin: 8px 0;"><strong>Incluye:</strong> ${bike.accessories.join(', ')}</div>` : ''}${isAdmin ? `<div style="font-size: 0.8em; color: #666;">Email: ${bike.ownerEmail}</div>` : ''}<div style="margin-top: 15px;"><button class="btn btn-primary" style="width: 100%; padding: 10px;" onclick="event.stopPropagation(); showBikeDetail('${bikeId}')">Ver detalles</button></div></div></div></div>`;
+          const adminControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="event.stopPropagation();editBike('${bikeId}','${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="event.stopPropagation();deleteBike('${bikeId}','${bike.ownerId}')" title="Eliminar">🗑️</button></div>` : '';
+          const accessoriesHtml = bike.accessories && bike.accessories.length > 0 ? `<div class="bike-card-accessories">Incluye: ${bike.accessories.join(', ')}</div>` : '';
+          const adminEmailHtml = isAdmin ? `<div style="font-size:0.78rem;color:var(--text-muted);">📧 ${bike.ownerEmail}</div>` : '';
+          bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div><div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
         });
       });
     }
 
     window.deleteBike = function(bikeId, ownerId) {
-      const canDelete = currentUser && (currentUser.uid === ownerId || isAdmin);
-      if (!canDelete) {
-        showMessage("No tienes permisos para eliminar esta bicicleta", "error");
-        return;
-      }
-      const confirmMsg = isAdmin && currentUser.uid !== ownerId ? '¿Estás seguro de eliminar esta bicicleta? (ADMIN: No es tuya)' : '¿Estás seguro de que quieres eliminar esta bicicleta?';
-      if (confirm(confirmMsg)) {
-        db.collection("bikes").doc(bikeId).delete().then(() => showMessage("Bicicleta eliminada correctamente")).catch(() => showMessage("Error al eliminar la bicicleta", "error"));
+      if (!currentUser || !(currentUser.uid === ownerId || isAdmin)) { showMessage("No tienes permisos para eliminar esta bicicleta", "error"); return; }
+      if (confirm(isAdmin && currentUser.uid !== ownerId ? '¿Seguro de eliminar? (ADMIN)' : '¿Seguro de eliminar esta bicicleta?')) {
+        db.collection("bikes").doc(bikeId).delete().then(() => showMessage("Bicicleta eliminada correctamente")).catch(() => showMessage("Error al eliminar", "error"));
       }
     };
 
     window.editBike = async function(bikeId, ownerId) {
-      const canEdit = currentUser && (currentUser.uid === ownerId || isAdmin);
-      if (!canEdit) {
-        showMessage("No tienes permisos para editar esta bicicleta", "error");
-        return;
-      }
+      if (!currentUser || !(currentUser.uid === ownerId || isAdmin)) { showMessage("No tienes permisos para editar esta bicicleta", "error"); return; }
       try {
         const doc = await db.collection("bikes").doc(bikeId).get();
         if (!doc.exists) { showMessage("Bicicleta no encontrada", "error"); return; }
         const bike = doc.data();
-
-        // Rellenar el formulario con los datos actuales
         document.getElementById('editBikeId').value = bikeId;
         document.getElementById('editBikeName').value = bike.name || '';
         document.getElementById('editBikeLocation').value = bike.location || '';
@@ -849,98 +778,59 @@
         document.getElementById('editBikeDailyPrice').value = bike.dailyPrice || '';
         document.getElementById('editBikeWhatsapp').value = bike.whatsapp || '';
         document.getElementById('editBikeDescription').value = bike.description || '';
-        document.getElementById('editIncludesHelmet').checked  = (bike.accessories || []).includes('Casco');
-        document.getElementById('editIncludesLock').checked    = (bike.accessories || []).includes('Candado');
-        document.getElementById('editIncludesLights').checked  = (bike.accessories || []).includes('Luces LED');
-        document.getElementById('editIncludesBasket').checked  = (bike.accessories || []).includes('Canasta');
+        document.getElementById('editIncludesHelmet').checked = (bike.accessories||[]).includes('Casco');
+        document.getElementById('editIncludesLock').checked = (bike.accessories||[]).includes('Candado');
+        document.getElementById('editIncludesLights').checked = (bike.accessories||[]).includes('Luces LED');
+        document.getElementById('editIncludesBasket').checked = (bike.accessories||[]).includes('Canasta');
         document.getElementById('editPhotoInput').value = '';
-
         document.getElementById('editBikeModal').style.display = 'block';
-      } catch (error) {
-        showMessage("Error al cargar los datos: " + error.message, "error");
-      }
+      } catch (error) { showMessage("Error al cargar los datos: " + error.message, "error"); }
     };
 
     document.getElementById('editBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const bikeId = document.getElementById('editBikeId').value;
       const submitBtn = this.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Guardando...';
-
+      submitBtn.disabled = true; submitBtn.textContent = 'Guardando...';
       try {
         const accessories = [];
-        if (document.getElementById('editIncludesHelmet').checked)  accessories.push('Casco');
-        if (document.getElementById('editIncludesLock').checked)    accessories.push('Candado');
-        if (document.getElementById('editIncludesLights').checked)  accessories.push('Luces LED');
-        if (document.getElementById('editIncludesBasket').checked)  accessories.push('Canasta');
-
+        if (document.getElementById('editIncludesHelmet').checked) accessories.push('Casco');
+        if (document.getElementById('editIncludesLock').checked) accessories.push('Candado');
+        if (document.getElementById('editIncludesLights').checked) accessories.push('Luces LED');
+        if (document.getElementById('editIncludesBasket').checked) accessories.push('Canasta');
         const updates = {
-          name:         document.getElementById('editBikeName').value,
-          location:     document.getElementById('editBikeLocation').value,
-          hourlyPrice:  document.getElementById('editBikeHourlyPrice').value,
-          dailyPrice:   document.getElementById('editBikeDailyPrice').value,
-          whatsapp:     document.getElementById('editBikeWhatsapp').value,
-          description:  document.getElementById('editBikeDescription').value,
-          accessories:  accessories,
-          updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
+          name: document.getElementById('editBikeName').value,
+          location: document.getElementById('editBikeLocation').value,
+          hourlyPrice: document.getElementById('editBikeHourlyPrice').value,
+          dailyPrice: document.getElementById('editBikeDailyPrice').value,
+          whatsapp: document.getElementById('editBikeWhatsapp').value,
+          description: document.getElementById('editBikeDescription').value,
+          accessories,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-
-        // Si subió una foto nueva, subirla primero
         const newPhoto = document.getElementById('editPhotoInput').files[0];
-        if (newPhoto) {
-          showMessage('Subiendo nueva foto...', 'info');
-          updates.photo = await uploadToCloudinary(newPhoto);
-        }
-
+        if (newPhoto) { showMessage('Subiendo nueva foto...', 'info'); updates.photo = await uploadToCloudinary(newPhoto); }
         await db.collection("bikes").doc(bikeId).update(updates);
         closeModal('editBikeModal');
         showMessage('Bicicleta actualizada correctamente ✅');
-
-        // Refrescar la vista de detalle si está abierta
-        if (currentBike && currentBike.id === bikeId) {
-          loadBikeDetail(bikeId);
-        }
+        if (currentBike && currentBike.id === bikeId) loadBikeDetail(bikeId);
         loadBikes();
-      } catch (error) {
-        showMessage("Error al guardar: " + error.message, "error");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Guardar cambios';
-      }
+      } catch (error) { showMessage("Error al guardar: " + error.message, "error"); }
+      finally { submitBtn.disabled = false; submitBtn.textContent = 'Guardar cambios'; }
     });
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupCloseHandlers);
-    } else {
-      setupCloseHandlers();
-    }
-    
+
     document.getElementById('addBikeForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      if (!currentUser) {
-        showMessage('Debes iniciar sesión para publicar una bicicleta', 'error');
-        testLogin();
-        return;
-      }
+      if (!currentUser) { showMessage('Debes iniciar sesión', 'error'); testLogin(); return; }
       const mainFile = document.getElementById("photoInput").files[0];
       const additionalFiles = document.getElementById("additionalPhotos").files;
-      if (!mainFile) {
-        showMessage('Debes subir al menos una foto de la bicicleta', 'error');
-        return;
-      }
-      if (additionalFiles.length > 4) {
-        showMessage('Máximo 4 fotos adicionales permitidas', 'error');
-        return;
-      }
+      if (!mainFile) { showMessage('Debes subir al menos una foto', 'error'); return; }
+      if (additionalFiles.length > 4) { showMessage('Máximo 4 fotos adicionales', 'error'); return; }
       try {
         showMessage('Subiendo fotos...', 'info');
         const mainPhotoURL = await uploadToCloudinary(mainFile);
         const additionalPhotos = [];
-        for (let i = 0; i < additionalFiles.length; i++) {
-          const photoURL = await uploadToCloudinary(additionalFiles[i]);
-          additionalPhotos.push(photoURL);
-        }
+        for (let i = 0; i < additionalFiles.length; i++) additionalPhotos.push(await uploadToCloudinary(additionalFiles[i]));
         const userDoc = await db.collection("users").doc(currentUser.uid).get();
         const userName = userDoc.exists ? userDoc.data().name : 'Usuario';
         const accessories = [];
@@ -948,52 +838,34 @@
         if (document.getElementById("includesLock").checked) accessories.push("Candado");
         if (document.getElementById("includesLights").checked) accessories.push("Luces LED");
         if (document.getElementById("includesBasket").checked) accessories.push("Canasta");
-        const bikeData = {
+        await db.collection("bikes").add({
           name: document.getElementById("bikeName").value,
           location: document.getElementById("bikeLocation").value,
           description: document.getElementById("bikeDescription").value,
           whatsapp: document.getElementById("bikeWhatsapp").value,
           hourlyPrice: document.getElementById("bikeHourlyPrice").value,
           dailyPrice: document.getElementById("bikeDailyPrice").value,
-          photo: mainPhotoURL,
-          additionalPhotos: additionalPhotos,
-          accessories: accessories,
-          ownerId: currentUser.uid,
-          ownerEmail: currentUser.email,
-          ownerName: userName,
+          photo: mainPhotoURL, additionalPhotos, accessories,
+          ownerId: currentUser.uid, ownerEmail: currentUser.email, ownerName: userName,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await db.collection("bikes").add(bikeData);
+        });
         document.getElementById("addBikeForm").reset();
         showMessage('Bicicleta publicada correctamente');
-        document.getElementById('bicicletas').scrollIntoView({ behavior: 'smooth' });
-      } catch (error) {
-        console.error('Add bike error:', error);
-        showMessage(`Error al publicar bicicleta: ${error.message}`, 'error');
-      }
+        scrollToSection('bicicletas');
+      } catch (error) { showMessage(`Error al publicar: ${error.message}`, 'error'); }
     });
-    
+
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
       try {
-        await auth.signInWithEmailAndPassword(email, password);
-        closeModal('loginModal');
-        document.getElementById('loginForm').reset();
+        await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+        closeModal('loginModal'); document.getElementById('loginForm').reset();
       } catch (error) {
-        let errorMessage = "Error de autenticación";
-        switch (error.code) {
-          case 'auth/user-not-found': errorMessage = "No existe una cuenta con este email"; break;
-          case 'auth/wrong-password': errorMessage = "Contraseña incorrecta"; break;
-          case 'auth/invalid-email': errorMessage = "Email inválido"; break;
-          case 'auth/too-many-requests': errorMessage = "Demasiados intentos. Intenta más tarde"; break;
-          default: errorMessage = error.message;
-        }
-        showMessage(errorMessage, 'error');
+        const msgs = { 'auth/user-not-found': 'No existe una cuenta con este email', 'auth/wrong-password': 'Contraseña incorrecta', 'auth/invalid-email': 'Email inválido', 'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde' };
+        showMessage(msgs[error.code] || error.message, 'error');
       }
     });
-    
+
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name = document.getElementById('signupName').value.trim();
@@ -1001,56 +873,26 @@
       const password = document.getElementById('signupPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const documentFile = document.getElementById('signupDocument').files[0];
-      if (!name) {
-        showMessage('El nombre es obligatorio', 'error');
-        return;
-      }
-      if (!documentFile) {
-        showMessage('Debes subir tu DNI o pasaporte', 'error');
-        return;
-      }
-      if (password !== confirmPassword) {
-        showMessage('Las contraseñas no coinciden', 'error');
-        return;
-      }
-      if (password.length < 6) {
-        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
-        return;
-      }
+      if (!name) { showMessage('El nombre es obligatorio', 'error'); return; }
+      if (!documentFile) { showMessage('Debes subir tu DNI o pasaporte', 'error'); return; }
+      if (password !== confirmPassword) { showMessage('Las contraseñas no coinciden', 'error'); return; }
+      if (password.length < 6) { showMessage('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
       try {
         showMessage('Creando cuenta y subiendo documento...', 'info');
         const documentURL = await uploadToCloudinary(documentFile);
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await db.collection("users").doc(userCredential.user.uid).set({
-          name: name,
-          email: email,
-          documentUrl: documentURL,
-          verified: false,
-          blocked: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        closeModal('signupModal');
-        document.getElementById('signupForm').reset();
+        await db.collection("users").doc(userCredential.user.uid).set({ name, email, documentUrl: documentURL, verified: false, blocked: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        closeModal('signupModal'); document.getElementById('signupForm').reset();
         showMessage('Cuenta creada exitosamente. Tu documento será verificado pronto.');
       } catch (error) {
-        let errorMessage = "Error al crear cuenta";
-        switch (error.code) {
-          case 'auth/email-already-in-use': errorMessage = "Ya existe una cuenta con este email"; break;
-          case 'auth/invalid-email': errorMessage = "Email inválido"; break;
-          case 'auth/weak-password': errorMessage = "La contraseña es muy débil"; break;
-          default: errorMessage = error.message;
-        }
-        showMessage(errorMessage, 'error');
+        const msgs = { 'auth/email-already-in-use': 'Ya existe una cuenta con este email', 'auth/invalid-email': 'Email inválido', 'auth/weak-password': 'La contraseña es muy débil' };
+        showMessage(msgs[error.code] || error.message, 'error');
       }
     });
 
     document.getElementById('logoutBtn').addEventListener('click', function() {
       if (!auth) return;
-      auth.signOut().then(() => {
-        showMessage('Sesión cerrada correctamente');
-      }).catch(() => {
-        showMessage('Error al cerrar sesión', 'error');
-      });
+      auth.signOut().then(() => showMessage('Sesión cerrada correctamente')).catch(() => showMessage('Error al cerrar sesión', 'error'));
     });
 
     document.getElementById('bookingRequestForm').addEventListener('submit', function(e) {
@@ -1059,42 +901,27 @@
       const startDate = document.getElementById('bookingStartDate').value;
       const endDate = document.getElementById('bookingEndDate').value;
       const message = document.getElementById('bookingMessage').value;
-      if (!startDate || !endDate) {
-        showMessage('Por favor selecciona las fechas de reserva', 'error');
-        return;
-      }
-      if (new Date(startDate) >= new Date(endDate)) {
-        showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error');
-        return;
-      }
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      if (!startDate || !endDate) { showMessage('Por favor selecciona las fechas de reserva', 'error'); return; }
+      if (new Date(startDate) >= new Date(endDate)) { showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error'); return; }
+      const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000*60*60*24));
       const total = days * parseInt(currentBike.dailyPrice);
-      const whatsappMessage = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com\n\n📅 Fechas: ${startDate} al ${endDate} (${days} día${days > 1 ? 's' : ''})\n💰 Precio estimado: S/ ${total}\n📍 Ubicación: ${currentBike.location}\n\n${message ? `Mensaje adicional: ${message}` : ''}\n\n¿Está disponible para esas fechas?`;
-      const whatsappUrl = `https://wa.me/${currentBike.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(whatsappMessage)}`;
-      window.open(whatsappUrl, '_blank');
+      const txt = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com\n\n📅 Fechas: ${startDate} al ${endDate} (${days} día${days>1?'s':''})\n💰 Precio estimado: S/ ${total}\n📍 Ubicación: ${currentBike.location}\n\n${message?`Mensaje adicional: ${message}`:''}\n\n¿Está disponible para esas fechas?`;
+      window.open(`https://wa.me/${currentBike.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`, '_blank');
     });
 
     ['bookingStartDate', 'bookingEndDate'].forEach(id => {
-      document.getElementById(id).addEventListener('change', updateBookingTotal);
+      document.getElementById(id).addEventListener('change', function() {
+        const s = document.getElementById('bookingStartDate').value;
+        const e = document.getElementById('bookingEndDate').value;
+        if (s && e && currentBike && new Date(s) < new Date(e)) {
+          const days = Math.ceil((new Date(e)-new Date(s))/(1000*60*60*24));
+          document.getElementById('bookingTotal').textContent = `S/ ${days*parseInt(currentBike.dailyPrice)} (${days} día${days>1?'s':''})`;
+        } else { document.getElementById('bookingTotal').textContent = 'S/ 0'; }
+      });
     });
 
-    function updateBookingTotal() {
-      const startDate = document.getElementById('bookingStartDate').value;
-      const endDate = document.getElementById('bookingEndDate').value;
-      if (startDate && endDate && currentBike) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        if (start < end) {
-          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-          const total = days * parseInt(currentBike.dailyPrice);
-          document.getElementById('bookingTotal').textContent = `S/ ${total} (${days} día${days > 1 ? 's' : ''})`;
-        } else {
-          document.getElementById('bookingTotal').textContent = 'S/ 0';
-        }
-      }
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupCloseHandlers);
+    else setupCloseHandlers();
 
     loadBikes();
     checkInitialRoute();
