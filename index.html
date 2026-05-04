@@ -854,6 +854,8 @@
         if (document.getElementById('editIncludesLock').checked) accessories.push('Candado');
         if (document.getElementById('editIncludesLights').checked) accessories.push('Luces LED');
         if (document.getElementById('editIncludesBasket').checked) accessories.push('Canasta');
+        const ownerDoc = await db.collection("users").doc(currentUser.uid).get();
+        const ownerName = ownerDoc.exists ? ownerDoc.data().name : (currentUser.displayName || currentUser.email || 'Usuario');
         const updates = {
           name: document.getElementById('editBikeName').value,
           location: document.getElementById('editBikeLocation').value,
@@ -861,7 +863,7 @@
           dailyPrice: document.getElementById('editBikeDailyPrice').value,
           whatsapp: document.getElementById('editBikeWhatsapp').value,
           description: document.getElementById('editBikeDescription').value,
-          accessories,
+          accessories, ownerName,
           deliveryAvailable: document.getElementById('editIncludesDelivery').checked,
           deliveryZones: document.getElementById('editIncludesDelivery').checked ? getDeliveryZones('editDeliveryZonesList') : [],
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
