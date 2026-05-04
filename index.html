@@ -865,7 +865,10 @@
       } catch (error) { showMessage(`Error al publicar: ${error.message}`, 'error'); }
     });
 
+    let googleSignInInProgress = false;
     async function signInWithGoogle() {
+      if (googleSignInInProgress) return;
+      googleSignInInProgress = true;
       try {
         const provider = new firebase.auth.GoogleAuthProvider();
         await auth.signInWithPopup(provider);
@@ -873,8 +876,9 @@
         closeModal('signupModal');
         showMessage('Sesión iniciada con Google');
       } catch (error) {
-        const silent = ['auth/cancelled-popup-request', 'auth/popup-closed-by-user'];
-        if (!silent.includes(error.code)) showMessage(error.message, 'error');
+        if (error.code !== 'auth/popup-closed-by-user') showMessage(error.message, 'error');
+      } finally {
+        googleSignInInProgress = false;
       }
     }
 
