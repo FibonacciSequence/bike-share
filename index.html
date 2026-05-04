@@ -874,7 +874,6 @@
         await auth.signInWithPopup(provider);
         closeModal('loginModal');
         closeModal('signupModal');
-        showMessage('Sesión iniciada con Google');
       } catch (error) {
         if (error.code !== 'auth/popup-closed-by-user') showMessage(error.message, 'error');
       } finally {
