@@ -196,6 +196,12 @@
     .detail-section-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
     .accessories-list { display: flex; flex-wrap: wrap; gap: 8px; }
     .accessory-badge { background: var(--green-pale); color: var(--green); padding: 6px 12px; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 600; }
+    .delivery-zone-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+    .delivery-zone-row input { flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; }
+    .delivery-zone-row input[type="number"] { max-width: 110px; flex: none; }
+    .btn-remove-zone { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 1.1rem; padding: 0 4px; line-height: 1; }
+    .btn-add-zone { background: none; border: 1.5px dashed var(--green); color: var(--green); border-radius: var(--radius-sm); padding: 6px 14px; font-size: 0.85rem; cursor: pointer; margin-top: 4px; }
+    .btn-add-zone:hover { background: var(--green-pale); }
     .booking-box { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); }
     .booking-box h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text); }
     .booking-total-box { background: var(--green-pale); border: 1px solid #c8e6c9; border-radius: var(--radius-sm); padding: 12px 16px; margin: 1rem 0; font-size: 0.9rem; }
@@ -402,10 +408,11 @@
           <div class="form-group">
             <label>Entrega a domicilio (opcional)</label>
             <div class="checkbox-group">
-              <label class="checkbox-label"><input type="checkbox" id="includesDelivery" style="width:auto;" onchange="document.getElementById('deliveryPriceGroup').style.display=this.checked?'block':'none'"> 🚚 Ofrezco entrega a domicilio</label>
+              <label class="checkbox-label"><input type="checkbox" id="includesDelivery" style="width:auto;" onchange="toggleDeliveryZones('deliveryZonesGroup',this.checked)"> 🚚 Ofrezco entrega a domicilio</label>
             </div>
-            <div id="deliveryPriceGroup" style="display:none; margin-top:0.5rem;">
-              <input type="number" id="deliveryPrice" min="1" placeholder="Precio de entrega (S/)">
+            <div id="deliveryZonesGroup" style="display:none; margin-top:0.75rem;">
+              <div id="deliveryZonesList"></div>
+              <button type="button" class="btn-add-zone" onclick="addDeliveryZoneRow('deliveryZonesList')">+ Agregar distrito</button>
             </div>
           </div>
           <div class="form-group">
@@ -582,10 +589,11 @@
         <div class="form-group">
           <label>Entrega a domicilio (opcional)</label>
           <div class="checkbox-group">
-            <label class="checkbox-label"><input type="checkbox" id="editIncludesDelivery" style="width:auto;" onchange="document.getElementById('editDeliveryPriceGroup').style.display=this.checked?'block':'none'"> 🚚 Ofrezco entrega a domicilio</label>
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesDelivery" style="width:auto;" onchange="toggleDeliveryZones('editDeliveryZonesGroup',this.checked)"> 🚚 Ofrezco entrega a domicilio</label>
           </div>
-          <div id="editDeliveryPriceGroup" style="display:none; margin-top:0.5rem;">
-            <input type="number" id="editDeliveryPrice" min="1" placeholder="Precio de entrega (S/)">
+          <div id="editDeliveryZonesGroup" style="display:none; margin-top:0.75rem;">
+            <div id="editDeliveryZonesList"></div>
+            <button type="button" class="btn-add-zone" onclick="addDeliveryZoneRow('editDeliveryZonesList')">+ Agregar distrito</button>
           </div>
         </div>
         <div class="form-group">
@@ -747,9 +755,9 @@
           accessoriesList.innerHTML = bike.accessories.map(a => `<span class="accessory-badge">${icons[a]||'✓'} ${a}</span>`).join('');
         } else { accessoriesSection.style.display = 'none'; }
         const deliverySection = document.getElementById('bikeDelivery');
-        if (bike.deliveryAvailable) {
+        if (bike.deliveryAvailable && bike.deliveryZones && bike.deliveryZones.length > 0) {
           deliverySection.style.display = 'block';
-          document.getElementById('bikeDeliveryText').textContent = `🚚 Este propietario ofrece entrega a domicilio por S/ ${bike.deliveryPrice}`;
+          document.getElementById('bikeDeliveryText').innerHTML = bike.deliveryZones.map(z => `🚚 <strong>${z.district}</strong> — S/ ${z.price}`).join('<br>');
         } else { deliverySection.style.display = 'none'; }
         document.getElementById('mainBikePhoto').src = bike.photo;
         const thumbs = document.getElementById('photoThumbnails');
@@ -789,7 +797,7 @@
           const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
           const adminControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="event.stopPropagation();editBike('${bikeId}','${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="event.stopPropagation();deleteBike('${bikeId}','${bike.ownerId}')" title="Eliminar">🗑️</button></div>` : '';
           const accessoriesHtml = bike.accessories && bike.accessories.length > 0 ? `<div class="bike-card-accessories">Incluye: ${bike.accessories.join(', ')}</div>` : '';
-          const deliveryHtml = bike.deliveryAvailable ? `<div class="bike-card-accessories">🚚 Entrega disponible — S/ ${bike.deliveryPrice}</div>` : '';
+          const deliveryHtml = (bike.deliveryAvailable && bike.deliveryZones && bike.deliveryZones.length > 0) ? `<div class="bike-card-accessories">🚚 Entrega: ${bike.deliveryZones.map(z => z.district).join(', ')}</div>` : '';
           const adminEmailHtml = isAdmin ? `<div style="font-size:0.78rem;color:var(--text-muted);">📧 ${bike.ownerEmail}</div>` : '';
           bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div><div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${deliveryHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
         });
@@ -821,8 +829,15 @@
         document.getElementById('editIncludesLights').checked = (bike.accessories||[]).includes('Luces LED');
         document.getElementById('editIncludesBasket').checked = (bike.accessories||[]).includes('Canasta');
         document.getElementById('editIncludesDelivery').checked = !!bike.deliveryAvailable;
-        document.getElementById('editDeliveryPrice').value = bike.deliveryPrice || '';
-        document.getElementById('editDeliveryPriceGroup').style.display = bike.deliveryAvailable ? 'block' : 'none';
+        const editZonesGroup = document.getElementById('editDeliveryZonesGroup');
+        editZonesGroup.style.display = bike.deliveryAvailable ? 'block' : 'none';
+        const editZonesList = document.getElementById('editDeliveryZonesList');
+        editZonesList.innerHTML = '';
+        if (bike.deliveryAvailable && bike.deliveryZones && bike.deliveryZones.length > 0) {
+          bike.deliveryZones.forEach(z => addDeliveryZoneRow('editDeliveryZonesList', z.district, z.price));
+        } else if (bike.deliveryAvailable) {
+          addDeliveryZoneRow('editDeliveryZonesList');
+        }
         document.getElementById('editPhotoInput').value = '';
         document.getElementById('editBikeModal').style.display = 'block';
       } catch (error) { showMessage("Error al cargar los datos: " + error.message, "error"); }
@@ -848,7 +863,7 @@
           description: document.getElementById('editBikeDescription').value,
           accessories,
           deliveryAvailable: document.getElementById('editIncludesDelivery').checked,
-          deliveryPrice: document.getElementById('editIncludesDelivery').checked ? (document.getElementById('editDeliveryPrice').value || 0) : null,
+          deliveryZones: document.getElementById('editIncludesDelivery').checked ? getDeliveryZones('editDeliveryZonesList') : [],
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         const newPhoto = document.getElementById('editPhotoInput').files[0];
@@ -890,15 +905,37 @@
           dailyPrice: document.getElementById("bikeDailyPrice").value,
           photo: mainPhotoURL, additionalPhotos, accessories,
           deliveryAvailable: document.getElementById('includesDelivery').checked,
-          deliveryPrice: document.getElementById('includesDelivery').checked ? (document.getElementById('deliveryPrice').value || 0) : null,
+          deliveryZones: document.getElementById('includesDelivery').checked ? getDeliveryZones('deliveryZonesList') : [],
           ownerId: currentUser.uid, ownerEmail: currentUser.email, ownerName: userName,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         document.getElementById("addBikeForm").reset();
+        document.getElementById('deliveryZonesList').innerHTML = '';
+        document.getElementById('deliveryZonesGroup').style.display = 'none';
         showMessage('Bicicleta publicada correctamente');
         scrollToSection('bicicletas');
       } catch (error) { showMessage(`Error al publicar: ${error.message}`, 'error'); }
     });
+
+    function toggleDeliveryZones(groupId, show) {
+      const group = document.getElementById(groupId);
+      group.style.display = show ? 'block' : 'none';
+      const listId = groupId === 'deliveryZonesGroup' ? 'deliveryZonesList' : 'editDeliveryZonesList';
+      if (show && document.getElementById(listId).children.length === 0) addDeliveryZoneRow(listId);
+    }
+    function addDeliveryZoneRow(listId, district='', price='') {
+      const row = document.createElement('div');
+      row.className = 'delivery-zone-row';
+      row.innerHTML = `<input type="text" placeholder="Distrito" value="${district}"><input type="number" min="1" placeholder="S/" value="${price}"><button type="button" class="btn-remove-zone" onclick="this.parentElement.remove()">✕</button>`;
+      document.getElementById(listId).appendChild(row);
+    }
+    function getDeliveryZones(listId) {
+      const rows = document.getElementById(listId).querySelectorAll('.delivery-zone-row');
+      return Array.from(rows).map(row => {
+        const inputs = row.querySelectorAll('input');
+        return { district: inputs[0].value.trim(), price: inputs[1].value };
+      }).filter(z => z.district && z.price);
+    }
 
     let googleSignInInProgress = false;
     async function signInWithGoogle() {
