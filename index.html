@@ -873,9 +873,8 @@
         closeModal('signupModal');
         showMessage('Sesión iniciada con Google');
       } catch (error) {
-        const msgs = { 'auth/popup-closed-by-user': 'Cerraste la ventana de Google', 'auth/cancelled-popup-request': '' };
-        const msg = msgs[error.code] || error.message;
-        if (msg) showMessage(msg, 'error');
+        const silent = ['auth/cancelled-popup-request', 'auth/popup-closed-by-user'];
+        if (!silent.includes(error.code)) showMessage(error.message, 'error');
       }
     }
 
