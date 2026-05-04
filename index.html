@@ -400,6 +400,15 @@
             <small>Selecciona los accesorios que incluyes con el alquiler</small>
           </div>
           <div class="form-group">
+            <label>Entrega a domicilio (opcional)</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label"><input type="checkbox" id="includesDelivery" style="width:auto;" onchange="document.getElementById('deliveryPriceGroup').style.display=this.checked?'block':'none'"> 🚚 Ofrezco entrega a domicilio</label>
+            </div>
+            <div id="deliveryPriceGroup" style="display:none; margin-top:0.5rem;">
+              <input type="number" id="deliveryPrice" min="1" placeholder="Precio de entrega (S/)">
+            </div>
+          </div>
+          <div class="form-group">
             <label for="photoInput">Foto principal de la bici *</label>
             <input type="file" id="photoInput" accept="image/*" required>
           </div>
@@ -445,6 +454,10 @@
           <div id="bikeAccessories" style="margin-bottom: 1.25rem; display: none;">
             <div class="detail-section-title">Accesorios incluidos</div>
             <div id="bikeAccessoriesList" class="accessories-list"></div>
+          </div>
+          <div id="bikeDelivery" style="margin-bottom: 1.25rem; display: none;">
+            <div class="detail-section-title">Entrega a domicilio</div>
+            <p id="bikeDeliveryText" style="font-size:0.92rem; color:var(--text-muted);"></p>
           </div>
           <div style="margin-bottom: 1.25rem;">
             <div class="detail-section-title">Ubicación</div>
@@ -564,6 +577,15 @@
             <label class="checkbox-label"><input type="checkbox" id="editIncludesLock" style="width:auto;"> 🔒 Candado</label>
             <label class="checkbox-label"><input type="checkbox" id="editIncludesLights" style="width:auto;"> 💡 Luces LED</label>
             <label class="checkbox-label"><input type="checkbox" id="editIncludesBasket" style="width:auto;"> 🧺 Canasta</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Entrega a domicilio (opcional)</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" id="editIncludesDelivery" style="width:auto;" onchange="document.getElementById('editDeliveryPriceGroup').style.display=this.checked?'block':'none'"> 🚚 Ofrezco entrega a domicilio</label>
+          </div>
+          <div id="editDeliveryPriceGroup" style="display:none; margin-top:0.5rem;">
+            <input type="number" id="editDeliveryPrice" min="1" placeholder="Precio de entrega (S/)">
           </div>
         </div>
         <div class="form-group">
@@ -724,6 +746,11 @@
           const icons = { 'Casco': '🪖', 'Candado': '🔒', 'Luces LED': '💡', 'Canasta': '🧺' };
           accessoriesList.innerHTML = bike.accessories.map(a => `<span class="accessory-badge">${icons[a]||'✓'} ${a}</span>`).join('');
         } else { accessoriesSection.style.display = 'none'; }
+        const deliverySection = document.getElementById('bikeDelivery');
+        if (bike.deliveryAvailable) {
+          deliverySection.style.display = 'block';
+          document.getElementById('bikeDeliveryText').textContent = `🚚 Este propietario ofrece entrega a domicilio por S/ ${bike.deliveryPrice}`;
+        } else { deliverySection.style.display = 'none'; }
         document.getElementById('mainBikePhoto').src = bike.photo;
         const thumbs = document.getElementById('photoThumbnails');
         thumbs.innerHTML = '';
@@ -762,8 +789,9 @@
           const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
           const adminControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="event.stopPropagation();editBike('${bikeId}','${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="event.stopPropagation();deleteBike('${bikeId}','${bike.ownerId}')" title="Eliminar">🗑️</button></div>` : '';
           const accessoriesHtml = bike.accessories && bike.accessories.length > 0 ? `<div class="bike-card-accessories">Incluye: ${bike.accessories.join(', ')}</div>` : '';
+          const deliveryHtml = bike.deliveryAvailable ? `<div class="bike-card-accessories">🚚 Entrega disponible — S/ ${bike.deliveryPrice}</div>` : '';
           const adminEmailHtml = isAdmin ? `<div style="font-size:0.78rem;color:var(--text-muted);">📧 ${bike.ownerEmail}</div>` : '';
-          bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div><div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
+          bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div><div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${deliveryHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
         });
       });
     }
@@ -792,6 +820,9 @@
         document.getElementById('editIncludesLock').checked = (bike.accessories||[]).includes('Candado');
         document.getElementById('editIncludesLights').checked = (bike.accessories||[]).includes('Luces LED');
         document.getElementById('editIncludesBasket').checked = (bike.accessories||[]).includes('Canasta');
+        document.getElementById('editIncludesDelivery').checked = !!bike.deliveryAvailable;
+        document.getElementById('editDeliveryPrice').value = bike.deliveryPrice || '';
+        document.getElementById('editDeliveryPriceGroup').style.display = bike.deliveryAvailable ? 'block' : 'none';
         document.getElementById('editPhotoInput').value = '';
         document.getElementById('editBikeModal').style.display = 'block';
       } catch (error) { showMessage("Error al cargar los datos: " + error.message, "error"); }
@@ -816,6 +847,8 @@
           whatsapp: document.getElementById('editBikeWhatsapp').value,
           description: document.getElementById('editBikeDescription').value,
           accessories,
+          deliveryAvailable: document.getElementById('editIncludesDelivery').checked,
+          deliveryPrice: document.getElementById('editIncludesDelivery').checked ? (document.getElementById('editDeliveryPrice').value || 0) : null,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         const newPhoto = document.getElementById('editPhotoInput').files[0];
@@ -842,7 +875,7 @@
         const additionalPhotos = [];
         for (let i = 0; i < additionalFiles.length; i++) additionalPhotos.push(await uploadToCloudinary(additionalFiles[i]));
         const userDoc = await db.collection("users").doc(currentUser.uid).get();
-        const userName = userDoc.exists ? userDoc.data().name : 'Usuario';
+        const userName = userDoc.exists ? userDoc.data().name : (currentUser.displayName || currentUser.email || 'Usuario');
         const accessories = [];
         if (document.getElementById("includesHelmet").checked) accessories.push("Casco");
         if (document.getElementById("includesLock").checked) accessories.push("Candado");
@@ -856,6 +889,8 @@
           hourlyPrice: document.getElementById("bikeHourlyPrice").value,
           dailyPrice: document.getElementById("bikeDailyPrice").value,
           photo: mainPhotoURL, additionalPhotos, accessories,
+          deliveryAvailable: document.getElementById('includesDelivery').checked,
+          deliveryPrice: document.getElementById('includesDelivery').checked ? (document.getElementById('deliveryPrice').value || 0) : null,
           ownerId: currentUser.uid, ownerEmail: currentUser.email, ownerName: userName,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
