@@ -209,6 +209,11 @@
     .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.25rem; }
     .modal-link { text-align: center; margin-top: 1rem; font-size: 0.88rem; color: var(--text-muted); }
     .modal-link a { color: var(--green); font-weight: 600; text-decoration: none; }
+    .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; color: var(--text); font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 0.75rem; transition: background 0.2s, box-shadow 0.2s; }
+    .btn-google:hover { background: #f5f5f5; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .btn-google img { width: 20px; height: 20px; }
+    .or-divider { display: flex; align-items: center; gap: 10px; margin: 1rem 0 0.25rem; color: var(--text-muted); font-size: 0.82rem; }
+    .or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background: var(--border); }
 
     .empty-state { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 3rem; text-align: center; grid-column: 1/-1; }
     .empty-state h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
@@ -492,6 +497,11 @@
           <button type="submit" class="btn btn-green">Iniciar Sesión</button>
         </div>
       </form>
+      <div class="or-divider">o</div>
+      <button type="button" class="btn-google" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continuar con Google
+      </button>
       <p class="modal-link">¿No tienes cuenta? <a href="#" onclick="closeModal('loginModal'); testSignup();">Regístrate aquí</a></p>
     </div>
   </div>
@@ -521,6 +531,11 @@
           <button type="submit" class="btn btn-green">Crear Cuenta</button>
         </div>
       </form>
+      <div class="or-divider">o</div>
+      <button type="button" class="btn-google" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continuar con Google
+      </button>
       <p class="modal-link">¿Ya tienes cuenta? <a href="#" onclick="closeModal('signupModal'); testLogin();">Inicia sesión aquí</a></p>
     </div>
   </div>
@@ -849,6 +864,20 @@
         scrollToSection('bicicletas');
       } catch (error) { showMessage(`Error al publicar: ${error.message}`, 'error'); }
     });
+
+    async function signInWithGoogle() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        closeModal('loginModal');
+        closeModal('signupModal');
+        showMessage('Sesión iniciada con Google');
+      } catch (error) {
+        const msgs = { 'auth/popup-closed-by-user': 'Cerraste la ventana de Google', 'auth/cancelled-popup-request': '' };
+        const msg = msgs[error.code] || error.message;
+        if (msg) showMessage(msg, 'error');
+      }
+    }
 
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
