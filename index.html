@@ -417,6 +417,16 @@
               <input type="number" id="bikeDailyPrice" min="1" required placeholder="50">
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bikeWeeklyPrice">Precio por semana (S/) <small style="font-weight:400;">opcional</small></label>
+              <input type="number" id="bikeWeeklyPrice" min="1" placeholder="280">
+            </div>
+            <div class="form-group">
+              <label for="bikeMonthlyPrice">Precio por mes (S/) <small style="font-weight:400;">opcional</small></label>
+              <input type="number" id="bikeMonthlyPrice" min="1" placeholder="900">
+            </div>
+          </div>
           <div class="form-group">
             <label for="bikeWhatsapp">WhatsApp *</label>
             <input type="text" id="bikeWhatsapp" placeholder="+51 999 999 999" required>
@@ -475,9 +485,11 @@
         <div>
           <h1 id="bikeDetailName" style="font-size: 1.8rem; font-weight: 800; letter-spacing:-0.5px; margin-bottom: 1rem;"></h1>
           <div class="detail-info-box">
-            <div class="price-row">
+            <div class="price-row" style="flex-wrap:wrap;">
               <div class="price-block"><strong id="bikeDetailHourlyPrice"></strong><span>por hora</span></div>
               <div class="price-block"><strong id="bikeDetailDailyPrice"></strong><span>por día</span></div>
+              <div class="price-block" id="bikeDetailWeeklyBlock" style="display:none;"><strong id="bikeDetailWeeklyPrice"></strong><span>por semana</span></div>
+              <div class="price-block" id="bikeDetailMonthlyBlock" style="display:none;"><strong id="bikeDetailMonthlyPrice"></strong><span>por mes</span></div>
             </div>
             <div style="font-size:0.9rem; color: var(--text-muted);">📍 <span id="bikeDetailLocation"></span></div>
           </div>
@@ -637,6 +649,10 @@
         <div class="form-row">
           <div class="form-group"><label for="editBikeHourlyPrice">Precio por hora (S/) *</label><input type="number" id="editBikeHourlyPrice" min="1" required></div>
           <div class="form-group"><label for="editBikeDailyPrice">Precio por día (S/) *</label><input type="number" id="editBikeDailyPrice" min="1" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="editBikeWeeklyPrice">Precio por semana (S/) <small style="font-weight:400;">opcional</small></label><input type="number" id="editBikeWeeklyPrice" min="1"></div>
+          <div class="form-group"><label for="editBikeMonthlyPrice">Precio por mes (S/) <small style="font-weight:400;">opcional</small></label><input type="number" id="editBikeMonthlyPrice" min="1"></div>
         </div>
         <div class="form-group"><label for="editBikeWhatsapp">WhatsApp *</label><input type="text" id="editBikeWhatsapp" placeholder="+51 999 999 999" required></div>
         <div class="form-group"><label for="editBikeDescription">Descripción *</label><textarea id="editBikeDescription" rows="4" maxlength="500" required></textarea></div>
@@ -820,6 +836,10 @@
         document.getElementById('bikeDetailName').textContent = bike.name;
         document.getElementById('bikeDetailHourlyPrice').textContent = `S/ ${bike.hourlyPrice}`;
         document.getElementById('bikeDetailDailyPrice').textContent = `S/ ${bike.dailyPrice}`;
+        const weeklyBlock = document.getElementById('bikeDetailWeeklyBlock');
+        const monthlyBlock = document.getElementById('bikeDetailMonthlyBlock');
+        if (bike.weeklyPrice) { document.getElementById('bikeDetailWeeklyPrice').textContent = `S/ ${bike.weeklyPrice}`; weeklyBlock.style.display = ''; } else { weeklyBlock.style.display = 'none'; }
+        if (bike.monthlyPrice) { document.getElementById('bikeDetailMonthlyPrice').textContent = `S/ ${bike.monthlyPrice}`; monthlyBlock.style.display = ''; } else { monthlyBlock.style.display = 'none'; }
         document.getElementById('bikeDetailLocation').textContent = bike.location;
         document.getElementById('mapLocationName').textContent = bike.location;
         document.getElementById('bikeMapIframe').src = `https://maps.google.com/maps?q=${encodeURIComponent((bike.location||'')+', Lima, Peru')}&output=embed&z=14`;
@@ -876,9 +896,11 @@
           const canManage = currentUser && (currentUser.uid === bike.ownerId || isAdmin);
           const adminControls = canManage ? `<div class="admin-controls"><button class="btn-edit" onclick="event.stopPropagation();editBike('${bikeId}','${bike.ownerId}')" title="Editar">✏️</button><button class="btn-delete" onclick="event.stopPropagation();deleteBike('${bikeId}','${bike.ownerId}')" title="Eliminar">🗑️</button></div>` : '';
           const accessoriesHtml = bike.accessories && bike.accessories.length > 0 ? `<div class="bike-card-accessories">Incluye: ${bike.accessories.join(', ')}</div>` : '';
+          const extraPrices = [bike.weeklyPrice ? `S/ ${bike.weeklyPrice}/sem` : '', bike.monthlyPrice ? `S/ ${bike.monthlyPrice}/mes` : ''].filter(Boolean).join(' · ');
+          const extraPricesHtml = extraPrices ? `<div class="bike-card-price-day" style="font-size:0.8rem;color:var(--text-muted);">${extraPrices}</div>` : '';
           const deliveryHtml = (bike.deliveryAvailable && bike.deliveryZones && bike.deliveryZones.length > 0) ? `<div class="bike-card-accessories">🚚 Entrega: ${bike.deliveryZones.map(z => z.district).join(', ')}</div>` : '';
           const adminEmailHtml = isAdmin ? `<div style="font-size:0.78rem;color:var(--text-muted);">📧 ${bike.ownerEmail}</div>` : '';
-          bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div><div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${deliveryHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
+          bikeList.innerHTML += `<div class="bike-card" onclick="showBikeDetail('${bikeId}')">${adminControls}<img src="${bike.photo}" alt="${bike.name}" onerror="this.src='https://via.placeholder.com/400x220?text=Sin+Imagen'"><div class="bike-card-body"><div class="badge-verified">✅ Verificado</div><div class="bike-card-title">${bike.name}</div><div class="bike-card-location">📍 ${bike.location}</div><div class="bike-card-price">S/ ${bike.hourlyPrice}<small style="font-size:0.7rem;font-weight:500;color:var(--text-muted);">/hora</small></div><div class="bike-card-price-day">S/ ${bike.dailyPrice} / día</div>${extraPricesHtml}<div class="bike-card-owner">👤 ${bike.ownerName||'Usuario'}</div>${accessoriesHtml}${deliveryHtml}${adminEmailHtml}<button class="btn btn-primary" style="width:100%;margin-top:0.75rem;padding:10px;" onclick="event.stopPropagation();showBikeDetail('${bikeId}')">Ver detalles</button></div></div>`;
         });
       });
     }
@@ -901,6 +923,8 @@
         document.getElementById('editBikeLocation').value = bike.location || '';
         document.getElementById('editBikeHourlyPrice').value = bike.hourlyPrice || '';
         document.getElementById('editBikeDailyPrice').value = bike.dailyPrice || '';
+        document.getElementById('editBikeWeeklyPrice').value = bike.weeklyPrice || '';
+        document.getElementById('editBikeMonthlyPrice').value = bike.monthlyPrice || '';
         document.getElementById('editBikeWhatsapp').value = bike.whatsapp || '';
         document.getElementById('editBikeDescription').value = bike.description || '';
         document.getElementById('editIncludesHelmet').checked = (bike.accessories||[]).includes('Casco');
@@ -940,6 +964,8 @@
           location: document.getElementById('editBikeLocation').value,
           hourlyPrice: document.getElementById('editBikeHourlyPrice').value,
           dailyPrice: document.getElementById('editBikeDailyPrice').value,
+          weeklyPrice: document.getElementById('editBikeWeeklyPrice').value || null,
+          monthlyPrice: document.getElementById('editBikeMonthlyPrice').value || null,
           whatsapp: document.getElementById('editBikeWhatsapp').value,
           description: document.getElementById('editBikeDescription').value,
           accessories, ownerName,
@@ -984,6 +1010,8 @@
           whatsapp: document.getElementById("bikeWhatsapp").value,
           hourlyPrice: document.getElementById("bikeHourlyPrice").value,
           dailyPrice: document.getElementById("bikeDailyPrice").value,
+          weeklyPrice: document.getElementById("bikeWeeklyPrice").value || null,
+          monthlyPrice: document.getElementById("bikeMonthlyPrice").value || null,
           photo: mainPhotoURL, additionalPhotos, accessories,
           deliveryAvailable: document.getElementById('includesDelivery').checked,
           deliveryZones: document.getElementById('includesDelivery').checked ? getDeliveryZones('deliveryZonesList') : [],
@@ -1085,7 +1113,7 @@
       if (new Date(startDate) >= new Date(endDate)) { showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error'); return; }
       if (currentUser.uid === currentBike.ownerId) { showMessage('No puedes reservar tu propia bicicleta', 'error'); return; }
       const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000*60*60*24));
-      const total = days * parseInt(currentBike.dailyPrice);
+      const total = calcTotal(days, currentBike);
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.disabled = true; submitBtn.textContent = 'Enviando...';
       try {
@@ -1110,6 +1138,20 @@
       } catch (err) { showMessage('Error al enviar la solicitud: ' + err.message, 'error'); }
       finally { submitBtn.disabled = false; submitBtn.textContent = 'Enviar solicitud de reserva'; }
     });
+
+    function calcTotal(days, bike) {
+      if (days >= 30 && bike.monthlyPrice) {
+        const months = Math.floor(days / 30);
+        const rem = days % 30;
+        return months * parseInt(bike.monthlyPrice) + rem * parseInt(bike.dailyPrice);
+      }
+      if (days >= 7 && bike.weeklyPrice) {
+        const weeks = Math.floor(days / 7);
+        const rem = days % 7;
+        return weeks * parseInt(bike.weeklyPrice) + rem * parseInt(bike.dailyPrice);
+      }
+      return days * parseInt(bike.dailyPrice);
+    }
 
     // ── Reservations ──
     let currentResTab = 'renter';
@@ -1231,7 +1273,8 @@
         const e = document.getElementById('bookingEndDate').value;
         if (s && e && currentBike && new Date(s) < new Date(e)) {
           const days = Math.ceil((new Date(e)-new Date(s))/(1000*60*60*24));
-          document.getElementById('bookingTotal').textContent = `S/ ${days*parseInt(currentBike.dailyPrice)} (${days} día${days>1?'s':''})`;
+          const total = calcTotal(days, currentBike);
+          document.getElementById('bookingTotal').textContent = `S/ ${total} (${days} día${days>1?'s':''})`;
         } else { document.getElementById('bookingTotal').textContent = 'S/ 0'; }
       });
     });
