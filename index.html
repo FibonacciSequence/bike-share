@@ -215,6 +215,36 @@
     .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.25rem; }
     .modal-link { text-align: center; margin-top: 1rem; font-size: 0.88rem; color: var(--text-muted); }
     .modal-link a { color: var(--green); font-weight: 600; text-decoration: none; }
+    /* Reservations */
+    #reservationsPage { display: none; padding-top: 80px; min-height: 100vh; padding-bottom: 60px; }
+    .res-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    .res-tab { padding: 8px 20px; border-radius: var(--radius-pill); border: 1.5px solid var(--border); background: white; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
+    .res-tab.active { background: var(--green); color: white; border-color: var(--green); }
+    .res-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+    .res-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .res-card-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .res-card-meta { font-size: 0.85rem; color: var(--text-muted); }
+    .res-status { padding: 4px 12px; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+    .res-status-pending { background: #fef3c7; color: #92400e; }
+    .res-status-accepted { background: var(--green-pale); color: var(--green); }
+    .res-status-rejected { background: #fee2e2; color: #991b1b; }
+    .res-actions { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-accept { background: var(--green); color: white; border: none; padding: 8px 18px; border-radius: var(--radius-pill); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .btn-reject { background: #ef4444; color: white; border: none; padding: 8px 18px; border-radius: var(--radius-pill); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .btn-chat { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); padding: 8px 18px; border-radius: var(--radius-pill); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .btn-chat:hover { border-color: var(--text-muted); }
+    /* Chat */
+    .chat-messages { height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; background: var(--bg); margin-bottom: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .chat-msg { max-width: 75%; padding: 8px 12px; border-radius: 14px; font-size: 0.88rem; line-height: 1.45; }
+    .chat-msg.mine { background: var(--green); color: white; align-self: flex-end; border-bottom-right-radius: 3px; }
+    .chat-msg.theirs { background: white; border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 3px; }
+    .chat-msg-name { font-size: 0.72rem; opacity: 0.7; margin-bottom: 2px; }
+    .chat-input-row { display: flex; gap: 8px; }
+    .chat-input-row input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-pill); font-size: 0.9rem; outline: none; }
+    .chat-input-row input:focus { border-color: var(--green); }
+    .chat-input-row button { background: var(--green); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-pill); cursor: pointer; font-weight: 600; }
+    .whatsapp-revealed { background: #dcfce7; border: 1.5px solid #86efac; border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 1rem; text-align: center; font-size: 0.95rem; }
+    .whatsapp-revealed a { color: var(--green); font-weight: 700; text-decoration: none; }
     .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; color: var(--text); font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 0.75rem; transition: background 0.2s, box-shadow 0.2s; }
     .btn-google:hover { background: #f5f5f5; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     .btn-google img { width: 20px; height: 20px; }
@@ -250,6 +280,7 @@
         <li><a href="#agregar" onclick="scrollToSection('agregar'); return false;">Agregar bici</a></li>
         <li><a href="#" class="nav-btn-login" onclick="testLogin(); return false;">Iniciar sesión</a></li>
         <li><a href="#" class="nav-btn-signup" onclick="testSignup(); return false;">Registrarse</a></li>
+        <li><a href="#" id="reservationsNavLink" style="display:none;" onclick="showReservationsPage(); return false;">Mis Reservas</a></li>
         <li><a href="#" id="logoutBtn" style="display: none;" class="nav-btn-login">Salir</a></li>
       </ul>
     </div>
@@ -488,7 +519,7 @@
                 <strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span><br>
                 <small>El precio final se confirmará con el propietario</small>
               </div>
-              <button type="submit" class="btn btn-green" style="width: 100%; margin-top: 0.5rem;">Enviar solicitud por WhatsApp 💬</button>
+              <button type="submit" class="btn btn-green" style="width: 100%; margin-top: 0.5rem;">Enviar solicitud de reserva</button>
             </form>
           </div>
         </div>
@@ -504,6 +535,38 @@
   </footer>
 
   <!-- LOGIN MODAL -->
+  <!-- RESERVATIONS PAGE -->
+  <div id="reservationsPage">
+    <div class="container" style="padding-top:2rem;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+        <button onclick="showMainPage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.9rem;font-weight:600;">← Volver</button>
+        <h2 style="font-size:1.5rem;font-weight:800;">Mis Reservas</h2>
+      </div>
+      <div class="res-tabs">
+        <button class="res-tab active" id="tabRenter" onclick="switchResTab('renter',this)">Mis solicitudes</button>
+        <button class="res-tab" id="tabOwner" onclick="switchResTab('owner',this)">Solicitudes recibidas</button>
+      </div>
+      <div id="reservationsList"></div>
+    </div>
+  </div>
+
+  <!-- CHAT MODAL -->
+  <div id="chatModal" class="modal">
+    <div class="modal-content" style="max-width:560px;">
+      <span class="close" onclick="closeChatModal()">&times;</span>
+      <h3 id="chatModalTitle" style="margin-bottom:0.2rem;"></h3>
+      <p id="chatModalSubtitle" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;"></p>
+      <div id="whatsappRevealed" style="display:none;" class="whatsapp-revealed">
+        ✅ Reserva aceptada — WhatsApp del propietario: <a id="whatsappLink" href="#" target="_blank"></a>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+        <button onclick="sendChatMessage()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('loginModal')">&times;</span>
@@ -648,8 +711,17 @@
 
     function showMainPage() {
       document.getElementById('bikeDetailPage').style.display = 'none';
+      document.getElementById('reservationsPage').style.display = 'none';
       document.querySelectorAll('section, .trust-bar').forEach(el => el.style.display = '');
       history.pushState('', document.title, window.location.pathname);
+    }
+
+    function showReservationsPage() {
+      document.querySelectorAll('section, .trust-bar').forEach(el => el.style.display = 'none');
+      document.getElementById('bikeDetailPage').style.display = 'none';
+      document.getElementById('reservationsPage').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      switchResTab('renter', document.getElementById('tabRenter'));
     }
 
     function showBikeDetail(bikeId) {
@@ -683,7 +755,12 @@
       document.querySelectorAll('.close').forEach(btn => {
         btn.onclick = e => { e.preventDefault(); const m = btn.closest('.modal'); if (m) m.style.display = 'none'; };
       });
-      window.onclick = event => { if (event.target.classList.contains('modal')) event.target.style.display = 'none'; };
+      window.onclick = event => {
+        if (event.target.classList.contains('modal')) {
+          if (event.target.id === 'chatModal') closeChatModal();
+          else event.target.style.display = 'none';
+        }
+      };
     }
 
     if (!auth) {
@@ -701,6 +778,7 @@
           document.getElementById('userInfo').textContent = `Conectado como: ${user.email}`;
         }
         document.getElementById('logoutBtn').style.display = 'block';
+        document.getElementById('reservationsNavLink').style.display = 'block';
         const loginLink = document.querySelector('a.nav-btn-login[onclick*="testLogin"]');
         const signupLink = document.querySelector('a.nav-btn-signup[onclick*="testSignup"]');
         if (loginLink) loginLink.style.display = 'none';
@@ -713,6 +791,7 @@
         currentUser = null; isAdmin = false;
         document.getElementById('userPanel').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('reservationsNavLink').style.display = 'none';
         document.getElementById('addBikeForm').style.display = 'none';
         document.getElementById('addBikeGate').style.display = 'block';
         const loginLink = document.querySelector('a.nav-btn-login[onclick*="testLogin"]');
@@ -995,19 +1074,156 @@
       auth.signOut().then(() => showMessage('Sesión cerrada correctamente')).catch(() => showMessage('Error al cerrar sesión', 'error'));
     });
 
-    document.getElementById('bookingRequestForm').addEventListener('submit', function(e) {
+    document.getElementById('bookingRequestForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      if (!currentUser) { showMessage('Debes iniciar sesión para hacer una reserva', 'error'); testLogin(); return; }
       if (!currentBike) return;
       const startDate = document.getElementById('bookingStartDate').value;
       const endDate = document.getElementById('bookingEndDate').value;
       const message = document.getElementById('bookingMessage').value;
       if (!startDate || !endDate) { showMessage('Por favor selecciona las fechas de reserva', 'error'); return; }
       if (new Date(startDate) >= new Date(endDate)) { showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error'); return; }
+      if (currentUser.uid === currentBike.ownerId) { showMessage('No puedes reservar tu propia bicicleta', 'error'); return; }
       const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000*60*60*24));
       const total = days * parseInt(currentBike.dailyPrice);
-      const txt = `Hola! Me interesa alquilar tu bicicleta "${currentBike.name}" desde limabikeshare.com\n\n📅 Fechas: ${startDate} al ${endDate} (${days} día${days>1?'s':''})\n💰 Precio estimado: S/ ${total}\n📍 Ubicación: ${currentBike.location}\n\n${message?`Mensaje adicional: ${message}`:''}\n\n¿Está disponible para esas fechas?`;
-      window.open(`https://wa.me/${currentBike.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`, '_blank');
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.disabled = true; submitBtn.textContent = 'Enviando...';
+      try {
+        const userDoc = await db.collection("users").doc(currentUser.uid).get();
+        const renterName = userDoc.exists ? userDoc.data().name : (currentUser.displayName || currentUser.email || 'Usuario');
+        const resRef = await db.collection("reservations").add({
+          bikeId: currentBike.id, bikeName: currentBike.name, bikePhoto: currentBike.photo,
+          renterId: currentUser.uid, renterEmail: currentUser.email, renterName,
+          ownerId: currentBike.ownerId, ownerName: currentBike.ownerName,
+          startDate, endDate, days, totalPrice: total,
+          status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        if (message.trim()) {
+          await db.collection("reservations").doc(resRef.id).collection("messages").add({
+            senderId: currentUser.uid, senderName: renterName,
+            text: message.trim(), createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+        document.getElementById('bookingRequestForm').reset();
+        document.getElementById('bookingTotal').textContent = 'S/ 0';
+        showMessage('¡Solicitud enviada! Revisa "Mis Reservas" para ver el estado.');
+      } catch (err) { showMessage('Error al enviar la solicitud: ' + err.message, 'error'); }
+      finally { submitBtn.disabled = false; submitBtn.textContent = 'Enviar solicitud de reserva'; }
     });
+
+    // ── Reservations ──
+    let currentResTab = 'renter';
+    let chatUnsubscribe = null;
+    let currentReservationId = null;
+
+    function switchResTab(role, btn) {
+      currentResTab = role;
+      document.querySelectorAll('.res-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      loadReservations(role);
+    }
+
+    async function loadReservations(role) {
+      const list = document.getElementById('reservationsList');
+      list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Cargando...</p>';
+      const field = role === 'renter' ? 'renterId' : 'ownerId';
+      try {
+        const snap = await db.collection("reservations").where(field, '==', currentUser.uid).orderBy('createdAt', 'desc').get();
+        if (snap.empty) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:3rem;">No hay reservas todavía.</p>'; return; }
+        list.innerHTML = '';
+        snap.forEach(doc => {
+          const r = doc.data(); const id = doc.id;
+          const statusLabel = { pending: 'Pendiente', accepted: 'Aceptada', rejected: 'Rechazada' }[r.status] || r.status;
+          const statusClass = { pending: 'res-status-pending', accepted: 'res-status-accepted', rejected: 'res-status-rejected' }[r.status] || '';
+          const ownerActions = (role === 'owner' && r.status === 'pending') ?
+            `<button class="btn-accept" onclick="acceptReservation('${id}')">Aceptar</button>
+             <button class="btn-reject" onclick="rejectReservation('${id}')">Rechazar</button>` : '';
+          const card = document.createElement('div');
+          card.className = 'res-card';
+          card.innerHTML = `
+            <div class="res-card-header">
+              <div>
+                <div class="res-card-title">🚲 ${r.bikeName}</div>
+                <div class="res-card-meta">📅 ${r.startDate} → ${r.endDate} (${r.days} día${r.days>1?'s':''})</div>
+                <div class="res-card-meta">💰 S/ ${r.totalPrice} estimado</div>
+                <div class="res-card-meta">${role==='renter'?'👤 Dueño: '+r.ownerName:'👤 Inquilino: '+r.renterName}</div>
+              </div>
+              <span class="res-status ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="res-actions">
+              ${ownerActions}
+              <button class="btn-chat" onclick="openChat('${id}',${JSON.stringify(r).replace(/</g,'\\u003c')})">💬 Ver chat</button>
+            </div>`;
+          list.appendChild(card);
+        });
+      } catch(err) { list.innerHTML = `<p style="color:#ef4444;text-align:center;padding:2rem;">Error: ${err.message}</p>`; }
+    }
+
+    async function acceptReservation(id) {
+      await db.collection("reservations").doc(id).update({ status: 'accepted' });
+      showMessage('Reserva aceptada');
+      loadReservations('owner');
+    }
+
+    async function rejectReservation(id) {
+      await db.collection("reservations").doc(id).update({ status: 'rejected' });
+      showMessage('Reserva rechazada');
+      loadReservations('owner');
+    }
+
+    async function openChat(id, reservation) {
+      currentReservationId = id;
+      document.getElementById('chatModalTitle').textContent = `🚲 ${reservation.bikeName}`;
+      document.getElementById('chatModalSubtitle').textContent = `${reservation.startDate} → ${reservation.endDate} · ${reservation.renterName} ↔ ${reservation.ownerName}`;
+      document.getElementById('chatModal').style.display = 'block';
+      const waDiv = document.getElementById('whatsappRevealed');
+      if (reservation.status === 'accepted') {
+        try {
+          const bikeDoc = await db.collection("bikes").doc(reservation.bikeId).get();
+          const waNumber = bikeDoc.exists ? (bikeDoc.data().whatsapp || '') : '';
+          if (waNumber) {
+            document.getElementById('whatsappLink').href = `https://wa.me/${waNumber.replace(/\D/g,'')}`;
+            document.getElementById('whatsappLink').textContent = waNumber;
+            waDiv.style.display = 'block';
+          } else { waDiv.style.display = 'none'; }
+        } catch { waDiv.style.display = 'none'; }
+      } else { waDiv.style.display = 'none'; }
+      if (chatUnsubscribe) chatUnsubscribe();
+      const msgDiv = document.getElementById('chatMessages');
+      msgDiv.innerHTML = '';
+      chatUnsubscribe = db.collection("reservations").doc(id).collection("messages")
+        .orderBy('createdAt').onSnapshot(snap => {
+          msgDiv.innerHTML = '';
+          snap.forEach(doc => {
+            const m = doc.data();
+            const mine = m.senderId === currentUser.uid;
+            const bubble = document.createElement('div');
+            bubble.className = `chat-msg ${mine ? 'mine' : 'theirs'}`;
+            bubble.innerHTML = `${!mine?`<div class="chat-msg-name">${m.senderName}</div>`:''}${m.text}`;
+            msgDiv.appendChild(bubble);
+          });
+          msgDiv.scrollTop = msgDiv.scrollHeight;
+        });
+    }
+
+    function closeChatModal() {
+      document.getElementById('chatModal').style.display = 'none';
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      currentReservationId = null;
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text || !currentReservationId || !currentUser) return;
+      input.value = '';
+      const userDoc = await db.collection("users").doc(currentUser.uid).get();
+      const senderName = userDoc.exists ? userDoc.data().name : (currentUser.displayName || currentUser.email || 'Usuario');
+      await db.collection("reservations").doc(currentReservationId).collection("messages").add({
+        senderId: currentUser.uid, senderName,
+        text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
 
     ['bookingStartDate', 'bookingEndDate'].forEach(id => {
       document.getElementById(id).addEventListener('change', function() {
