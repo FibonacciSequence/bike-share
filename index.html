@@ -1135,6 +1135,11 @@
         document.getElementById('bookingRequestForm').reset();
         document.getElementById('bookingTotal').textContent = 'S/ 0';
         showMessage('¡Solicitud enviada! Revisa "Mis Reservas" para ver el estado.');
+        const waNumber = (currentBike.whatsapp || '').replace(/\D/g, '');
+        if (waNumber) {
+          const txt = `🚲 *Nueva solicitud de reserva en Lima Bike Share*\n\n📋 Bicicleta: ${currentBike.name}\n👤 Inquilino: ${renterName} (${currentUser.email})\n📅 Fechas: ${startDate} → ${endDate} (${days} día${days>1?'s':''})\n💰 Total estimado: S/ ${total}${message.trim() ? `\n\n💬 Mensaje: ${message.trim()}` : ''}\n\nRevisa la solicitud en limabikeshare.com`;
+          window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(txt)}`, '_blank');
+        }
       } catch (err) { showMessage('Error al enviar la solicitud: ' + err.message, 'error'); }
       finally { submitBtn.disabled = false; submitBtn.textContent = 'Enviar solicitud de reserva'; }
     });
