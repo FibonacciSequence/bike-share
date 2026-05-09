@@ -523,13 +523,31 @@
                 <div class="form-group"><label for="bookingStartDate">Fecha de inicio</label><input type="date" id="bookingStartDate" required></div>
                 <div class="form-group"><label for="bookingEndDate">Fecha de fin</label><input type="date" id="bookingEndDate" required></div>
               </div>
+              <div id="bookingDeliveryGroup" style="display:none;">
+                <div class="form-group">
+                  <label class="checkbox-label"><input type="checkbox" id="bookingWantsDelivery" style="width:auto;" onchange="toggleBookingDelivery(this.checked)"> 🚚 Quiero entrega a domicilio</label>
+                </div>
+                <div id="bookingDeliveryDistrict" style="display:none;">
+                  <div class="form-group">
+                    <label for="bookingDeliveryZone">Distrito de entrega</label>
+                    <select id="bookingDeliveryZone" onchange="updateBookingTotal()">
+                      <option value="">Selecciona distrito...</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bookingRenterWhatsapp">Tu WhatsApp</label>
+                <input type="text" id="bookingRenterWhatsapp" placeholder="+51 999 999 999" required>
+                <small>Para avisarte cuando el dueño responda</small>
+              </div>
               <div class="form-group">
                 <label for="bookingMessage">Mensaje (opcional)</label>
-                <textarea id="bookingMessage" rows="3" placeholder="Cuéntale al propietario sobre tu plan de uso..."></textarea>
+                <textarea id="bookingMessage" rows="2" placeholder="Cuéntale al propietario sobre tu plan de uso..."></textarea>
               </div>
               <div class="booking-total-box">
                 <strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span><br>
-                <small>El precio final se confirmará con el propietario</small>
+                <small id="bookingTotalBreakdown" style="color:var(--text-muted);"></small>
               </div>
               <button type="submit" class="btn btn-green" style="width: 100%; margin-top: 0.5rem;">Enviar solicitud de reserva</button>
             </form>
@@ -854,10 +872,20 @@
           accessoriesList.innerHTML = bike.accessories.map(a => `<span class="accessory-badge">${icons[a]||'✓'} ${a}</span>`).join('');
         } else { accessoriesSection.style.display = 'none'; }
         const deliverySection = document.getElementById('bikeDelivery');
+        const bookingDeliveryGroup = document.getElementById('bookingDeliveryGroup');
+        const bookingDeliveryZone = document.getElementById('bookingDeliveryZone');
+        document.getElementById('bookingWantsDelivery').checked = false;
+        document.getElementById('bookingDeliveryDistrict').style.display = 'none';
         if (bike.deliveryAvailable && bike.deliveryZones && bike.deliveryZones.length > 0) {
           deliverySection.style.display = 'block';
           document.getElementById('bikeDeliveryText').innerHTML = bike.deliveryZones.map(z => `🚚 <strong>${z.district}</strong> — S/ ${z.price}`).join('<br>');
-        } else { deliverySection.style.display = 'none'; }
+          bookingDeliveryGroup.style.display = 'block';
+          bookingDeliveryZone.innerHTML = '<option value="">Selecciona distrito...</option>' +
+            bike.deliveryZones.map(z => `<option value="${z.price}" data-district="${z.district}">🚚 ${z.district} — S/ ${z.price}</option>`).join('');
+        } else {
+          deliverySection.style.display = 'none';
+          bookingDeliveryGroup.style.display = 'none';
+        }
         document.getElementById('mainBikePhoto').src = bike.photo;
         const thumbs = document.getElementById('photoThumbnails');
         thumbs.innerHTML = '';
@@ -1112,8 +1140,16 @@
       if (!startDate || !endDate) { showMessage('Por favor selecciona las fechas de reserva', 'error'); return; }
       if (new Date(startDate) >= new Date(endDate)) { showMessage('La fecha de fin debe ser posterior a la fecha de inicio', 'error'); return; }
       if (currentUser.uid === currentBike.ownerId) { showMessage('No puedes reservar tu propia bicicleta', 'error'); return; }
+      const renterWa = document.getElementById('bookingRenterWhatsapp').value.trim();
+      if (!renterWa) { showMessage('Ingresa tu WhatsApp para recibir la respuesta del dueño', 'error'); return; }
       const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000*60*60*24));
-      const total = calcTotal(days, currentBike);
+      const bikeTotal = calcTotal(days, currentBike);
+      const deliverySelect = document.getElementById('bookingDeliveryZone');
+      const wantsDelivery = document.getElementById('bookingWantsDelivery').checked;
+      const deliveryPrice = wantsDelivery && deliverySelect.value ? parseInt(deliverySelect.value) : 0;
+      const deliveryDistrict = wantsDelivery && deliverySelect.value ? deliverySelect.options[deliverySelect.selectedIndex].dataset.district : '';
+      if (wantsDelivery && !deliverySelect.value) { showMessage('Selecciona el distrito de entrega', 'error'); return; }
+      const total = bikeTotal + deliveryPrice;
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.disabled = true; submitBtn.textContent = 'Enviando...';
       try {
@@ -1121,9 +1157,9 @@
         const renterName = userDoc.exists ? userDoc.data().name : (currentUser.displayName || currentUser.email || 'Usuario');
         const resRef = await db.collection("reservations").add({
           bikeId: currentBike.id, bikeName: currentBike.name, bikePhoto: currentBike.photo,
-          renterId: currentUser.uid, renterEmail: currentUser.email, renterName,
+          renterId: currentUser.uid, renterEmail: currentUser.email, renterName, renterWhatsapp: renterWa,
           ownerId: currentBike.ownerId, ownerName: currentBike.ownerName,
-          startDate, endDate, days, totalPrice: total,
+          startDate, endDate, days, bikeTotal, deliveryDistrict, deliveryPrice, totalPrice: total,
           status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         if (message.trim()) {
@@ -1134,28 +1170,56 @@
         }
         document.getElementById('bookingRequestForm').reset();
         document.getElementById('bookingTotal').textContent = 'S/ 0';
-        showMessage('¡Solicitud enviada! Revisa "Mis Reservas" para ver el estado.');
-        const waNumber = (currentBike.whatsapp || '').replace(/\D/g, '');
-        if (waNumber) {
-          const txt = `🚲 *Nueva solicitud de reserva en Lima Bike Share*\n\n📋 Bicicleta: ${currentBike.name}\n👤 Inquilino: ${renterName} (${currentUser.email})\n📅 Fechas: ${startDate} → ${endDate} (${days} día${days>1?'s':''})\n💰 Total estimado: S/ ${total}${message.trim() ? `\n\n💬 Mensaje: ${message.trim()}` : ''}\n\nRevisa la solicitud en limabikeshare.com`;
-          window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(txt)}`, '_blank');
+        document.getElementById('bookingTotalBreakdown').textContent = '';
+        document.getElementById('bookingDeliveryGroup').style.display = 'none';
+        const ownerWa = (currentBike.whatsapp || '').replace(/\D/g, '');
+        if (ownerWa) {
+          const deliveryLine = deliveryDistrict ? `\n🚚 Entrega: ${deliveryDistrict} — S/ ${deliveryPrice}` : '';
+          const txt = `🚲 *Nueva solicitud de reserva — Lima Bike Share*\n\n📋 ${currentBike.name}\n👤 ${renterName}\n📅 ${startDate} → ${endDate} (${days} día${days>1?'s':''})${deliveryLine}\n💰 Total: S/ ${total}${message.trim()?`\n💬 "${message.trim()}"`:''}\n\nVer solicitud: https://www.limabikeshare.com`;
+          window.open(`https://wa.me/${ownerWa}?text=${encodeURIComponent(txt)}`, '_blank');
         }
+        showMessage('¡Solicitud enviada! El dueño fue notificado por WhatsApp.');
       } catch (err) { showMessage('Error al enviar la solicitud: ' + err.message, 'error'); }
       finally { submitBtn.disabled = false; submitBtn.textContent = 'Enviar solicitud de reserva'; }
     });
 
     function calcTotal(days, bike) {
       if (days >= 30 && bike.monthlyPrice) {
-        const months = Math.floor(days / 30);
-        const rem = days % 30;
+        const months = Math.floor(days / 30); const rem = days % 30;
         return months * parseInt(bike.monthlyPrice) + rem * parseInt(bike.dailyPrice);
       }
       if (days >= 7 && bike.weeklyPrice) {
-        const weeks = Math.floor(days / 7);
-        const rem = days % 7;
+        const weeks = Math.floor(days / 7); const rem = days % 7;
         return weeks * parseInt(bike.weeklyPrice) + rem * parseInt(bike.dailyPrice);
       }
       return days * parseInt(bike.dailyPrice);
+    }
+
+    function toggleBookingDelivery(checked) {
+      document.getElementById('bookingDeliveryDistrict').style.display = checked ? 'block' : 'none';
+      if (!checked) document.getElementById('bookingDeliveryZone').value = '';
+      updateBookingTotal();
+    }
+
+    function updateBookingTotal() {
+      const s = document.getElementById('bookingStartDate').value;
+      const e = document.getElementById('bookingEndDate').value;
+      if (!s || !e || !currentBike || new Date(s) >= new Date(e)) {
+        document.getElementById('bookingTotal').textContent = 'S/ 0';
+        document.getElementById('bookingTotalBreakdown').textContent = '';
+        return;
+      }
+      const days = Math.ceil((new Date(e) - new Date(s)) / (1000*60*60*24));
+      const bikeTotal = calcTotal(days, currentBike);
+      const deliverySelect = document.getElementById('bookingDeliveryZone');
+      const wantsDelivery = document.getElementById('bookingWantsDelivery').checked;
+      const deliveryPrice = wantsDelivery && deliverySelect.value ? parseInt(deliverySelect.value) : 0;
+      const deliveryDistrict = wantsDelivery && deliverySelect.value ? deliverySelect.options[deliverySelect.selectedIndex].dataset.district : '';
+      const total = bikeTotal + deliveryPrice;
+      document.getElementById('bookingTotal').textContent = `S/ ${total}`;
+      const parts = [`${days} día${days>1?'s':''}: S/ ${bikeTotal}`];
+      if (deliveryPrice) parts.push(`Entrega ${deliveryDistrict}: S/ ${deliveryPrice}`);
+      document.getElementById('bookingTotalBreakdown').textContent = parts.join(' + ');
     }
 
     // ── Reservations ──
@@ -1192,7 +1256,7 @@
               <div>
                 <div class="res-card-title">🚲 ${r.bikeName}</div>
                 <div class="res-card-meta">📅 ${r.startDate} → ${r.endDate} (${r.days} día${r.days>1?'s':''})</div>
-                <div class="res-card-meta">💰 S/ ${r.totalPrice} estimado</div>
+                <div class="res-card-meta">💰 S/ ${r.totalPrice} estimado${r.deliveryDistrict?` (incl. entrega ${r.deliveryDistrict})`:''}</div>
                 <div class="res-card-meta">${role==='renter'?'👤 Dueño: '+r.ownerName:'👤 Inquilino: '+r.renterName}</div>
               </div>
               <span class="res-status ${statusClass}">${statusLabel}</span>
@@ -1208,7 +1272,14 @@
 
     async function acceptReservation(id) {
       await db.collection("reservations").doc(id).update({ status: 'accepted' });
-      showMessage('Reserva aceptada');
+      const resDoc = await db.collection("reservations").doc(id).get();
+      const r = resDoc.data();
+      if (r.renterWhatsapp) {
+        const wa = r.renterWhatsapp.replace(/\D/g, '');
+        const txt = `✅ *Tu reserva fue aceptada — Lima Bike Share*\n\n📋 ${r.bikeName}\n📅 ${r.startDate} → ${r.endDate}\n💰 Total: S/ ${r.totalPrice}\n\nEntra al chat para coordinar los detalles: https://www.limabikeshare.com`;
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(txt)}`, '_blank');
+      }
+      showMessage('Reserva aceptada — se notificó al inquilino por WhatsApp');
       loadReservations('owner');
     }
 
@@ -1273,15 +1344,7 @@
     }
 
     ['bookingStartDate', 'bookingEndDate'].forEach(id => {
-      document.getElementById(id).addEventListener('change', function() {
-        const s = document.getElementById('bookingStartDate').value;
-        const e = document.getElementById('bookingEndDate').value;
-        if (s && e && currentBike && new Date(s) < new Date(e)) {
-          const days = Math.ceil((new Date(e)-new Date(s))/(1000*60*60*24));
-          const total = calcTotal(days, currentBike);
-          document.getElementById('bookingTotal').textContent = `S/ ${total} (${days} día${days>1?'s':''})`;
-        } else { document.getElementById('bookingTotal').textContent = 'S/ 0'; }
-      });
+      document.getElementById(id).addEventListener('change', updateBookingTotal);
     });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupCloseHandlers);
