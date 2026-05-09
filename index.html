@@ -12,7 +12,9 @@
     function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
     function scrollToSection(sectionId) {
       const detailPage = document.getElementById('bikeDetailPage');
-      if (detailPage && detailPage.style.display !== 'none') {
+      const resPage = document.getElementById('reservationsPage');
+      if ((detailPage && detailPage.style.display !== 'none') ||
+          (resPage && resPage.style.display !== 'none')) {
         if (typeof showMainPage === 'function') showMainPage();
         setTimeout(function() { scrollToSection(sectionId); }, 50);
         return false;
