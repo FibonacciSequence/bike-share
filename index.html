@@ -584,6 +584,7 @@
       <div class="res-tabs">
         <button class="res-tab active" id="tabRenter" onclick="switchResTab('renter',this)">Mis solicitudes</button>
         <button class="res-tab" id="tabOwner" onclick="switchResTab('owner',this)">Solicitudes recibidas</button>
+        <button class="res-tab" id="tabAll" style="display:none;" onclick="switchResTab('all',this)">🔧 Todas</button>
       </div>
       <div id="reservationsList"></div>
     </div>
@@ -764,6 +765,7 @@
       document.getElementById('bikeDetailPage').style.display = 'none';
       document.getElementById('reservationsPage').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('tabAll').style.display = isAdmin ? 'inline-block' : 'none';
       switchResTab('renter', document.getElementById('tabRenter'));
     }
 
@@ -1248,9 +1250,11 @@
     async function loadReservations(role) {
       const list = document.getElementById('reservationsList');
       list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">Cargando...</p>';
-      const field = role === 'renter' ? 'renterId' : 'ownerId';
       try {
-        const snap = await db.collection("reservations").where(field, '==', currentUser.uid).orderBy('createdAt', 'desc').get();
+        const query = role === 'all'
+          ? db.collection("reservations").orderBy('createdAt', 'desc')
+          : db.collection("reservations").where(role === 'renter' ? 'renterId' : 'ownerId', '==', currentUser.uid).orderBy('createdAt', 'desc');
+        const snap = await query.get();
         if (snap.empty) { list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:3rem;">No hay reservas todavía.</p>'; return; }
         list.innerHTML = '';
         snap.forEach(doc => {
@@ -1268,7 +1272,7 @@
                 <div class="res-card-title">🚲 ${r.bikeName}</div>
                 <div class="res-card-meta">📅 ${r.startDate} → ${r.endDate} (${r.days} día${r.days>1?'s':''})</div>
                 <div class="res-card-meta">💰 S/ ${r.totalPrice} estimado${r.deliveryDistrict?` (incl. entrega ${r.deliveryDistrict})`:''}</div>
-                <div class="res-card-meta">${role==='renter'?'👤 Dueño: '+r.ownerName:'👤 Inquilino: '+r.renterName}</div>
+                <div class="res-card-meta">${role==='all'?`👤 ${r.renterName} → ${r.ownerName}`:role==='renter'?'👤 Dueño: '+r.ownerName:'👤 Inquilino: '+r.renterName}</div>
               </div>
               <span class="res-status ${statusClass}">${statusLabel}</span>
             </div>
