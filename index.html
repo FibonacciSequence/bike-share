@@ -787,13 +787,13 @@
       if (bikeMatch) showBikeDetail(bikeMatch[1]);
     }
 
-    function showMessage(message, type = 'info') {
+    function showMessage(message, type = 'info', duration = 5000) {
       const div = document.createElement('div');
       const isError = type === 'error';
       div.style.cssText = `background:${isError?'#fef2f2':'#f0fdf4'};border:1px solid ${isError?'#fecaca':'#bbf7d0'};color:${isError?'#991b1b':'#166534'};border-radius:10px;padding:13px 20px;max-width:500px;text-align:center;position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:3000;font-size:0.9rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.1);`;
-      div.textContent = `${isError ? '❌' : '✅'} ${message}`;
+      div.innerHTML = `${isError ? '❌' : '✅'} ${message}`;
       document.body.appendChild(div);
-      setTimeout(() => div.remove(), 5000);
+      setTimeout(() => div.remove(), duration);
     }
 
     function setupCloseHandlers() {
@@ -1292,9 +1292,11 @@
       if (r.renterWhatsapp) {
         const wa = r.renterWhatsapp.replace(/\D/g, '');
         const txt = `✅ *Tu reserva fue aceptada — Lima Bike Share*\n\n📋 ${r.bikeName}\n📅 ${r.startDate} → ${r.endDate}\n💰 Total: S/ ${r.totalPrice}\n\nEntra al chat para coordinar los detalles: https://www.limabikeshare.com`;
-        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(txt)}`, '_blank');
+        const url = `https://wa.me/${wa}?text=${encodeURIComponent(txt)}`;
+        showMessage(`Reserva aceptada. <a href="${url}" target="_blank" style="color:var(--green);font-weight:700;">📲 Notificar al inquilino por WhatsApp</a>`, 'info', 12000);
+      } else {
+        showMessage('Reserva aceptada');
       }
-      showMessage('Reserva aceptada — se notificó al inquilino por WhatsApp');
       loadReservations('owner');
     }
 
