@@ -518,6 +518,13 @@
           </div>
           <div class="booking-box">
             <h3>Solicitar Reserva</h3>
+            <div id="bookingLoginGate" style="display:none; text-align:center; padding: 1rem 0;">
+              <p style="color:var(--text-muted); margin-bottom:1rem;">Necesitas una cuenta para solicitar una reserva.</p>
+              <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <button class="btn btn-green" onclick="testSignup()">Crear cuenta</button>
+                <button class="btn btn-outline" onclick="testLogin()">Iniciar sesión</button>
+              </div>
+            </div>
             <form id="bookingRequestForm">
               <div class="form-row">
                 <div class="form-group"><label for="bookingStartDate">Fecha de inicio</label><input type="date" id="bookingStartDate" required></div>
@@ -886,6 +893,8 @@
           deliverySection.style.display = 'none';
           bookingDeliveryGroup.style.display = 'none';
         }
+        document.getElementById('bookingLoginGate').style.display = currentUser ? 'none' : 'block';
+        document.getElementById('bookingRequestForm').style.display = currentUser ? 'block' : 'none';
         document.getElementById('mainBikePhoto').src = bike.photo;
         const thumbs = document.getElementById('photoThumbnails');
         thumbs.innerHTML = '';
