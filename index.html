@@ -429,6 +429,13 @@
               <input type="number" id="bikeMonthlyPrice" min="1" placeholder="900">
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bikeDeposit">Depósito de garantía (S/) <small style="font-weight:400;">opcional</small></label>
+              <input type="number" id="bikeDeposit" min="1" placeholder="100">
+              <small>Se devuelve al finalizar el alquiler en buen estado</small>
+            </div>
+          </div>
           <div class="form-group">
             <label for="bikeWhatsapp">WhatsApp *</label>
             <input type="text" id="bikeWhatsapp" placeholder="+51 999 999 999" required>
@@ -493,6 +500,7 @@
               <div class="price-block" id="bikeDetailWeeklyBlock" style="display:none;"><strong id="bikeDetailWeeklyPrice"></strong><span>por semana</span></div>
               <div class="price-block" id="bikeDetailMonthlyBlock" style="display:none;"><strong id="bikeDetailMonthlyPrice"></strong><span>por mes</span></div>
             </div>
+            <div id="bikeDetailDepositBlock" style="display:none; margin-top:0.5rem; font-size:0.88rem; color:var(--text-muted);">🔒 Depósito de garantía: <strong id="bikeDetailDeposit" style="color:var(--text);"></strong></div>
             <div style="font-size:0.9rem; color: var(--text-muted);">📍 <span id="bikeDetailLocation"></span></div>
           </div>
           <div class="owner-card">
@@ -557,6 +565,7 @@
               <div class="booking-total-box">
                 <strong>Total estimado:</strong> <span id="bookingTotal">S/ 0</span><br>
                 <small id="bookingTotalBreakdown" style="color:var(--text-muted);"></small>
+                <small id="bookingDepositInfo" style="display:none;color:#92400e;background:#fef3c7;padding:4px 8px;border-radius:6px;margin-top:6px;display:none;"></small>
               </div>
               <button type="submit" class="btn btn-green" style="width: 100%; margin-top: 0.5rem;">Enviar solicitud de reserva</button>
             </form>
@@ -681,6 +690,7 @@
         <div class="form-row">
           <div class="form-group"><label for="editBikeWeeklyPrice">Precio por semana (S/) <small style="font-weight:400;">opcional</small></label><input type="number" id="editBikeWeeklyPrice" min="1"></div>
           <div class="form-group"><label for="editBikeMonthlyPrice">Precio por mes (S/) <small style="font-weight:400;">opcional</small></label><input type="number" id="editBikeMonthlyPrice" min="1"></div>
+          <div class="form-group"><label for="editBikeDeposit">Depósito de garantía (S/) <small style="font-weight:400;">opcional</small></label><input type="number" id="editBikeDeposit" min="1" placeholder="100"><small>Se devuelve al finalizar el alquiler en buen estado</small></div>
         </div>
         <div class="form-group"><label for="editBikeWhatsapp">WhatsApp *</label><input type="text" id="editBikeWhatsapp" placeholder="+51 999 999 999" required></div>
         <div class="form-group"><label for="editBikeDescription">Descripción *</label><textarea id="editBikeDescription" rows="4" maxlength="500" required></textarea></div>
@@ -869,6 +879,8 @@
         const monthlyBlock = document.getElementById('bikeDetailMonthlyBlock');
         if (bike.weeklyPrice) { document.getElementById('bikeDetailWeeklyPrice').textContent = `S/ ${bike.weeklyPrice}`; weeklyBlock.style.display = ''; } else { weeklyBlock.style.display = 'none'; }
         if (bike.monthlyPrice) { document.getElementById('bikeDetailMonthlyPrice').textContent = `S/ ${bike.monthlyPrice}`; monthlyBlock.style.display = ''; } else { monthlyBlock.style.display = 'none'; }
+        const depositBlock = document.getElementById('bikeDetailDepositBlock');
+        if (bike.deposit) { document.getElementById('bikeDetailDeposit').textContent = `S/ ${bike.deposit}`; depositBlock.style.display = 'block'; } else { depositBlock.style.display = 'none'; }
         document.getElementById('bikeDetailLocation').textContent = bike.location;
         document.getElementById('mapLocationName').textContent = bike.location;
         document.getElementById('bikeMapIframe').src = `https://maps.google.com/maps?q=${encodeURIComponent((bike.location||'')+', Lima, Peru')}&output=embed&z=14`;
@@ -966,6 +978,7 @@
         document.getElementById('editBikeDailyPrice').value = bike.dailyPrice || '';
         document.getElementById('editBikeWeeklyPrice').value = bike.weeklyPrice || '';
         document.getElementById('editBikeMonthlyPrice').value = bike.monthlyPrice || '';
+        document.getElementById('editBikeDeposit').value = bike.deposit || '';
         document.getElementById('editBikeWhatsapp').value = bike.whatsapp || '';
         document.getElementById('editBikeDescription').value = bike.description || '';
         document.getElementById('editIncludesHelmet').checked = (bike.accessories||[]).includes('Casco');
@@ -1007,6 +1020,7 @@
           dailyPrice: document.getElementById('editBikeDailyPrice').value,
           weeklyPrice: document.getElementById('editBikeWeeklyPrice').value || null,
           monthlyPrice: document.getElementById('editBikeMonthlyPrice').value || null,
+          deposit: document.getElementById('editBikeDeposit').value || null,
           whatsapp: document.getElementById('editBikeWhatsapp').value,
           description: document.getElementById('editBikeDescription').value,
           accessories, ownerName,
@@ -1053,6 +1067,7 @@
           dailyPrice: document.getElementById("bikeDailyPrice").value,
           weeklyPrice: document.getElementById("bikeWeeklyPrice").value || null,
           monthlyPrice: document.getElementById("bikeMonthlyPrice").value || null,
+          deposit: document.getElementById("bikeDeposit").value || null,
           photo: mainPhotoURL, additionalPhotos, accessories,
           deliveryAvailable: document.getElementById('includesDelivery').checked,
           deliveryZones: document.getElementById('includesDelivery').checked ? getDeliveryZones('deliveryZonesList') : [],
@@ -1233,6 +1248,11 @@
       const parts = [`${days} día${days>1?'s':''}: S/ ${bikeTotal}`];
       if (deliveryPrice) parts.push(`Entrega ${deliveryDistrict}: S/ ${deliveryPrice}`);
       document.getElementById('bookingTotalBreakdown').textContent = parts.join(' + ');
+      const depositInfo = document.getElementById('bookingDepositInfo');
+      if (currentBike.deposit) {
+        depositInfo.textContent = `🔒 Depósito de garantía: S/ ${currentBike.deposit} (se devuelve al finalizar)`;
+        depositInfo.style.display = 'block';
+      } else { depositInfo.style.display = 'none'; }
     }
 
     // ── Reservations ──
